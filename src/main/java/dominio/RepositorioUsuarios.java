@@ -11,6 +11,7 @@ public class RepositorioUsuarios {
 		
 	public RepositorioUsuarios() {
 		usuariosRegistrados = new HashMap<String, Usuario>();
+		// Inicializar repositorio con recuperarRepoUsuario)definir aquí)
 	}
 	
 	// Patrón Singleton 
