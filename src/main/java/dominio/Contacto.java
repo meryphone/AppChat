@@ -1,40 +1,47 @@
 package dominio;
 
-public class Contacto {
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+
+public abstract class Contacto {
 
 	private String nombre;
-	private String apellidos;
-	private int telefono;
+	private List<Mensaje> mensajes;
+	private int identificadorBD;
 	
-	public Contacto(String _nombre, String _apellidos,  int _telefono) {
-	 nombre =_nombre;
-	 apellidos = _apellidos;
-	 telefono = _telefono;
-	}
-	
-	public String toString () {
-		return nombre + " " + apellidos;
+	public Contacto(String nombre) {
+		this.nombre = nombre;
+		 this.mensajes = new LinkedList();
 	}
 
-	public String getNombre() {
+	protected String getNombre() {
 		return nombre;
 	}
 
-	public String getApellidos() {
-		return apellidos;
+	protected void setNombre(String nombre) {
+		this.nombre = nombre;
 	}
 
-	public int getTelefono() {
-		return telefono;
+	protected List<Mensaje> getMensajes() {
+		return mensajes;
 	}
 
-	public boolean isAgregado() {
-
-		if (nombre == "") {
-			return false;
-		} else {
-			return true;
-		}
+	protected void setMensajes(List<Mensaje> mensajes) {
+		this.mensajes = mensajes;
 	}
+
+	protected int getIdentificadorBD() {
+		return identificadorBD;
+	}
+
+	protected void setIdentificadorBD(int identificadorBD) {
+		this.identificadorBD = identificadorBD;
+	}
+	
+	
+
+
+
 
 }
