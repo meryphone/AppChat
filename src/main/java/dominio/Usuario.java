@@ -1,54 +1,50 @@
 package dominio;
 
 import java.net.URL;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.StringTokenizer;
+
 import javax.swing.ImageIcon;
+
+import persistencia.AdaptadorContactoDAO;
 
 public class Usuario {
 
-	public static final ImageIcon IMAGEN_POR_DEFECTO;
+	public static final String IMAGEN_POR_DEFECTO = "/resources/nueva_cuenta(1).png";
 	
-	private int identificadorBD;
+	private int codigo;
 	private String nombreCompleto;
 	private String movil;
 	private String contrasena;
 	private String email;
 	private Optional<Date> fechaNacimiento;
-	private ImageIcon imagenPerfil;
+	private String pathImagen;
 	private boolean premium = false;
 	private Optional<String> mensajeSaludo;
 	private List<ContactoIndividual> listaContactos;
-
-	static {
-		ImageIcon imagenPorDefecto;
-		try {
-			URL url = Usuario.class.getResource("/resources/nueva_cuenta(1).png");
-			if (url != null) {
-				imagenPorDefecto = new ImageIcon(url);
-			} else {
-				System.err.println("No se encontró la imagen predeterminada. Usando icono vacío.");
-				imagenPorDefecto = new ImageIcon(); // Icono vacío si no se encuentra la imagen
-			}
-		} catch (Exception e) {
-			System.err.println("Error al cargar la imagen predeterminada. Usando icono vacío.");
-			imagenPorDefecto = new ImageIcon(); // Icono vacío en caso de error
-		}
-		
-		IMAGEN_POR_DEFECTO = imagenPorDefecto;
-	}
+	
+	/**
+	 * Constructor de un contacto.
+	 * @param nombreCompleto
+	 * @param movil
+	 * @param contrasena
+	 * @param email
+	 */
 
 	public Usuario(String nombreCompleto, String movil, String contrasena, String email) {
-
+		
+		this.codigo = 0; // Cuando se crea un usuario nuevo en el sistema y todavía no está en perisistencia codigo = 0
 		this.nombreCompleto = nombreCompleto;
 		this.movil = movil;
 		this.contrasena = contrasena;
 		this.email = email;
 		fechaNacimiento = Optional.empty();
 		mensajeSaludo = Optional.empty();
-		this.imagenPerfil = IMAGEN_POR_DEFECTO;
+		this.pathImagen = IMAGEN_POR_DEFECTO;
 		this.listaContactos = new LinkedList<ContactoIndividual>();
 
 	}
@@ -78,11 +74,32 @@ public class Usuario {
 	}
 	
 	public List<ContactoIndividual> getListaContactos() {
-		return listaContactos;
+		return Collections.unmodifiableList(listaContactos);
 	}
 
 	public void setListaContactos(List<ContactoIndividual> listaContactos) {
 		this.listaContactos = listaContactos;
+	}
+	
+	public String getCodigosContactos(List<ContactoIndividual> listaContactos) {
+		
+		String codigosContacto = "";
+		
+		for(ContactoIndividual contacto : listaContactos) {
+			codigosContacto += contacto.getCodigo();
+		}
+		
+		return codigosContacto.trim();
+	}
+	
+	public List<Contacto> getListaContactosDesdeCodigos(String codigos){
+		List<Contacto> listaContactos = new LinkedList<Contacto>();
+		
+		StringTokenizer strTok = new StringTokenizer(codigos, " ");
+		AdaptadorContactoDAO adaptadorContacto = AdaptadorContactoDAO.getInstance();
+		
+		
+		
 	}
 
 	public String getNombreCompleto() {
@@ -125,12 +142,12 @@ public class Usuario {
 		this.fechaNacimiento = Optional.of(fechaNacimiento);
 	}
 
-	public ImageIcon getImagenPerfil() {
-		return imagenPerfil;
+	public String getPathImagen() {
+		return pathImagen;
 	}
 
-	public void setImagenPerfil(ImageIcon imagenPerfil) {
-		this.imagenPerfil = imagenPerfil;
+	public void setPathImagen(String pathImagen) {
+		this.pathImagen = pathImagen;
 	}
 
 	public boolean isPremium() {
@@ -148,5 +165,15 @@ public class Usuario {
 	public void setMensajeSaludo(String mensajeSaludo) {
 		this.mensajeSaludo = Optional.of(mensajeSaludo);
 	}
+
+	public int getCodigo() {
+		return codigo;
+	}
+
+	public void setCodigo(int codigo) {
+		this.codigo = codigo;
+	}
+	
+	
 
 }

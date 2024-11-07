@@ -61,6 +61,7 @@ public class DatosUsuario extends JFrame implements MensajeAdvertencia {
 	private JLabel lblEmail;
 	private JTextField email;
 	private Controlador controlador = Controlador.getInstance();
+	String imagenUserPath;
 	private JPasswordField contrasenaRepe;
 
 	/**
@@ -316,9 +317,9 @@ public class DatosUsuario extends JFrame implements MensajeAdvertencia {
 		gbc_btnCambiarFoto.insets = new Insets(0, 0, 0, 5);
 		gbc_btnCambiarFoto.gridx = 8;
 		gbc_btnCambiarFoto.gridy = 11;
-		contentPane.add(btnCambiarFoto, gbc_btnCambiarFoto);
+		contentPane.add(btnCambiarFoto, gbc_btnCambiarFoto);		
 
-		btnCambiarFoto.addActionListener( e -> cambiarImagenPerfil());
+		btnCambiarFoto.addActionListener( e -> imagenUserPath = cambiarImagenPerfil());
 
 		btnAceptar = new JButton("Aceptar");
 		btnAceptar.setFont(new Font("DejaVu Sans Mono", Font.BOLD, 12));
@@ -333,7 +334,7 @@ public class DatosUsuario extends JFrame implements MensajeAdvertencia {
 
 	}
 
-	private void cambiarImagenPerfil() {
+	private String cambiarImagenPerfil() {
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setDialogTitle("Selecciona una nueva imagen de perfil");
 
@@ -353,7 +354,11 @@ public class DatosUsuario extends JFrame implements MensajeAdvertencia {
 				e.printStackTrace();
 				mostrarError(e.getMessage(), contentPane);
 			}
+			
+			return archivoSeleccionado.getAbsolutePath();
 		}
+		
+		return null;		
 	}
 	
 	private void llamarControladorRegistro() {		
@@ -367,7 +372,7 @@ public class DatosUsuario extends JFrame implements MensajeAdvertencia {
                 new String(contrasenaRepe.getPassword()),
                 email.getText(),
                 fechaNacimiento.getDate(),
-                imagenPerfil.getIcon(),
+                imagenUserPath,
                 mensajeSaludo.getText()
             );
 

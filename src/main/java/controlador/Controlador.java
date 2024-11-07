@@ -49,7 +49,7 @@ public class Controlador {
 	 * @param contrasenaRepe
 	 * @param email
 	 * @param fechaNacimiento
-	 * @param imagenPerfil
+	 * @param pathImagen
 	 * @param mensajeSaludo
 	 * @return
 	 * @throws ExcepcionRegistro
@@ -57,7 +57,7 @@ public class Controlador {
 
 	public boolean registrarUsuario(String nombre, String apellidos, String movil, String contrasena,
             String contrasenaRepe, String email, Date fechaNacimiento,
-            Icon imagenPerfil, String mensajeSaludo) throws ExcepcionRegistro {
+            String pathImagen, String mensajeSaludo) throws ExcepcionRegistro {
 		
 		
 		// Si el telefono ya está registrado se lanza una excepción
@@ -72,7 +72,7 @@ public class Controlador {
 
 		Usuario usuario = new Usuario(nombre + " " + apellidos, movil, contrasena, email);
 		
-		configurarOpcionales(usuario, fechaNacimiento, imagenPerfil, mensajeSaludo);
+		configurarOpcionales(usuario, fechaNacimiento, pathImagen, mensajeSaludo);
 		
 		usuarioActual = usuario;
 		repositorioUsuarios.anadirUsuario(usuario);
@@ -123,6 +123,8 @@ public class Controlador {
 	    }else {
 	    	throw new ExcepcionContacto("El usuario no existe");
 	    }
+	    
+		return true;
 	           
 	}
 
@@ -177,17 +179,17 @@ public class Controlador {
 	 * Establece el valor de los campos opcionales del registro al usuario pasado como parámetro.
 	 * @param usuario
 	 * @param fechaNacimiento
-	 * @param imagenPerfil
+	 * @param pathImagen
 	 * @param mensajeSaludo
 	 */
 	
-	private void configurarOpcionales(Usuario usuario, Date fechaNacimiento, Icon imagenPerfil, String mensajeSaludo) {
+	private void configurarOpcionales(Usuario usuario, Date fechaNacimiento, String pathImagen, String mensajeSaludo) {
 	    // Uso de Optional para manejar valores opcionales de manera segura
 	    Optional.ofNullable(fechaNacimiento).ifPresent(usuario::setFechaNacimiento);
 	    Optional.ofNullable(mensajeSaludo).filter(s -> !s.isEmpty()).ifPresent(usuario::setMensajeSaludo);
-	    Optional.ofNullable(imagenPerfil)
+	    Optional.ofNullable(pathImagen)
 	            .filter(icon -> !icon.equals(Usuario.IMAGEN_POR_DEFECTO))
-	            .ifPresent(icon -> usuario.setImagenPerfil((ImageIcon) icon));
+	            .ifPresent(icon -> usuario.setpathImagen(icon));
 	}
 	
 

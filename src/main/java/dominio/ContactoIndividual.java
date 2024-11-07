@@ -2,7 +2,8 @@ package dominio;
 
 
 public class ContactoIndividual extends Contacto {
-
+	
+	private int codigo;
 	private String telefono;
 	private Usuario usuarioCreador;  //Para identificar en la base de datos los contactos que pertenecen a un usuario en concreto.	
 	
@@ -26,6 +27,14 @@ public class ContactoIndividual extends Contacto {
 
 	public void setUsuarioCreador(Usuario usuarioCreador) {
 		this.usuarioCreador = usuarioCreador;
+	}
+	
+	public void setCodigo(int codigoNuevo) {
+		codigo = codigoNuevo;
+	}
+	
+	public int getCodigo() {
+		return codigo;
 	}
 	
 	
