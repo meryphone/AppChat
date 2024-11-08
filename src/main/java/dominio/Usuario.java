@@ -101,7 +101,8 @@ public class Usuario {
 		
 		
 	}
-
+	
+	//Comprobar lo de los setters, si no son utilizados hay que quitarlos
 	public String getNombreCompleto() {
 		return nombreCompleto;
 	}
@@ -173,7 +174,5 @@ public class Usuario {
 	public void setCodigo(int codigo) {
 		this.codigo = codigo;
 	}
-	
-	
 
 }

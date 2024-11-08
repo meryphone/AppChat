@@ -69,9 +69,9 @@ public class Contactos extends JFrame {
 		
 		// Para probar Jlist
 				DefaultListModel<Contacto> modelo = new DefaultListModel<>();
-				modelo.addElement(new Contacto("Jose", "López", 123));
-				modelo.addElement(new Contacto("Ana", "Jover", 321));
-				modelo.addElement(new Contacto("María", "Sánchez", 456));
+				modelo.addElement(new Contacto("Jose"));
+				modelo.addElement(new Contacto("Ana"));
+				modelo.addElement(new Contacto("María"));
 				JList<Contacto> listaContactos = new JList<Contacto>(modelo);
 				listaContactos.setCellRenderer(new ContactoCellRenderer());
 				/////////////////////////////////////////////////////////////
@@ -117,9 +117,9 @@ public class Contactos extends JFrame {
 		
 		// Para probar Jlist
 		DefaultListModel<Contacto> modelo1 = new DefaultListModel<>();
-		modelo1.addElement(new Contacto("Jose", "López", 123));
-		modelo1.addElement(new Contacto("Ana", "Jover", 321));
-		modelo1.addElement(new Contacto("María", "Sánchez", 456));
+		modelo1.addElement(new Contacto("Jose"));
+		modelo1.addElement(new Contacto("Ana"));
+		modelo1.addElement(new Contacto("María"));
 		JList<Contacto> listaContactos1 = new JList<Contacto>(modelo1);
 		listaContactos1.setCellRenderer(new ContactoCellRenderer());
 		/////////////////////////////////////////////////////////////
