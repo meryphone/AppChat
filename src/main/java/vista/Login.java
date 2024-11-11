@@ -16,7 +16,7 @@ import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 
 import controlador.Controlador;
-import dominio.excepciones.ExcepcionLogin;
+import excepciones.ExcepcionLogin;
 
 import javax.swing.border.LineBorder;
 import java.awt.Color;

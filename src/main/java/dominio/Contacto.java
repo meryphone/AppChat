@@ -1,47 +1,55 @@
 package dominio;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 public abstract class Contacto {
+    
+    private String nombre;
+    private List<Mensaje> mensajes;
+    private int codigo;
 
-	private String nombre;
-	private List<Mensaje> mensajes;
-	private int identificadorBD;
-	
-	public Contacto(String nombre) {
-		this.nombre = nombre;
-		 this.mensajes = new LinkedList();
-	}
+    // Constructor con parámetro nombre
+    public Contacto(String nombre) {
+        this.nombre = nombre;
+        this.mensajes = new LinkedList<>();
+    }
 
-	protected String getNombre() {
-		return nombre;
-	}
+    /**
+     * Contructor sin parametros para inicilizar un ContactoIndividual y aplicar métodos set.
+     */
+    public Contacto() {
+        this.mensajes = new LinkedList<>();
+    }
 
-	protected void setNombre(String nombre) {
-		this.nombre = nombre;
-	}
+    // Métodos comunes a todas las subclases
+    public String getNombre() {
+        return nombre;
+    }
 
-	protected List<Mensaje> getMensajes() {
-		return mensajes;
-	}
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
 
-	protected void setMensajes(List<Mensaje> mensajes) {
-		this.mensajes = mensajes;
-	}
+    public List<Mensaje> getMensajes() {	// arraylist implementa list
+        return mensajes;
+    }
 
-	protected int getIdentificadorBD() {
-		return identificadorBD;
-	}
+    public void setMensajes(ArrayList<Mensaje> arrayList) { 
+        this.mensajes = arrayList;
+    }
 
-	protected void setIdentificadorBD(int identificadorBD) {
-		this.identificadorBD = identificadorBD;
-	}
-	
-	
+    public int getCodigo() {
+        return codigo;
+    }
 
+    public void setCodigo(int codigo) {
+        this.codigo = codigo;
+    }
 
-
-
+    // Método común para verificar si el contacto tiene mensajes
+    public boolean tieneMensajes() {
+        return !mensajes.isEmpty();
+    }
 }

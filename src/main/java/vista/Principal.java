@@ -28,6 +28,8 @@ import javax.swing.ImageIcon;
 import javax.swing.border.TitledBorder;
 
 import dominio.Contacto;
+import dominio.ContactoIndividual;
+import dominio.Usuario;
 import tds.BubbleText;
 
 import javax.swing.border.LineBorder;
@@ -71,8 +73,6 @@ public class Principal extends JFrame {
 	 * @param imagen
 	 * @return imagenCircular
 	 */
-	
-	
 
 	private Image imagenCircular(Image imagen) {
 
@@ -87,8 +87,6 @@ public class Principal extends JFrame {
 		return imagenCircular;
 
 	}
-	
-
 
 	/**
 	 * Create the frame.
@@ -225,21 +223,22 @@ public class Principal extends JFrame {
 		scrollPane.setRowHeaderView(scrollBar);
 
 		// Para probar Jlist
-		DefaultListModel<Contacto> modelo = new DefaultListModel<>();
-		modelo.addElement(new Contacto("Jose", "López", 123));
-		modelo.addElement(new Contacto("Ana", "Jover", 321));
-		modelo.addElement(new Contacto("María", "Sánchez", 456));
+		DefaultListModel<ContactoIndividual> modelo = new DefaultListModel<>();
+		modelo.addElement(new ContactoIndividual("Jose", "123", new Usuario()));
+		modelo.addElement(new ContactoIndividual("Ana", "321", new Usuario()));
+		modelo.addElement(new ContactoIndividual("María", "456", new Usuario()));
+		JList<ContactoIndividual> listaContactos = new JList<ContactoIndividual>(modelo);
+		listaContactos.setCellRenderer(new ContactoIndividualCellRenderer());
 		/////////////////////////////////////////////////////////////
 
-		JList<Contacto> listaContactos = new JList<Contacto>(modelo);
 		scrollPane.setViewportView(listaContactos);
-		listaContactos.setCellRenderer(new ContactoCellRenderer());
+		listaContactos.setCellRenderer(new ContactoIndividualCellRenderer());
 
 		JPanel der = new JPanel();
 		der.setBorder(new TitledBorder(new LineBorder(new Color(99, 130, 191), 2), "Chat con Blas04",
 				TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		der.setBackground(UIManager.getColor("Tree.dropCellBackground"));
-		der.setMaximumSize(getMaximumSize()); //Para que el panel ocupe todo el espacio disponible.
+		der.setMaximumSize(getMaximumSize()); // Para que el panel ocupe todo el espacio disponible.
 		centro.add(der);
 		der.setLayout(new BoxLayout(der, BoxLayout.Y_AXIS));
 
@@ -252,7 +251,7 @@ public class Principal extends JFrame {
 		der.add(burbuja2);
 		burbuja2.setMaximumSize(new Dimension(Integer.MAX_VALUE, burbuja2.getPreferredSize().height));
 		der.add(burbuja2);
-		
+
 		///////////////////////////
 
 	}

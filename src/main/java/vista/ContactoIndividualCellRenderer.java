@@ -8,14 +8,15 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
-import dominio.Contacto;
+import dominio.ContactoIndividual;
 
-public class ContactoCellRenderer extends JPanel implements ListCellRenderer<Contacto> {
+@SuppressWarnings("serial")
+public class ContactoIndividualCellRenderer extends JPanel implements ListCellRenderer<ContactoIndividual> {
 	
 	private JLabel nombre;
 	private JLabel imagen;
 	
-	public ContactoCellRenderer(){
+	public ContactoIndividualCellRenderer(){
 		nombre = new JLabel();
 		imagen = new JLabel();
 		
@@ -27,10 +28,10 @@ public class ContactoCellRenderer extends JPanel implements ListCellRenderer<Con
 	}	
 
 	@Override
-	public Component getListCellRendererComponent(JList<? extends Contacto> list, Contacto contacto, int index,
+	public Component getListCellRendererComponent(JList<? extends ContactoIndividual> list, ContactoIndividual contacto, int index,
 			boolean isSelected, boolean cellHasFocus) {
 		
-		nombre.setText(contacto.toString());		
+		nombre.setText(contacto.getNombre());		
 		imagen.setIcon(new ImageIcon(Principal.class.getResource("/resources/usuario(1).png")));
 		
 		if (isSelected) {

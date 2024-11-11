@@ -34,7 +34,7 @@ import javax.swing.UIManager;
 import com.toedter.calendar.JDateChooser;
 
 import controlador.Controlador;
-import dominio.excepciones.ExcepcionRegistro;
+import excepciones.ExcepcionRegistro;
 
 public class DatosUsuario extends JFrame implements MensajeAdvertencia {
 

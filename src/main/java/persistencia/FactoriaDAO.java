@@ -1,6 +1,6 @@
 package persistencia;
 
-import dominio.excepciones.ExcepcionDAO;
+import excepciones.ExcepcionDAO;
 import persistencia.interfaces.IAdaptadorContactoDAO;
 import persistencia.interfaces.IAdaptadorGrupoDAO;
 import persistencia.interfaces.IAdaptadorMensajeDAO;

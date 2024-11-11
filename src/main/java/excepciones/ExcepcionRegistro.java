@@ -1,4 +1,4 @@
-package dominio.excepciones;
+package excepciones;
 
 /**
  * Excepción para manejar errores de registro.

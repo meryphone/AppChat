@@ -8,13 +8,11 @@ import javax.swing.JPanel;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.border.TitledBorder;
-
-import dominio.Contacto;
-
+import dominio.ContactoIndividual;
+import dominio.Usuario;
 import javax.swing.border.LineBorder;
 import java.awt.Color;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import java.awt.BorderLayout;
 import javax.swing.JButton;
 import javax.swing.UIManager;
@@ -68,12 +66,12 @@ public class Contactos extends JFrame {
 		izq.add(scrollPane, BorderLayout.CENTER);
 		
 		// Para probar Jlist
-				DefaultListModel<Contacto> modelo = new DefaultListModel<>();
-				modelo.addElement(new Contacto("Jose", "López", 123));
-				modelo.addElement(new Contacto("Ana", "Jover", 321));
-				modelo.addElement(new Contacto("María", "Sánchez", 456));
-				JList<Contacto> listaContactos = new JList<Contacto>(modelo);
-				listaContactos.setCellRenderer(new ContactoCellRenderer());
+				DefaultListModel<ContactoIndividual> modelo = new DefaultListModel<>();
+				modelo.addElement(new ContactoIndividual("Jose", "123", new Usuario()));
+				modelo.addElement(new ContactoIndividual("Ana", "321", new Usuario()));
+				modelo.addElement(new ContactoIndividual("María","456", new Usuario()));
+				JList<ContactoIndividual> listaContactos = new JList<ContactoIndividual>(modelo);
+				listaContactos.setCellRenderer(new ContactoIndividualCellRenderer());
 				/////////////////////////////////////////////////////////////
 		
 		scrollPane.setViewportView(listaContactos);
@@ -116,12 +114,12 @@ public class Contactos extends JFrame {
 		der.add(scrollPane_1, BorderLayout.CENTER);
 		
 		// Para probar Jlist
-		DefaultListModel<Contacto> modelo1 = new DefaultListModel<>();
-		modelo1.addElement(new Contacto("Jose", "López", 123));
-		modelo1.addElement(new Contacto("Ana", "Jover", 321));
-		modelo1.addElement(new Contacto("María", "Sánchez", 456));
-		JList<Contacto> listaContactos1 = new JList<Contacto>(modelo1);
-		listaContactos1.setCellRenderer(new ContactoCellRenderer());
+		DefaultListModel<ContactoIndividual> modelo1 = new DefaultListModel<>();
+		modelo1.addElement(new ContactoIndividual("Jose", "123", new Usuario()));
+		modelo1.addElement(new ContactoIndividual("Ana", "321", new Usuario()));
+		modelo1.addElement(new ContactoIndividual("María","456", new Usuario()));
+		JList<ContactoIndividual> listaContactos1 = new JList<ContactoIndividual>(modelo1);
+		listaContactos1.setCellRenderer(new ContactoIndividualCellRenderer());
 		/////////////////////////////////////////////////////////////
 		
 		scrollPane_1.setViewportView(listaContactos1);

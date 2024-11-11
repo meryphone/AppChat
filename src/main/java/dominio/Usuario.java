@@ -1,6 +1,5 @@
 package dominio;
 
-import java.net.URL;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
@@ -8,13 +7,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.StringTokenizer;
 
-import javax.swing.ImageIcon;
-
+import excepciones.ExcepcionDAO;
 import persistencia.AdaptadorContactoDAO;
+import persistencia.TDSFactoriaDAO;
 
 public class Usuario {
 
-	public static final String IMAGEN_POR_DEFECTO = "/resources/nueva_cuenta(1).png";
+	public static final String IMAGEN_POR_DEFECTO = "/resources/nueva_cuenta(1).png"; // CREAR CLASE CON TODAS LAS CONSTANTES???
 	
 	private int codigo;
 	private String nombreCompleto;
@@ -50,6 +49,13 @@ public class Usuario {
 	}
 	
 	/**
+	 * Constructor para inizializar sin parámetros.
+	 */
+	public Usuario() {
+		
+	}
+
+	/**
 	 * Si existe el contacto cuyo teléfono es el pasado como parámetro, se devuelve un Optional que contiene dicho contacto, sino se 
 	 * devuelve un Optional vacio.
 	 * @param tlf
@@ -79,27 +85,6 @@ public class Usuario {
 
 	public void setListaContactos(List<ContactoIndividual> listaContactos) {
 		this.listaContactos = listaContactos;
-	}
-	
-	public String getCodigosContactos(List<ContactoIndividual> listaContactos) {
-		
-		String codigosContacto = "";
-		
-		for(ContactoIndividual contacto : listaContactos) {
-			codigosContacto += contacto.getCodigo();
-		}
-		
-		return codigosContacto.trim();
-	}
-	
-	public List<Contacto> getListaContactosDesdeCodigos(String codigos){
-		List<Contacto> listaContactos = new LinkedList<Contacto>();
-		
-		StringTokenizer strTok = new StringTokenizer(codigos, " ");
-		AdaptadorContactoDAO adaptadorContacto = AdaptadorContactoDAO.getInstance();
-		
-		
-		
 	}
 
 	public String getNombreCompleto() {

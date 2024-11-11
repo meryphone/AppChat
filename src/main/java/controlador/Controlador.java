@@ -12,7 +12,7 @@ import dominio.Contacto;
 import dominio.ContactoIndividual;
 import dominio.RepositorioUsuarios;
 import dominio.Usuario;
-import dominio.excepciones.*;
+import excepciones.*;
 
 public class Controlador {
 	

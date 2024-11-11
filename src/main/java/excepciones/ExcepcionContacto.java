@@ -1,4 +1,4 @@
-package dominio.excepciones;
+package excepciones;
 
 @SuppressWarnings("serial")
 public class ExcepcionContacto extends Exception {
