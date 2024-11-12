@@ -86,6 +86,7 @@ public class DatosUsuario extends JFrame implements MensajeAdvertencia {
 	public DatosUsuario() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 940, 486);
+	    setResizable(false);             // Evita que la ventana se pueda redimensionar
 		contentPane = new JPanel();
 		contentPane.setBackground(UIManager.getColor("List.dropCellBackground"));
 		contentPane.setSize(new Dimension(800, 800));
@@ -94,28 +95,27 @@ public class DatosUsuario extends JFrame implements MensajeAdvertencia {
 
 		setContentPane(contentPane);
 		GridBagLayout gbl_contentPane = new GridBagLayout();
-		gbl_contentPane.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		gbl_contentPane.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		gbl_contentPane.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		gbl_contentPane.columnWeights = new double[] { 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0,
+		gbl_contentPane.columnWeights = new double[] { 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
 				1.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		gbl_contentPane.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 				Double.MIN_VALUE };
 		contentPane.setLayout(gbl_contentPane);
-
-		label_1 = new JLabel("");
-		label_1.setIcon(new ImageIcon(DatosUsuario.class.getResource("/resources/REGISTRO.png")));
-		GridBagConstraints gbc_label_1 = new GridBagConstraints();
-		gbc_label_1.anchor = GridBagConstraints.WEST;
-		gbc_label_1.gridwidth = 4;
-		gbc_label_1.insets = new Insets(0, 0, 5, 5);
-		gbc_label_1.gridx = 4;
-		gbc_label_1.gridy = 0;
-		contentPane.add(label_1, gbc_label_1);
+		
+				label_1 = new JLabel("");
+				label_1.setIcon(new ImageIcon(DatosUsuario.class.getResource("/resources/REGISTRO.png")));
+				GridBagConstraints gbc_label_1 = new GridBagConstraints();
+				gbc_label_1.gridwidth = 22;
+				gbc_label_1.insets = new Insets(0, 0, 5, 0);
+				gbc_label_1.gridx = 0;
+				gbc_label_1.gridy = 0;
+				contentPane.add(label_1, gbc_label_1);
 
 		label = new JLabel("");
 		GridBagConstraints gbc_label = new GridBagConstraints();
 		gbc_label.insets = new Insets(0, 0, 5, 5);
-		gbc_label.gridx = 7;
+		gbc_label.gridx = 9;
 		gbc_label.gridy = 1;
 		contentPane.add(label, gbc_label);
 
@@ -130,7 +130,7 @@ public class DatosUsuario extends JFrame implements MensajeAdvertencia {
 
 		nombre = new JTextField();
 		GridBagConstraints gbc_nombre = new GridBagConstraints();
-		gbc_nombre.gridwidth = 15;
+		gbc_nombre.gridwidth = 19;
 		gbc_nombre.insets = new Insets(0, 0, 5, 5);
 		gbc_nombre.fill = GridBagConstraints.HORIZONTAL;
 		gbc_nombre.gridx = 2;
@@ -149,7 +149,7 @@ public class DatosUsuario extends JFrame implements MensajeAdvertencia {
 
 		apellidos = new JTextField();
 		GridBagConstraints gbc_apellidos = new GridBagConstraints();
-		gbc_apellidos.gridwidth = 15;
+		gbc_apellidos.gridwidth = 19;
 		gbc_apellidos.insets = new Insets(0, 0, 5, 5);
 		gbc_apellidos.fill = GridBagConstraints.HORIZONTAL;
 		gbc_apellidos.gridx = 2;
@@ -168,9 +168,9 @@ public class DatosUsuario extends JFrame implements MensajeAdvertencia {
 
 		telefono = new JTextField();
 		GridBagConstraints gbc_telefono = new GridBagConstraints();
-		gbc_telefono.gridwidth = 3;
-		gbc_telefono.insets = new Insets(0, 0, 5, 5);
 		gbc_telefono.fill = GridBagConstraints.HORIZONTAL;
+		gbc_telefono.gridwidth = 6;
+		gbc_telefono.insets = new Insets(0, 0, 5, 5);
 		gbc_telefono.gridx = 2;
 		gbc_telefono.gridy = 4;
 		contentPane.add(telefono, gbc_telefono);
@@ -181,7 +181,7 @@ public class DatosUsuario extends JFrame implements MensajeAdvertencia {
 		GridBagConstraints gbc_lblEmail = new GridBagConstraints();
 		gbc_lblEmail.anchor = GridBagConstraints.EAST;
 		gbc_lblEmail.insets = new Insets(0, 0, 5, 5);
-		gbc_lblEmail.gridx = 8;
+		gbc_lblEmail.gridx = 11;
 		gbc_lblEmail.gridy = 4;
 		contentPane.add(lblEmail, gbc_lblEmail);
 
@@ -190,7 +190,7 @@ public class DatosUsuario extends JFrame implements MensajeAdvertencia {
 		gbc_email.gridwidth = 8;
 		gbc_email.insets = new Insets(0, 0, 5, 5);
 		gbc_email.fill = GridBagConstraints.HORIZONTAL;
-		gbc_email.gridx = 9;
+		gbc_email.gridx = 13;
 		gbc_email.gridy = 4;
 		contentPane.add(email, gbc_email);
 		email.setColumns(10);
@@ -206,9 +206,9 @@ public class DatosUsuario extends JFrame implements MensajeAdvertencia {
 
 		contrasena = new JPasswordField();
 		GridBagConstraints gbc_contrasena = new GridBagConstraints();
-		gbc_contrasena.gridwidth = 3;
+		gbc_contrasena.gridwidth = 6;
 		gbc_contrasena.insets = new Insets(0, 0, 5, 5);
-		gbc_contrasena.fill = GridBagConstraints.HORIZONTAL;
+		gbc_contrasena.fill = GridBagConstraints.BOTH;
 		gbc_contrasena.gridx = 2;
 		gbc_contrasena.gridy = 5;
 		contentPane.add(contrasena, gbc_contrasena);
@@ -218,7 +218,7 @@ public class DatosUsuario extends JFrame implements MensajeAdvertencia {
 		GridBagConstraints gbc_lblRepitaContrasea = new GridBagConstraints();
 		gbc_lblRepitaContrasea.anchor = GridBagConstraints.EAST;
 		gbc_lblRepitaContrasea.insets = new Insets(0, 0, 5, 5);
-		gbc_lblRepitaContrasea.gridx = 8;
+		gbc_lblRepitaContrasea.gridx = 11;
 		gbc_lblRepitaContrasea.gridy = 5;
 		contentPane.add(lblRepitaContrasea, gbc_lblRepitaContrasea);
 
@@ -227,7 +227,7 @@ public class DatosUsuario extends JFrame implements MensajeAdvertencia {
 		gbc_contrasenaRepe.gridwidth = 8;
 		gbc_contrasenaRepe.insets = new Insets(0, 0, 5, 5);
 		gbc_contrasenaRepe.fill = GridBagConstraints.HORIZONTAL;
-		gbc_contrasenaRepe.gridx = 9;
+		gbc_contrasenaRepe.gridx = 13;
 		gbc_contrasenaRepe.gridy = 5;
 		contentPane.add(contrasenaRepe, gbc_contrasenaRepe);
 
@@ -241,22 +241,27 @@ public class DatosUsuario extends JFrame implements MensajeAdvertencia {
 		contentPane.add(lblNewLabel, gbc_lblNewLabel);
 
 		fechaNacimiento = new JDateChooser();
+		fechaNacimiento.getCalendarButton().addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
 		GridBagConstraints gbc_fechaNacimiento = new GridBagConstraints();
-		gbc_fechaNacimiento.gridwidth = 2;
+		gbc_fechaNacimiento.gridwidth = 6;
 		gbc_fechaNacimiento.insets = new Insets(0, 0, 5, 5);
 		gbc_fechaNacimiento.fill = GridBagConstraints.BOTH;
 		gbc_fechaNacimiento.gridx = 2;
 		gbc_fechaNacimiento.gridy = 7;
 		contentPane.add(fechaNacimiento, gbc_fechaNacimiento);
-
-		lblNewLabel_2 = new JLabel("Foto:");
-		lblNewLabel_2.setFont(new Font("Courier 10 Pitch", Font.BOLD, 14));
-		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
-		gbc_lblNewLabel_2.anchor = GridBagConstraints.WEST;
-		gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel_2.gridx = 7;
-		gbc_lblNewLabel_2.gridy = 8;
-		contentPane.add(lblNewLabel_2, gbc_lblNewLabel_2);
+		
+				lblNewLabel_2 = new JLabel("Foto:");
+				lblNewLabel_2.setFont(new Font("Courier 10 Pitch", Font.BOLD, 14));
+				GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
+				gbc_lblNewLabel_2.gridwidth = 4;
+				gbc_lblNewLabel_2.anchor = GridBagConstraints.WEST;
+				gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
+				gbc_lblNewLabel_2.gridx = 16;
+				gbc_lblNewLabel_2.gridy = 8;
+				contentPane.add(lblNewLabel_2, gbc_lblNewLabel_2);
 
 		lblNewLabel_1 = new JLabel("Biografía:");
 		lblNewLabel_1.setFont(new Font("Courier 10 Pitch", Font.BOLD, 14));
@@ -273,28 +278,29 @@ public class DatosUsuario extends JFrame implements MensajeAdvertencia {
 		mensajeSaludo.setPreferredSize(new Dimension(5, 5));
 		GridBagConstraints gbc_mensajeSaludo = new GridBagConstraints();
 		gbc_mensajeSaludo.gridheight = 2;
-		gbc_mensajeSaludo.gridwidth = 3;
+		gbc_mensajeSaludo.gridwidth = 10;
 		gbc_mensajeSaludo.insets = new Insets(0, 0, 5, 5);
 		gbc_mensajeSaludo.fill = GridBagConstraints.BOTH;
 		gbc_mensajeSaludo.gridx = 2;
 		gbc_mensajeSaludo.gridy = 9;
 		contentPane.add(mensajeSaludo, gbc_mensajeSaludo);
-
-		imagenPerfil = new JLabel("");
-		imagenPerfil.setIcon(new ImageIcon(DatosUsuario.class.getResource("/resources/nueva-cuenta (1).png")));
-		GridBagConstraints gbc_imagenPerfil = new GridBagConstraints();
-		gbc_imagenPerfil.gridwidth = 6;
-		gbc_imagenPerfil.insets = new Insets(0, 0, 5, 5);
-		gbc_imagenPerfil.gridx = 6;
-		gbc_imagenPerfil.gridy = 9;
-		contentPane.add(imagenPerfil, gbc_imagenPerfil);
+		
+				imagenPerfil = new JLabel("");
+				imagenPerfil.setIcon(new ImageIcon(DatosUsuario.class.getResource("/resources/nueva-cuenta (1).png")));
+				GridBagConstraints gbc_imagenPerfil = new GridBagConstraints();
+				gbc_imagenPerfil.gridwidth = 2;
+				gbc_imagenPerfil.insets = new Insets(0, 0, 5, 5);
+				gbc_imagenPerfil.gridx = 18;
+				gbc_imagenPerfil.gridy = 9;
+				contentPane.add(imagenPerfil, gbc_imagenPerfil);
 
 		btnCancelar = new JButton("Cancelar");
 		btnCancelar.setMaximumSize(new Dimension(100, 27));
 		btnCancelar.setPreferredSize(new Dimension(100, 27));
 		btnCancelar.setFont(new Font("DejaVu Sans Mono", Font.BOLD, 12));
 		GridBagConstraints gbc_btnCancelar = new GridBagConstraints();
-		gbc_btnCancelar.gridwidth = 2;
+		gbc_btnCancelar.anchor = GridBagConstraints.WEST;
+		gbc_btnCancelar.gridwidth = 5;
 		gbc_btnCancelar.insets = new Insets(0, 0, 0, 5);
 		gbc_btnCancelar.gridx = 2;
 		gbc_btnCancelar.gridy = 11;
@@ -309,28 +315,28 @@ public class DatosUsuario extends JFrame implements MensajeAdvertencia {
 	                dispose(); 				
 			}			
 		});
-
-
-		btnCambiarFoto = new JButton("Cambiar foto");
-		btnCambiarFoto.setFont(new Font("DejaVu Sans Mono", Font.BOLD, 12));
-		GridBagConstraints gbc_btnCambiarFoto = new GridBagConstraints();
-		gbc_btnCambiarFoto.insets = new Insets(0, 0, 0, 5);
-		gbc_btnCambiarFoto.gridx = 8;
-		gbc_btnCambiarFoto.gridy = 11;
-		contentPane.add(btnCambiarFoto, gbc_btnCambiarFoto);		
-
-		btnCambiarFoto.addActionListener( e -> imagenUserPath = cambiarImagenPerfil());
-
-		btnAceptar = new JButton("Aceptar");
-		btnAceptar.setFont(new Font("DejaVu Sans Mono", Font.BOLD, 12));
-		btnAceptar.addActionListener( e -> llamarControladorRegistro());
+				
+						btnAceptar = new JButton("Aceptar");
+						btnAceptar.setFont(new Font("DejaVu Sans Mono", Font.BOLD, 12));
+						btnAceptar.addActionListener( e -> llamarControladorRegistro());
+						
+						GridBagConstraints gbc_btnAceptar = new GridBagConstraints();
+						gbc_btnAceptar.anchor = GridBagConstraints.EAST;
+						gbc_btnAceptar.insets = new Insets(0, 0, 0, 5);
+						gbc_btnAceptar.gridx = 11;
+						gbc_btnAceptar.gridy = 11;
+						contentPane.add(btnAceptar, gbc_btnAceptar);
 		
-		GridBagConstraints gbc_btnAceptar = new GridBagConstraints();
-		gbc_btnAceptar.anchor = GridBagConstraints.EAST;
-		gbc_btnAceptar.insets = new Insets(0, 0, 0, 5);
-		gbc_btnAceptar.gridx = 4;
-		gbc_btnAceptar.gridy = 11;
-		contentPane.add(btnAceptar, gbc_btnAceptar);
+		
+				btnCambiarFoto = new JButton("Cambiar foto");
+				btnCambiarFoto.setFont(new Font("DejaVu Sans Mono", Font.BOLD, 12));
+				GridBagConstraints gbc_btnCambiarFoto = new GridBagConstraints();
+				gbc_btnCambiarFoto.insets = new Insets(0, 0, 0, 5);
+				gbc_btnCambiarFoto.gridx = 19;
+				gbc_btnCambiarFoto.gridy = 11;
+				contentPane.add(btnCambiarFoto, gbc_btnCambiarFoto);		
+				
+						btnCambiarFoto.addActionListener( e -> imagenUserPath = cambiarImagenPerfil());
 
 	}
 
