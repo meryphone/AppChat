@@ -22,7 +22,7 @@ public abstract class Contacto {
     public Contacto() {
         this.mensajes = new LinkedList<>();
     }
-
+    
     // Métodos comunes a todas las subclases
     public String getNombre() {
         return nombre;

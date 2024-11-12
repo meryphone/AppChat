@@ -114,12 +114,14 @@ public class Contactos extends JFrame {
 		der.add(scrollPane_1, BorderLayout.CENTER);
 		
 		// Para probar Jlist
+
 		DefaultListModel<ContactoIndividual> modelo1 = new DefaultListModel<>();
 		modelo1.addElement(new ContactoIndividual("Jose", "123", new Usuario()));
 		modelo1.addElement(new ContactoIndividual("Ana", "321", new Usuario()));
 		modelo1.addElement(new ContactoIndividual("María","456", new Usuario()));
 		JList<ContactoIndividual> listaContactos1 = new JList<ContactoIndividual>(modelo1);
 		listaContactos1.setCellRenderer(new ContactoIndividualCellRenderer());
+
 		/////////////////////////////////////////////////////////////
 		
 		scrollPane_1.setViewportView(listaContactos1);

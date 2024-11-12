@@ -6,25 +6,29 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.border.TitledBorder;
-import javax.swing.border.LineBorder;
+
+import dominio.Contacto;
+import dominio.Mensaje;
+
 import java.awt.Color;
 import java.awt.GridBagLayout;
 import javax.swing.JTextField;
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
-import java.awt.Component;
-import javax.swing.Box;
 import javax.swing.ImageIcon;
-import java.awt.Dimension;
 import javax.swing.UIManager;
 import java.awt.Insets;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
 import javax.swing.JButton;
+import javax.swing.JScrollPane;
+import javax.swing.JScrollBar;
+import javax.swing.border.LineBorder;
 
 public class Buscar extends JFrame {
 
@@ -170,10 +174,34 @@ public class Buscar extends JFrame {
 		busqueda.add(btnBuscar, gbc_btnBuscar);
 
 		JPanel mensajes = new JPanel();
+		mensajes.setBorder(new LineBorder(new Color(0, 0, 0), 2));
 		mensajes.setBackground(UIManager.getColor("List.dropCellBackground"));
 		contentPane.add(mensajes);
-
+		mensajes.setLayout(new BorderLayout(0, 0));
+		
+		JScrollPane scrollPane = new JScrollPane();
+		mensajes.add(scrollPane);
+		
+		// Para probar Jlist
+/*		DefaultListModel<Mensaje> modelo1 = new DefaultListModel<>();
+		Contacto c1 = new Contacto("Eva");
+		Contacto c2 = new Contacto("Blas");
+		modelo1.addElement(new Mensaje("Hola Eva", c1, c2));
+		
+		Contacto c3 = new Contacto("Mery");
+		Contacto c4 = new Contacto("BlasBlas");
+		modelo1.addElement(new Mensaje("guarraaaaa", c3, c4));
+		JList<Mensaje> listamensajes = new JList<Mensaje>(modelo1);
+		listamensajes.setCellRenderer(new BusquedaCellRenderer());
+		scrollPane.setViewportView(listamensajes);
+		
+		JScrollBar scrollBar = new JScrollBar();
+		scrollPane.setRowHeaderView(scrollBar);*/
+		/////////////////////////////////////////////////////////////
+		
 	}
+	
+	
 
 	private void addPlaceholderBehavior(JTextField textField, String placeholderText) {
 		textField.addFocusListener(new FocusListener() {

@@ -87,6 +87,26 @@ public class Usuario {
 		this.listaContactos = listaContactos;
 	}
 
+	public String getCodigosContactos(List<ContactoIndividual> listaContactos) {
+		
+		String codigosContacto = "";
+		
+		for(ContactoIndividual contacto : listaContactos) {
+			codigosContacto += contacto.getCodigo();
+		}
+		
+		return codigosContacto.trim();
+	}
+	
+	public List<Contacto> getListaContactosDesdeCodigos(String codigos){
+		List<Contacto> listaContactos = new LinkedList<Contacto>();
+		
+		StringTokenizer strTok = new StringTokenizer(codigos, " ");
+		AdaptadorContactoDAO adaptadorContacto = AdaptadorContactoDAO.getInstance();
+		
+	}
+	
+	//Comprobar lo de los setters, si no son utilizados hay que quitarlos
 	public String getNombreCompleto() {
 		return nombreCompleto;
 	}
@@ -158,7 +178,5 @@ public class Usuario {
 	public void setCodigo(int codigo) {
 		this.codigo = codigo;
 	}
-	
-	
 
 }
