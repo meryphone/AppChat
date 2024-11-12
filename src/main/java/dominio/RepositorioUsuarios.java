@@ -22,7 +22,7 @@ public class RepositorioUsuarios {
 	        }
 	        return repositorioUsuarios; 
 	}
-	
+	//TODOS ESTOS METODOS VAN EN EL CONTROLADOR
 	/**
 	 * Añade a la lista de usuarios registrados el usuario pasado como párametro.
 	 * @param nuevoUsuario

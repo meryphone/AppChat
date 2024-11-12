@@ -6,13 +6,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.BoxLayout;
-import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.border.TitledBorder;
-
-import dominio.Contacto;
-import dominio.Mensaje;
 
 import java.awt.Color;
 import java.awt.GridBagLayout;
@@ -27,7 +22,6 @@ import java.awt.event.FocusListener;
 
 import javax.swing.JButton;
 import javax.swing.JScrollPane;
-import javax.swing.JScrollBar;
 import javax.swing.border.LineBorder;
 
 public class Buscar extends JFrame {
@@ -93,7 +87,7 @@ public class Buscar extends JFrame {
 		GridBagLayout gbl_busqueda = new GridBagLayout();
 		gbl_busqueda.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		gbl_busqueda.rowHeights = new int[] { 0, 0, 0, 0 };
-		gbl_busqueda.columnWeights = new double[] { 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+		gbl_busqueda.columnWeights = new double[] { 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 				0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		gbl_busqueda.rowWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		busqueda.setLayout(gbl_busqueda);
@@ -156,7 +150,7 @@ public class Buscar extends JFrame {
 
 		Contacto = new JTextField(placeholderText3);
 		GridBagConstraints gbc_contacto = new GridBagConstraints();
-		gbc_contacto.gridwidth = 9;
+		gbc_contacto.gridwidth = 6;
 		gbc_contacto.insets = new Insets(0, 0, 5, 5);
 		gbc_contacto.fill = GridBagConstraints.HORIZONTAL;
 		gbc_contacto.gridx = 5;
@@ -168,8 +162,9 @@ public class Buscar extends JFrame {
 
 		JButton btnBuscar = new JButton("Buscar");
 		GridBagConstraints gbc_btnBuscar = new GridBagConstraints();
+		gbc_btnBuscar.gridwidth = 2;
 		gbc_btnBuscar.insets = new Insets(0, 0, 5, 5);
-		gbc_btnBuscar.gridx = 15;
+		gbc_btnBuscar.gridx = 14;
 		gbc_btnBuscar.gridy = 1;
 		busqueda.add(btnBuscar, gbc_btnBuscar);
 
@@ -183,7 +178,7 @@ public class Buscar extends JFrame {
 		mensajes.add(scrollPane);
 		
 		// Para probar Jlist
-		DefaultListModel<Mensaje> modelo1 = new DefaultListModel<>();
+	/*	DefaultListModel<Mensaje> modelo1 = new DefaultListModel<>();
 		Contacto c1 = new Contacto("Eva");
 		Contacto c2 = new Contacto("Blas");
 		modelo1.addElement(new Mensaje("Hola Eva", c1, c2));
@@ -196,7 +191,7 @@ public class Buscar extends JFrame {
 		scrollPane.setViewportView(listamensajes);
 		
 		JScrollBar scrollBar = new JScrollBar();
-		scrollPane.setRowHeaderView(scrollBar);
+		scrollPane.setRowHeaderView(scrollBar);*/
 		/////////////////////////////////////////////////////////////
 		
 	}

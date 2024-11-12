@@ -2,8 +2,7 @@ package dominio;
 
 
 public class ContactoIndividual extends Contacto {
-	
-	private int codigo;
+	//El codigo ya le viene de la clase Contacto
 	private String telefono;
 	private Usuario usuarioCreador;  //Para identificar en la base de datos los contactos que pertenecen a un usuario en concreto.	
 	
@@ -17,25 +16,18 @@ public class ContactoIndividual extends Contacto {
 		return telefono;
 	}
 
-	public void setTelefono(String telefono) {
+	/*public void setTelefono(String telefono) {
 		this.telefono = telefono;
-	}
+	}*/
 
 	public Usuario getUsuarioCreador() {
 		return usuarioCreador;
 	}
 
-	public void setUsuarioCreador(Usuario usuarioCreador) {
+	/*public void setUsuarioCreador(Usuario usuarioCreador) {
 		this.usuarioCreador = usuarioCreador;
-	}
+	}*/
 	
-	public void setCodigo(int codigoNuevo) {
-		codigo = codigoNuevo;
-	}
-	
-	public int getCodigo() {
-		return codigo;
-	}
 	
 	
 /* Metodo que comprobaria si un contaco en especifivo pertenece a la lista de contactos de alguien. (no se si hace falta)

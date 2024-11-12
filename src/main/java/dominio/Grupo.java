@@ -5,21 +5,21 @@ import java.util.List;
 
 public class Grupo extends Contacto {
 	private String imagen; //del grupo
-	private List<Contacto> miembros;
+	private List<ContactoIndividual> miembros;
 	private Usuario propietario; //del grupo
 
 	public Grupo(String nombre, Usuario propietario) {
 		super(nombre);
 		this.propietario = propietario;
-		this.miembros = new LinkedList<Contacto>();
+		this.miembros = new LinkedList<ContactoIndividual>();
 	}
 
 	public String getImagen() {
 		return imagen;
 	}
 
-	public List<Contacto> getMiembros() {
-		return miembros;
+	public List<ContactoIndividual> getMiembros() {
+		return new LinkedList<ContactoIndividual>(miembros);
 	}
 
 	public Usuario getPropietario() {
@@ -39,8 +39,8 @@ public class Grupo extends Contacto {
 	}*/
 	
 	
-	//ir viendo si esto va aquí o no
-	public void agregarContacto(Contacto contacto) {
+	//ESTO VA EN EL CONTROLADORS
+	/*public void agregarContacto(ContactoIndividual contacto) {
         if (!miembros.contains(contacto)) {
             miembros.add(contacto);
         }
@@ -48,7 +48,7 @@ public class Grupo extends Contacto {
 
     public void eliminarContacto(Contacto contacto) {
         miembros.remove(contacto);
-    }
+    }*/
 	
     /*public void enviarMensaje(String texto, Usuario emisor) {
         for (Contacto contacto : miembros) {

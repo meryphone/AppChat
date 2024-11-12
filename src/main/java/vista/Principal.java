@@ -225,15 +225,15 @@ public class Principal extends JFrame {
 		scrollPane.setRowHeaderView(scrollBar);
 
 		// Para probar Jlist
-		DefaultListModel<Contacto> modelo = new DefaultListModel<>();
+	/*	DefaultListModel<Contacto> modelo = new DefaultListModel<>();
 		modelo.addElement(new Contacto("Jose", "López", 123));
 		modelo.addElement(new Contacto("Ana", "Jover", 321));
-		modelo.addElement(new Contacto("María", "Sánchez", 456));
+		modelo.addElement(new Contacto("María", "Sánchez", 456));*/
 		/////////////////////////////////////////////////////////////
 
-		JList<Contacto> listaContactos = new JList<Contacto>(modelo);
-		scrollPane.setViewportView(listaContactos);
-		listaContactos.setCellRenderer(new ContactoCellRenderer());
+		//JList<Contacto> listaContactos = new JList<Contacto>(modelo);
+		//scrollPane.setViewportView(listaContactos);
+		//listaContactos.setCellRenderer(new ContactoCellRenderer());
 
 		JPanel der = new JPanel();
 		der.setBorder(new TitledBorder(new LineBorder(new Color(99, 130, 191), 2), "Chat con Blas04",

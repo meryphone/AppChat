@@ -47,8 +47,8 @@ public class BusquedaCellRenderer extends JPanel implements ListCellRenderer<Men
 	public Component getListCellRendererComponent(JList<? extends Mensaje> list, Mensaje mensaje, int index,
 			boolean isSelected, boolean cellHasFocus) {
 		
-		emisor.setText(mensaje.getEmisor());		
-		receptor.setText(mensaje.getReceptor());	
+		//emisor.setText(mensaje.getEmisor());		
+		//receptor.setText(mensaje.getReceptor());	
 		this.mensaje.setText(mensaje.getTexto());
 		
 		if (isSelected) {

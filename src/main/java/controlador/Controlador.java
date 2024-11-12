@@ -6,8 +6,6 @@ import java.util.Optional;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
-import com.itextpdf.text.ExceptionConverter;
-
 import dominio.Contacto;
 import dominio.ContactoIndividual;
 import dominio.RepositorioUsuarios;
@@ -114,7 +112,12 @@ public class Controlador {
 	    if(!repositorioUsuarios.getUsuarioPorTelefono(tlf).isEmpty()){ // Si existe el contacto.
 	    	
 	    	 usuarioActual.getContactoPorTelefono(tlf).
-	    	 ifPresent(contacto -> {throw new ExcepcionContacto("El contacto ya está agregado.");
+	    	 ifPresent(contacto -> {
+	    		 try {
+	    			 throw new ExcepcionContacto("El contacto ya está agregado.");
+	    		 }catch(ExcepcionContacto e) {
+	    		        throw new RuntimeException(e); // Envolver en RuntimeException
+	    		 }
              });
 	    	 
 	    	 usuarioActual.anadirContacto( new ContactoIndividual(nombreContacto,tlf,usuarioActual));
@@ -189,7 +192,7 @@ public class Controlador {
 	    Optional.ofNullable(mensajeSaludo).filter(s -> !s.isEmpty()).ifPresent(usuario::setMensajeSaludo);
 	    Optional.ofNullable(pathImagen)
 	            .filter(icon -> !icon.equals(Usuario.IMAGEN_POR_DEFECTO))
-	            .ifPresent(icon -> usuario.setpathImagen(icon));
+	            .ifPresent(icon -> usuario.setPathImagen(icon));
 	}
 	
 
