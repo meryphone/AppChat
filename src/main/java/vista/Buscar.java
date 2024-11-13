@@ -61,7 +61,7 @@ public class Buscar extends JFrame {
 	 * Create the frame.
 	 */
 	public Buscar() {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 811, 540);
 		contentPane = new JPanel();
 		contentPane.setBackground(UIManager.getColor("List.dropCellBackground"));

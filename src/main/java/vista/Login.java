@@ -16,6 +16,7 @@ import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 
 import controlador.Controlador;
+import dominio.Usuario;
 import excepciones.ExcepcionLogin;
 
 import javax.swing.border.LineBorder;
@@ -96,23 +97,20 @@ public class Login extends JFrame implements MensajeAdvertencia{
         sur.add(btnLogin);
         
         btnLogin.addActionListener(ev -> {
-        	try {
-        		boolean logueExitoso = false;
-				logueExitoso = controlador.loguearUsuario(telefono.getText(), new String (contrasena.getPassword()));
-				
-				if(logueExitoso) {
-					Principal ventanaMain = new Principal();
-					ventanaMain.setVisible(true);
-					dispose();
-				} else {
-					mostrarError("Las contraseñas no coinciden", contentPane);
-				}
-					
-				
-			} catch (ExcepcionLogin e) {
-				mostrarError(e.getMessage(), contentPane);
-			}
+            try {
+            	//PREGUNTAR SI ES CORRECTO QUE AQUÍ PUEDA CREAR UN OBJETO USUARIO
+            	Usuario usuarioAutenticado = controlador.loguearUsuario(telefono.getText(), new String(contrasena.getPassword()));
+                
+                ImageIcon imagenPerfil = new ImageIcon(usuarioAutenticado.getPathImagen());
+                Principal ventanaMain = new Principal(usuarioAutenticado.getNombreCompleto(), imagenPerfil);
+                
+                ventanaMain.setVisible(true);
+                dispose();
+            } catch (ExcepcionLogin e) {
+                mostrarError(e.getMessage(), contentPane);
+            }
         });
+
         
         Component rigidArea = Box.createRigidArea(new Dimension(20, 20));
         sur.add(rigidArea);

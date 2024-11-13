@@ -5,8 +5,8 @@ import java.awt.Graphics2D;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
 import javax.swing.BoxLayout;
@@ -18,7 +18,8 @@ import javax.swing.border.BevelBorder;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 
-import java.awt.Insets;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -27,44 +28,43 @@ import javax.swing.JButton;
 import javax.swing.ImageIcon;
 import javax.swing.border.TitledBorder;
 
-import dominio.Contacto;
-import dominio.ContactoIndividual;
-import dominio.Usuario;
 import tds.BubbleText;
 
 import javax.swing.border.LineBorder;
 import java.awt.Color;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
 import java.awt.Component;
 
 import javax.imageio.ImageIO;
 import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListModel;
 import javax.swing.JScrollPane;
 import javax.swing.JScrollBar;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
+import java.awt.FlowLayout;
+import javax.swing.JTextField;
 
-public class Principal extends JFrame {
+public class Principal extends JFrame implements MensajeAdvertencia {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
+    private JLabel lblUsuario;  // Declaración de lblUsuario como variable de instancia
+    private JTextField textField;
 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					Principal frame = new Principal();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+        EventQueue.invokeLater(() -> {
+            try {
+                ImageIcon icono = new ImageIcon(Principal.class.getResource("/resources/usuario(1).png"));
+                Principal frame = new Principal("Usuario", icono);
+                frame.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
 	}
 
 	/**
@@ -73,7 +73,6 @@ public class Principal extends JFrame {
 	 * @param imagen
 	 * @return imagenCircular
 	 */
-
 	private Image imagenCircular(Image imagen) {
 
 		BufferedImage imagenCircular = new BufferedImage(72, 72, BufferedImage.TYPE_4BYTE_ABGR);
@@ -91,9 +90,9 @@ public class Principal extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public Principal() {
+	public Principal(String nombreUsuario, ImageIcon imagenUsuario) {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 776, 513);
+		setBounds(100, 100, 839, 512);
 		contentPane = new JPanel();
 		contentPane.setBackground(UIManager.getColor("CheckBoxMenuItem.acceleratorForeground"));
 		contentPane.setPreferredSize(new Dimension(20, 20));
@@ -102,35 +101,22 @@ public class Principal extends JFrame {
 
 		setContentPane(contentPane);
 		contentPane.setLayout(new BorderLayout(0, 0));
-
+		
 		JPanel arriba = new JPanel();
 		arriba.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
 		contentPane.add(arriba, BorderLayout.NORTH);
-		GridBagLayout gbl_arriba = new GridBagLayout();
-		gbl_arriba.columnWidths = new int[] { 164, 0, 0, 111, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		gbl_arriba.rowHeights = new int[] { 23, 0, 0 };
-		gbl_arriba.columnWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-				Double.MIN_VALUE };
-		gbl_arriba.rowWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
-		arriba.setLayout(gbl_arriba);
-
+		arriba.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		
+		//AQUI CREO QUE VAMOS A TENER QUE UTILIZAR  SEGURAMENTE UN ITEMLISTENER
 		JComboBox comboBox = new JComboBox();
+		comboBox.setMaximumRowCount(20);
 		comboBox.setBackground(UIManager.getColor("Button.light"));
 		comboBox.setModel(new DefaultComboBoxModel(new String[] { "Contactos", "Teléfono" }));
-		GridBagConstraints gbc_comboBox = new GridBagConstraints();
-		gbc_comboBox.insets = new Insets(0, 0, 5, 5);
-		gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
-		gbc_comboBox.gridx = 0;
-		gbc_comboBox.gridy = 0;
-		arriba.add(comboBox, gbc_comboBox);
+		arriba.add(comboBox);
 
 		JButton atras = new JButton("");
-		atras.setIcon(new ImageIcon(Principal.class.getResource("/resources/volver(1).png")));
-		GridBagConstraints gbc_atras = new GridBagConstraints();
-		gbc_atras.insets = new Insets(0, 0, 5, 5);
-		gbc_atras.gridx = 1;
-		gbc_atras.gridy = 0;
-		arriba.add(atras, gbc_atras);
+		atras.setIcon(new ImageIcon(Principal.class.getResource("/resources/enviar(2)(3).png")));
+		arriba.add(atras);
 
 		/*
 		 * atras.addActionListener(ev -> { dispose(); Login login = new Login();
@@ -139,11 +125,7 @@ public class Principal extends JFrame {
 
 		JButton buscar = new JButton("");
 		buscar.setIcon(new ImageIcon(Principal.class.getResource("/resources/buscar(1).png")));
-		GridBagConstraints gbc_buscar = new GridBagConstraints();
-		gbc_buscar.insets = new Insets(0, 0, 5, 5);
-		gbc_buscar.gridx = 2;
-		gbc_buscar.gridy = 0;
-		arriba.add(buscar, gbc_buscar);
+		arriba.add(buscar);
 		buscar.addActionListener(ev -> {
 			Buscar buscador = new Buscar();
 			buscador.setVisible(true);
@@ -151,21 +133,11 @@ public class Principal extends JFrame {
 
 		JLabel lblNewLabel = new JLabel("");
 		lblNewLabel.setIcon(new ImageIcon(Principal.class.getResource("/resources/Appchatlogominecraft(3).png")));
-		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
-		gbc_lblNewLabel.gridwidth = 2;
-		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel.gridx = 3;
-		gbc_lblNewLabel.gridy = 0;
-		arriba.add(lblNewLabel, gbc_lblNewLabel);
+		arriba.add(lblNewLabel);
 
 		JButton btnContactos = new JButton("Contactos");
 		btnContactos.setIcon(new ImageIcon(Principal.class.getResource("/resources/libreta-de-contactos.png")));
-		GridBagConstraints gbc_btnContactos = new GridBagConstraints();
-		gbc_btnContactos.gridwidth = 2;
-		gbc_btnContactos.insets = new Insets(0, 0, 5, 5);
-		gbc_btnContactos.gridx = 5;
-		gbc_btnContactos.gridy = 0;
-		arriba.add(btnContactos, gbc_btnContactos);
+		arriba.add(btnContactos);
 		btnContactos.addActionListener(ev -> {
 			Contactos contactos = new Contactos();
 			contactos.setVisible(true);
@@ -173,29 +145,24 @@ public class Principal extends JFrame {
 
 		JButton btnPremium = new JButton("PREMIUM");
 		btnPremium.setIcon(new ImageIcon(Principal.class.getResource("/resources/dolar(2)(1).png")));
-		GridBagConstraints gbc_btnPremium = new GridBagConstraints();
-		gbc_btnPremium.gridwidth = 5;
-		gbc_btnPremium.insets = new Insets(0, 0, 5, 5);
-		gbc_btnPremium.gridx = 7;
-		gbc_btnPremium.gridy = 0;
-		arriba.add(btnPremium, gbc_btnPremium);
-
-		JLabel lblUsuario = new JLabel("Usuario");
-		lblUsuario.setIcon(new ImageIcon(Principal.class.getResource("/resources/usuario(1).png")));
-		GridBagConstraints gbc_lblUsuario = new GridBagConstraints();
-		gbc_lblUsuario.gridwidth = 2;
-		gbc_lblUsuario.insets = new Insets(0, 0, 5, 0);
-		gbc_lblUsuario.gridx = 12;
-		gbc_lblUsuario.gridy = 0;
-		arriba.add(lblUsuario, gbc_lblUsuario);
-
+		arriba.add(btnPremium);
+		
+		lblUsuario = new JLabel(nombreUsuario);
+		lblUsuario.setIcon(imagenUsuario);
+		lblUsuario.setIconTextGap(10);
+		arriba.add(lblUsuario);
+		
+		//MouseListener para cambiar la imagen de perfil al hacer clic
+        lblUsuario.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                cambiarImagenPerfil();
+            }
+        });
+        
 		Component verticalGlue = Box.createVerticalGlue();
-		GridBagConstraints gbc_verticalGlue = new GridBagConstraints();
-		gbc_verticalGlue.insets = new Insets(0, 0, 0, 5);
-		gbc_verticalGlue.gridx = 0;
-		gbc_verticalGlue.gridy = 1;
-		arriba.add(verticalGlue, gbc_verticalGlue);
-
+		arriba.add(verticalGlue);
+		
 		JPanel centro = new JPanel();
 		contentPane.add(centro, BorderLayout.CENTER);
 		centro.setLayout(new BoxLayout(centro, BoxLayout.X_AXIS));
@@ -219,9 +186,6 @@ public class Principal extends JFrame {
 		gbc_scrollPane.gridy = 0;
 		izq.add(scrollPane, gbc_scrollPane);
 
-		JScrollBar scrollBar = new JScrollBar();
-		scrollPane.setRowHeaderView(scrollBar);
-
 		// Para probar Jlist
 
 	/*	DefaultListModel<Contacto> modelo = new DefaultListModel<>();
@@ -236,25 +200,130 @@ public class Principal extends JFrame {
 
 
 		JPanel der = new JPanel();
+		der.setMinimumSize(new Dimension(200, 200));
 		der.setBorder(new TitledBorder(new LineBorder(new Color(99, 130, 191), 2), "Chat con Blas04",
 				TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		
 		der.setBackground(UIManager.getColor("Tree.dropCellBackground"));
-		der.setMaximumSize(getMaximumSize()); // Para que el panel ocupe todo el espacio disponible.
+		der.setMaximumSize(getMaximumSize()); 
 		centro.add(der);
-		der.setLayout(new BoxLayout(der, BoxLayout.Y_AXIS));
+		der.setLayout(new BorderLayout(0, 0));
+		
+		JScrollPane scrollPane_1 = new JScrollPane();
+		scrollPane_1.setBackground(new Color(255, 255, 255));
+		der.add(scrollPane_1, BorderLayout.CENTER);
+		
+		JPanel chat = new JPanel();
+		scrollPane_1.setViewportView(chat);
+		chat.setLayout(new BoxLayout(chat, BoxLayout.Y_AXIS)); // Para apilar las burbujas verticalmente
+		chat.setBackground(UIManager.getColor("Tree.dropCellBackground")); 
+		
+		JPanel enviarMensaje = new JPanel(new BorderLayout()); 
+		der.add(enviarMensaje, BorderLayout.SOUTH);
+
+		//Para crear el menú de emoticonos
+		JPopupMenu menuEmoticonos = new JPopupMenu();
+		for (int i = 0; i < 8; i++) { 
+		    final int index = i; 
+		    
+		    JLabel emoticonoLabel = new JLabel(BubbleText.getEmoji(index)); 
+		    menuEmoticonos.add(emoticonoLabel);
+
+		    emoticonoLabel.addMouseListener(new MouseAdapter() {
+		        @Override
+		        public void mouseClicked(MouseEvent e) {
+		        	
+		            BubbleText burbujaEmoticono = new BubbleText(chat, index, Color.GREEN, nombreUsuario, BubbleText.SENT,18); 
+		            chat.add(burbujaEmoticono);
+		            chat.revalidate();
+		            chat.repaint();
+		            menuEmoticonos.setVisible(false); 
+		        }
+		    });
+		}
+
+		
+		JButton btnEmoticono = new JButton("");
+		btnEmoticono.setIcon(new ImageIcon(Principal.class.getResource("/resources/contento(1).png")));
+		enviarMensaje.add(btnEmoticono, BorderLayout.WEST); 
+
+		// Mostrar el menú desplegable al hacer clic en el botón de emoticono
+		btnEmoticono.addActionListener(e -> menuEmoticonos.show(btnEmoticono, btnEmoticono.getWidth() / 2, btnEmoticono.getHeight() / 2));
+		enviarMensaje.add(btnEmoticono, BorderLayout.WEST);
+		
+		textField = new JTextField();
+		enviarMensaje.add(textField, BorderLayout.CENTER); 
+
+		JButton btnEnviar = new JButton("");
+		btnEnviar.setIcon(new ImageIcon(Principal.class.getResource("/resources/enviar-mensaje(1).png")));
+		enviarMensaje.add(btnEnviar, BorderLayout.EAST); 
+		
+		//Para enviar mensaje en un bubbleText
+		btnEnviar.addActionListener(ev -> {
+		    String mensajeTexto = textField.getText();
+		    		    
+		    if (!mensajeTexto.isEmpty()) {
+		    	
+		        BubbleText burbuja = new BubbleText(chat, mensajeTexto, Color.GREEN, nombreUsuario, BubbleText.SENT);
+		        chat.add(burbuja);
+
+		        //Para que se actualice la interfaz
+		        chat.revalidate();
+		        chat.repaint();
+
+		        JScrollBar verticalScrollBar = scrollPane_1.getVerticalScrollBar();
+		        verticalScrollBar.setValue(verticalScrollBar.getMaximum());
+
+		        //Para limpiar el campo de texto después de enviar
+		        textField.setText("");
+		    }
+		});
+
 
 		///// Prueba chat
-		BubbleText burbuja = new BubbleText(der, "k pasa ermaniko", Color.GREEN, "elBridas", BubbleText.SENT);
+		/*BubbleText burbuja = new BubbleText(der, "k pasa ermaniko", Color.GREEN, "elBridas", BubbleText.SENT);
 		burbuja.setMaximumSize(new Dimension(Integer.MAX_VALUE, burbuja.getPreferredSize().height));
 		der.add(burbuja);
 
 		BubbleText burbuja2 = new BubbleText(der, "k kiereh tu", Color.LIGHT_GRAY, "Blas", BubbleText.RECEIVED);
 		der.add(burbuja2);
 		burbuja2.setMaximumSize(new Dimension(Integer.MAX_VALUE, burbuja2.getPreferredSize().height));
-		der.add(burbuja2);
+		der.add(burbuja2);*/
 
 		///////////////////////////
 
 	}
+	
+	  // Método para cambiar la imagen de perfil del usuario
+	private void cambiarImagenPerfil() {
+	    JFileChooser fileChooser = new JFileChooser();
+	    fileChooser.setDialogTitle("Selecciona una nueva imagen de perfil");
 
+	    int resultado = fileChooser.showOpenDialog(this);
+	    if (resultado == JFileChooser.APPROVE_OPTION) {
+	        File archivoSeleccionado = fileChooser.getSelectedFile();
+	        try {
+	            BufferedImage imagenOriginal = ImageIO.read(archivoSeleccionado);
+	            if (imagenOriginal == null) {
+					throw new Exception("El archivo seleccionado no es una imagen válida.");
+				}
+	            Image imagenRedimensionada = imagenOriginal.getScaledInstance(24, 24, Image.SCALE_SMOOTH); //tamaño 24x24
+	            ImageIcon imagenCircular = new ImageIcon(imagenCircular(imagenRedimensionada));
+	            lblUsuario.setIcon(imagenCircular);  //actualizo la imagen en lblUsuario
+	        } catch (Exception e) {
+				e.printStackTrace();
+				mostrarError(e.getMessage(), contentPane);
+			}
+	    }
+	}
+	@Override
+    public void mostrarError(String mensaje, Component parentComponent) {
+        JOptionPane.showMessageDialog(parentComponent, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    @Override
+    public void mostrarConfirmacion(String mensaje, Component parentComponent) {
+        JOptionPane.showMessageDialog(parentComponent, mensaje, "Confirmación", JOptionPane.INFORMATION_MESSAGE);
+    }
+	
 }

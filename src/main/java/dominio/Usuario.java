@@ -52,6 +52,10 @@ public class Usuario {
 	 * Constructor para inizializar sin parámetros.
 	 */
 	public Usuario() {
+		this.nombreCompleto = "";
+		this.movil = "";
+		this.contrasena = "";
+		this.email = "";
 		
 	}
 
@@ -75,9 +79,9 @@ public class Usuario {
 	 * @param nuevoContacto
 	 */
 	//ESTO CREO QUE VA EN EL CONTROLADOR
-	/*public void anadirContacto(ContactoIndividual nuevoContacto) {
+	public void anadirContacto(ContactoIndividual nuevoContacto) {
 		listaContactos.add(nuevoContacto);
-	}*/
+	}
 	
 	public List<ContactoIndividual> getListaContactos() {
 		return new LinkedList<ContactoIndividual>(listaContactos);

@@ -4,12 +4,15 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.border.TitledBorder;
 import dominio.ContactoIndividual;
 import dominio.Usuario;
+import excepciones.ExcepcionContacto;
+
 import javax.swing.border.LineBorder;
 import java.awt.Color;
 import javax.swing.JScrollPane;
@@ -20,8 +23,10 @@ import java.awt.Component;
 import javax.swing.Box;
 import java.awt.Dimension;
 import java.awt.SystemColor;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-public class Contactos extends JFrame {
+public class Contactos extends JFrame implements MensajeAdvertencia{
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -47,7 +52,7 @@ public class Contactos extends JFrame {
 	 */
 	public Contactos() {
 		setBackground(SystemColor.window);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 665, 422);
 		contentPane = new JPanel();
 		contentPane.setBackground(UIManager.getColor("List.dropCellBackground"));
@@ -66,7 +71,7 @@ public class Contactos extends JFrame {
 		izq.add(scrollPane, BorderLayout.CENTER);
 		
 		// Para probar Jlist
-				DefaultListModel<ContactoIndividual> modelo = new DefaultListModel<>();
+			/*	DefaultListModel<ContactoIndividual> modelo = new DefaultListModel<>();
 				modelo.addElement(new ContactoIndividual("Jose", "123", new Usuario()));
 				modelo.addElement(new ContactoIndividual("Ana", "321", new Usuario()));
 				modelo.addElement(new ContactoIndividual("María","456", new Usuario()));
@@ -74,14 +79,24 @@ public class Contactos extends JFrame {
 				listaContactos.setCellRenderer(new ContactoIndividualCellRenderer());
 				/////////////////////////////////////////////////////////////
 		
-		scrollPane.setViewportView(listaContactos);
+		scrollPane.setViewportView(listaContactos);*/
 				
 		JPanel abajoIzq = new JPanel();
 		abajoIzq.setBackground(UIManager.getColor("List.dropCellBackground"));
 		izq.add(abajoIzq, BorderLayout.SOUTH);
 		
-		JButton AñadirContacto = new JButton("Añadir contacto");
-		abajoIzq.add(AñadirContacto);
+		JButton anadirContacto = new JButton("Añadir contacto");
+		abajoIzq.add(anadirContacto);
+		anadirContacto.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				dispose();
+				AlertaAñadirContacto contacto = new AlertaAñadirContacto();
+				contacto.setVisible(true);				
+			}
+		});
+		
 		
 		JPanel centro = new JPanel();
 		centro.setBackground(UIManager.getColor("List.dropCellBackground"));
@@ -115,17 +130,27 @@ public class Contactos extends JFrame {
 		
 		// Para probar Jlist
 
-		DefaultListModel<ContactoIndividual> modelo1 = new DefaultListModel<>();
+		/*DefaultListModel<ContactoIndividual> modelo1 = new DefaultListModel<>();
 		modelo1.addElement(new ContactoIndividual("Jose", "123", new Usuario()));
 		modelo1.addElement(new ContactoIndividual("Ana", "321", new Usuario()));
 		modelo1.addElement(new ContactoIndividual("María","456", new Usuario()));
 		JList<ContactoIndividual> listaContactos1 = new JList<ContactoIndividual>(modelo1);
-		listaContactos1.setCellRenderer(new ContactoIndividualCellRenderer());
+		listaContactos1.setCellRenderer(new ContactoIndividualCellRenderer());*/
 
 		/////////////////////////////////////////////////////////////
 		
-		scrollPane_1.setViewportView(listaContactos1);
+		//scrollPane_1.setViewportView(listaContactos1);
 		
 	}
+	
+	 @Override
+	 public void mostrarError(String mensaje, Component parentComponent) {
+	     JOptionPane.showMessageDialog(parentComponent, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
+	 }
+
+	 @Override
+	 public void mostrarConfirmacion(String mensaje, Component parentComponent) {
+	     JOptionPane.showMessageDialog(parentComponent, mensaje, "Confirmación", JOptionPane.INFORMATION_MESSAGE);
+	 }
 
 }

@@ -59,7 +59,7 @@ public class Controlador {
 		
 		
 		// Si el telefono ya está registrado se lanza una excepción
-		if(repositorioUsuarios.getUsuarioPorTelefono(movil).isEmpty()) {
+		if(!repositorioUsuarios.getUsuarioPorTelefono(movil).isEmpty()) {
 			throw new ExcepcionRegistro("El teléfono ya está registrado");
 		}
 		
@@ -87,18 +87,12 @@ public class Controlador {
 	 * @throws ExcepcionLogin
 	 */
 	
-	public boolean loguearUsuario(String telefono, String contrasena) throws ExcepcionLogin {
-
+	public Usuario loguearUsuario(String telefono, String contrasena) throws ExcepcionLogin {
 	    return repositorioUsuarios.getUsuarioPorTelefono(telefono)
-	            .map(usuario -> {
-	                if (usuario.getContrasena().equals(contrasena)) {	// Aplica la acción al contenido del Optional si este no está vacio.
-	                    return true; 
-	                } else {
-	                    throw new ExcepcionLogin("La contraseña es incorrecta"); 
-	                }
-	            })
-	            .orElseThrow(() -> new ExcepcionLogin("El teléfono no se encuentra registrado"));
+	        .filter(usuario -> usuario.getContrasena().equals(contrasena))
+	        .orElseThrow(() -> new ExcepcionLogin("El teléfono o la contraseña no son correctos"));
 	}
+
 	
 	/**
 	 * Método para añadir un nuevo contacto al usuario cuyo teléfono se pasa como parámetro.
@@ -108,30 +102,33 @@ public class Controlador {
 	 * @throws ExcepcionContacto si el contacto ya existe o el usuario no está registrado
 	 */
 	public boolean agregarContacto(String tlf, String nombreContacto) throws ExcepcionContacto {
-		
-	    if(!repositorioUsuarios.getUsuarioPorTelefono(tlf).isEmpty()){ // Si existe el contacto.
-	    	
-	    	 usuarioActual.getContactoPorTelefono(tlf).
-	    	 ifPresent(contacto -> {
-	    		 try {
-	    			 throw new ExcepcionContacto("El contacto ya está agregado.");
-	    		 }catch(ExcepcionContacto e) {
-	    		        throw new RuntimeException(e); // Envolver en RuntimeException
-	    		 }
-             });
-	    	 
-	    	 usuarioActual.anadirContacto( new ContactoIndividual(nombreContacto,tlf,usuarioActual));
-	    	 // adaptadorCOntacto.nañadorCOnatcto
-	    	 
-	    }else {
-	    	throw new ExcepcionContacto("El usuario no existe");
+	    // Verifica si el usuario existe en el repositorio por teléfono
+	    if (!repositorioUsuarios.getUsuarioPorTelefono(tlf).isEmpty()) {
+	        // Si el contacto ya existe, lanza una excepción
+	        usuarioActual.getContactoPorTelefono(tlf).ifPresent(contacto -> {
+	            try {
+	                throw new ExcepcionContacto("El contacto ya está agregado.");
+	            } catch (ExcepcionContacto e) {
+	                throw new RuntimeException(e); // Envolver en RuntimeException
+	            }
+	        });
+
+	        // Agrega el contacto si no se ha lanzado ninguna excepción
+	        usuarioActual.anadirContacto(new ContactoIndividual(nombreContacto, tlf, usuarioActual));
+	        // Llama a adaptadorContacto para añadir el contacto si es necesario
+	        // adaptadorContacto.anadirContacto(nombreContacto, tlf);
+
+	    } else {
+	        throw new ExcepcionContacto("El usuario no existe");
 	    }
-	    
-		return true;
-	           
+
+	    return true;
 	}
 
+	
+	
 
+	
 	
 	/**
 	 * Encargado de validar que todos los campos obligatorios no esten vacíos.
