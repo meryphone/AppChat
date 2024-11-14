@@ -1,6 +1,8 @@
 package controlador;
 
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 
 import javax.swing.Icon;
@@ -88,9 +90,17 @@ public class Controlador {
 	 */
 	
 	public Usuario loguearUsuario(String telefono, String contrasena) throws ExcepcionLogin {
-	    return repositorioUsuarios.getUsuarioPorTelefono(telefono)
-	        .filter(usuario -> usuario.getContrasena().equals(contrasena))
-	        .orElseThrow(() -> new ExcepcionLogin("El teléfono o la contraseña no son correctos"));
+	    
+	    if (repositorioUsuarios.getUsuarioPorTelefono(telefono).isEmpty()) {
+	        throw new ExcepcionLogin("El teléfono no está registrado.");
+	    }
+	    Usuario user = repositorioUsuarios.getUsuarioPorTelefono(telefono).get();
+	    if (!user.getContrasena().equals(contrasena)) {
+	        throw new ExcepcionLogin("La contraseña es incorrecta.");
+	    }
+	    
+	    //Si todo es correcto, devuelve el usuario
+	    return user;
 	}
 
 	
@@ -103,13 +113,17 @@ public class Controlador {
 	 */
 	public boolean agregarContacto(String tlf, String nombreContacto) throws ExcepcionContacto {
 	    // Verifica si el usuario existe en el repositorio por teléfono
-	    if (!repositorioUsuarios.getUsuarioPorTelefono(tlf).isEmpty()) {
+		if (usuarioActual == null) {
+		    throw new ExcepcionContacto("No hay un usuario actual autenticado.");
+		}
+
+	    if (!repositorioUsuarios.getUsuarioPorTelefono(usuarioActual.getMovil()).isEmpty()) {
 	        // Si el contacto ya existe, lanza una excepción
 	        usuarioActual.getContactoPorTelefono(tlf).ifPresent(contacto -> {
 	            try {
 	                throw new ExcepcionContacto("El contacto ya está agregado.");
 	            } catch (ExcepcionContacto e) {
-	                throw new RuntimeException(e); // Envolver en RuntimeException
+	                throw new RuntimeException(e); 
 	            }
 	        });
 
@@ -124,6 +138,14 @@ public class Controlador {
 
 	    return true;
 	}
+	
+	public List<ContactoIndividual> obtenerContactos() {
+	    if (usuarioActual != null) {
+	        return usuarioActual.getListaContactos(); // Asegúrate de que `getContactos` devuelva una lista de ContactoIndividual
+	    }
+	    return new LinkedList<>(); // Devuelve una lista vacía si no hay un usuario autenticado
+	}
+
 
 	
 	

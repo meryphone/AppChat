@@ -7,6 +7,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import controlador.Controlador;
+import excepciones.ExcepcionContacto;
 
 import java.awt.BorderLayout;
 import javax.swing.BoxLayout;
@@ -31,7 +32,7 @@ public class AlertaAñadirContacto extends JFrame implements MensajeAdvertencia{
 	private JTextField textTlf;
 	private JTextField textNombre;
 	private Controlador controlador = Controlador.getInstance();
-
+	private Principal principal;
 	/**
 	 * Launch the application.
 	 */
@@ -39,7 +40,7 @@ public class AlertaAñadirContacto extends JFrame implements MensajeAdvertencia{
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					AlertaAñadirContacto frame = new AlertaAñadirContacto();
+					AlertaAñadirContacto frame = new AlertaAñadirContacto(null);
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -51,7 +52,8 @@ public class AlertaAñadirContacto extends JFrame implements MensajeAdvertencia{
 	/**
 	 * Create the frame.
 	 */
-	public AlertaAñadirContacto() {
+	public AlertaAñadirContacto(Principal principal) {
+		this.principal = principal;
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 492, 258);
 	    setResizable(false);             // Evita que la ventana se pueda redimensionar
@@ -72,18 +74,22 @@ public class AlertaAñadirContacto extends JFrame implements MensajeAdvertencia{
 		aceptar.setHorizontalAlignment(SwingConstants.LEADING);
 		abajo.add(aceptar);
 		
+		//PREGUNTAR SI ESTÁ BIEN QUE LA VISTA ACCEDA A LAS EXCEPCIONES
 		aceptar.addActionListener(ev -> {
 			try {
 				boolean agregarContacto = controlador.agregarContacto(textTlf.getText(), textNombre.getText());
 				if(agregarContacto) {
 					mostrarConfirmacion("Contacto añadido correctamente", contentPane);
-					Contactos contactos = new Contactos();
+					Contactos contactos = new Contactos(principal);
 					contactos.setVisible(true);
 					dispose(); //cierra la ventana actual
 				}
-			} catch (Exception e) {
-				mostrarError("No se ha podido agregar el contacto", contentPane);
-			}
+			} catch (ExcepcionContacto e) {
+		        mostrarError(e.getMessage(), contentPane);
+		    } catch (Exception e) {
+		        mostrarError("No se ha podido agregar el contacto", contentPane);
+		        e.printStackTrace(); // Para depuración
+		    }
 		});
 		
 		JButton cancelar= new JButton("Cancelar");
@@ -94,7 +100,7 @@ public class AlertaAñadirContacto extends JFrame implements MensajeAdvertencia{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Contactos contactos = new Contactos();
+				Contactos contactos = new Contactos(principal);
 				contactos.setVisible(true);
 				dispose(); //cierra la ventana actual
 			}			

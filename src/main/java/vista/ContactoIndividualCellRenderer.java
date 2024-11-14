@@ -12,14 +12,13 @@ import dominio.ContactoIndividual;
 
 @SuppressWarnings("serial")
 public class ContactoIndividualCellRenderer extends JPanel implements ListCellRenderer<ContactoIndividual> {
-	
+	private static final ImageIcon ICONO_CONTACTO = new ImageIcon(Principal.class.getResource("/resources/usuario(1).png"));
 	private JLabel nombre;
 	private JLabel imagen;
 	
 	public ContactoIndividualCellRenderer(){
 		nombre = new JLabel();
-		imagen = new JLabel();
-		
+		imagen = new JLabel(ICONO_CONTACTO);		
 		setLayout(new FlowLayout(FlowLayout.LEFT));
 		
         add(imagen); 
@@ -32,7 +31,6 @@ public class ContactoIndividualCellRenderer extends JPanel implements ListCellRe
 			boolean isSelected, boolean cellHasFocus) {
 		
 		nombre.setText(contacto.getNombre());		
-		imagen.setIcon(new ImageIcon(Principal.class.getResource("/resources/usuario(1).png")));
 		
 		if (isSelected) {
 			setBackground(list.getSelectionBackground());

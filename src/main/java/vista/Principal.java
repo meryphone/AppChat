@@ -23,16 +23,20 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.ImageIcon;
 import javax.swing.border.TitledBorder;
 
+import controlador.Controlador;
+import dominio.ContactoIndividual;
 import tds.BubbleText;
 
 import javax.swing.border.LineBorder;
 import java.awt.Color;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 
 import java.awt.Component;
@@ -40,6 +44,7 @@ import java.awt.Component;
 import javax.imageio.ImageIO;
 import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
 import javax.swing.JScrollPane;
 import javax.swing.JScrollBar;
 import java.awt.FlowLayout;
@@ -51,7 +56,8 @@ public class Principal extends JFrame implements MensajeAdvertencia {
 	private JPanel contentPane;
     private JLabel lblUsuario;  // Declaración de lblUsuario como variable de instancia
     private JTextField textField;
-
+    private JList<ContactoIndividual> listaContactos;
+    private Controlador controlador = Controlador.getInstance();
 	/**
 	 * Launch the application.
 	 */
@@ -65,26 +71,6 @@ public class Principal extends JFrame implements MensajeAdvertencia {
                 e.printStackTrace();
             }
         });
-	}
-
-	/**
-	 * Método para poner un marco de foto circular.
-	 * 
-	 * @param imagen
-	 * @return imagenCircular
-	 */
-	private Image imagenCircular(Image imagen) {
-
-		BufferedImage imagenCircular = new BufferedImage(72, 72, BufferedImage.TYPE_4BYTE_ABGR);
-
-		Graphics2D graficos = imagenCircular.createGraphics();
-		Ellipse2D.Double forma = new Ellipse2D.Double(0, 0, 72, 72);
-		graficos.setClip(forma);
-		graficos.drawImage(imagen, 0, 0, 72, 72, null);
-		graficos.dispose();
-
-		return imagenCircular;
-
 	}
 
 	/**
@@ -139,8 +125,10 @@ public class Principal extends JFrame implements MensajeAdvertencia {
 		btnContactos.setIcon(new ImageIcon(Principal.class.getResource("/resources/libreta-de-contactos.png")));
 		arriba.add(btnContactos);
 		btnContactos.addActionListener(ev -> {
-			Contactos contactos = new Contactos();
+			Contactos contactos = new Contactos(this);
 			contactos.setVisible(true);
+			actualizarListaContactos();
+
 		});
 
 		JButton btnPremium = new JButton("PREMIUM");
@@ -186,17 +174,12 @@ public class Principal extends JFrame implements MensajeAdvertencia {
 		gbc_scrollPane.gridy = 0;
 		izq.add(scrollPane, gbc_scrollPane);
 
-		// Para probar Jlist
+		listaContactos = new JList<>();
+		listaContactos.setCellRenderer(new ContactoIndividualCellRenderer());
+		scrollPane.setViewportView(listaContactos);
 
-	/*	DefaultListModel<Contacto> modelo = new DefaultListModel<>();
-		modelo.addElement(new Contacto("Jose", "López", 123));
-		modelo.addElement(new Contacto("Ana", "Jover", 321));
-		modelo.addElement(new Contacto("María", "Sánchez", 456));*/
-		/////////////////////////////////////////////////////////////
-
-		//JList<Contacto> listaContactos = new JList<Contacto>(modelo);
-		//scrollPane.setViewportView(listaContactos);
-		//listaContactos.setCellRenderer(new ContactoCellRenderer());
+		   
+		actualizarListaContactos();
 
 
 		JPanel der = new JPanel();
@@ -279,22 +262,33 @@ public class Principal extends JFrame implements MensajeAdvertencia {
 		    }
 		});
 
+	}
+	
+	/**
+	 * Método para poner un marco de foto circular.
+	 * 
+	 * @param imagen
+	 * @return imagenCircular
+	 */
+	private Image imagenCircular(Image imagen) {
 
-		///// Prueba chat
-		/*BubbleText burbuja = new BubbleText(der, "k pasa ermaniko", Color.GREEN, "elBridas", BubbleText.SENT);
-		burbuja.setMaximumSize(new Dimension(Integer.MAX_VALUE, burbuja.getPreferredSize().height));
-		der.add(burbuja);
+		BufferedImage imagenCircular = new BufferedImage(24, 24, BufferedImage.TYPE_4BYTE_ABGR);
 
-		BubbleText burbuja2 = new BubbleText(der, "k kiereh tu", Color.LIGHT_GRAY, "Blas", BubbleText.RECEIVED);
-		der.add(burbuja2);
-		burbuja2.setMaximumSize(new Dimension(Integer.MAX_VALUE, burbuja2.getPreferredSize().height));
-		der.add(burbuja2);*/
+		Graphics2D graficos = imagenCircular.createGraphics();
+		Ellipse2D.Double forma = new Ellipse2D.Double(0, 0, 24, 24);
+		graficos.setClip(forma);
+		graficos.drawImage(imagen, 0, 0, 24, 24, null);
+		graficos.dispose();
 
-		///////////////////////////
+		return imagenCircular;
 
 	}
 	
-	  // Método para cambiar la imagen de perfil del usuario
+	/**
+	 * Método para cambiar la foto de perfil.
+	 * 
+	 * @return void
+	 */
 	private void cambiarImagenPerfil() {
 	    JFileChooser fileChooser = new JFileChooser();
 	    fileChooser.setDialogTitle("Selecciona una nueva imagen de perfil");
@@ -316,6 +310,22 @@ public class Principal extends JFrame implements MensajeAdvertencia {
 			}
 	    }
 	}
+	/**
+	 * Método para actualizar la lista de contactos
+	 * 
+	 * @return void
+	 */
+	public void actualizarListaContactos() {
+	    // Obtener la lista de contactos desde el controlador
+	    List<ContactoIndividual> contactos = controlador.obtenerContactos();
+	    // Crear un modelo para el JList y añadir los contactos
+	    DefaultListModel<ContactoIndividual> modelo = new DefaultListModel<>();
+	    for (ContactoIndividual contacto : contactos) {
+	        modelo.addElement(contacto);
+	    }
+	    listaContactos.setModel(modelo);
+	}
+	
 	@Override
     public void mostrarError(String mensaje, Component parentComponent) {
         JOptionPane.showMessageDialog(parentComponent, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
