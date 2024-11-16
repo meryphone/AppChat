@@ -96,7 +96,9 @@ public class AdaptadorContactoDAO {
 	
 	
 	
-	// -------Funciones auxiliares----------
+	
+	
+	// --------Funciones auxiliares----------
 	
 	private String obtenerCodigosMensajes(List<Mensaje> mensajes) {
 		
