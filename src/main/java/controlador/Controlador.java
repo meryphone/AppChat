@@ -1,12 +1,12 @@
 package controlador;
 
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-
-import com.itextpdf.text.ExceptionConverter;
 
 import dominio.Contacto;
 import dominio.ContactoIndividual;
@@ -61,7 +61,7 @@ public class Controlador {
 		
 		
 		// Si el telefono ya está registrado se lanza una excepción
-		if(repositorioUsuarios.getUsuarioPorTelefono(movil).isEmpty()) {
+		if(!repositorioUsuarios.getUsuarioPorTelefono(movil).isEmpty()) {
 			throw new ExcepcionRegistro("El teléfono ya está registrado");
 		}
 		
@@ -89,18 +89,20 @@ public class Controlador {
 	 * @throws ExcepcionLogin
 	 */
 	
-	public boolean loguearUsuario(String telefono, String contrasena) throws ExcepcionLogin {
-
-	    return repositorioUsuarios.getUsuarioPorTelefono(telefono)
-	            .map(usuario -> {
-	                if (usuario.getContrasena().equals(contrasena)) {	// Aplica la acción al contenido del Optional si este no está vacio.
-	                    return true; 
-	                } else {
-	                    throw new ExcepcionLogin("La contraseña es incorrecta"); 
-	                }
-	            })
-	            .orElseThrow(() -> new ExcepcionLogin("El teléfono no se encuentra registrado"));
+	public Usuario loguearUsuario(String telefono, String contrasena) throws ExcepcionLogin {
+	    
+	    if (repositorioUsuarios.getUsuarioPorTelefono(telefono).isEmpty()) {
+	        throw new ExcepcionLogin("El teléfono no está registrado.");
+	    }
+	    Usuario user = repositorioUsuarios.getUsuarioPorTelefono(telefono).get();
+	    if (!user.getContrasena().equals(contrasena)) {
+	        throw new ExcepcionLogin("La contraseña es incorrecta.");
+	    }
+	    
+	    //Si todo es correcto, devuelve el usuario
+	    return user;
 	}
+
 	
 	/**
 	 * Método para añadir un nuevo contacto al usuario cuyo teléfono se pasa como parámetro.
@@ -110,25 +112,45 @@ public class Controlador {
 	 * @throws ExcepcionContacto si el contacto ya existe o el usuario no está registrado
 	 */
 	public boolean agregarContacto(String tlf, String nombreContacto) throws ExcepcionContacto {
-		
-	    if(!repositorioUsuarios.getUsuarioPorTelefono(tlf).isEmpty()){ // Si existe el contacto.
-	    	
-	    	 usuarioActual.getContactoPorTelefono(tlf).
-	    	 ifPresent(contacto -> {throw new ExcepcionContacto("El contacto ya está agregado.");
-             });
-	    	 
-	    	 usuarioActual.anadirContacto( new ContactoIndividual(nombreContacto,tlf,usuarioActual));
-	    	 // adaptadorCOntacto.nañadorCOnatcto
-	    	 
-	    }else {
-	    	throw new ExcepcionContacto("El usuario no existe");
+	    // Verifica si el usuario existe en el repositorio por teléfono
+		if (usuarioActual == null) {
+		    throw new ExcepcionContacto("No hay un usuario actual autenticado.");
+		}
+
+	    if (!repositorioUsuarios.getUsuarioPorTelefono(usuarioActual.getMovil()).isEmpty()) {
+	        // Si el contacto ya existe, lanza una excepción
+	        usuarioActual.getContactoPorTelefono(tlf).ifPresent(contacto -> {
+	            try {
+	                throw new ExcepcionContacto("El contacto ya está agregado.");
+	            } catch (ExcepcionContacto e) {
+	                throw new RuntimeException(e); 
+	            }
+	        });
+
+	        // Agrega el contacto si no se ha lanzado ninguna excepción
+	        usuarioActual.anadirContacto(new ContactoIndividual(nombreContacto, tlf, usuarioActual));
+	        // Llama a adaptadorContacto para añadir el contacto si es necesario
+	        // adaptadorContacto.anadirContacto(nombreContacto, tlf);
+
+	    } else {
+	        throw new ExcepcionContacto("El usuario no existe");
 	    }
-	    
-		return true;
-	           
+
+	    return true;
+	}
+	
+	public List<ContactoIndividual> obtenerContactos() {
+	    if (usuarioActual != null) {
+	        return usuarioActual.getListaContactos(); // Asegúrate de que `getContactos` devuelva una lista de ContactoIndividual
+	    }
+	    return new LinkedList<>(); // Devuelve una lista vacía si no hay un usuario autenticado
 	}
 
 
+	
+	
+
+	
 	
 	/**
 	 * Encargado de validar que todos los campos obligatorios no esten vacíos.
@@ -189,7 +211,7 @@ public class Controlador {
 	    Optional.ofNullable(mensajeSaludo).filter(s -> !s.isEmpty()).ifPresent(usuario::setMensajeSaludo);
 	    Optional.ofNullable(pathImagen)
 	            .filter(icon -> !icon.equals(Usuario.IMAGEN_POR_DEFECTO))
-	            .ifPresent(icon -> usuario.setpathImagen(icon));
+	            .ifPresent(icon -> usuario.setPathImagen(icon));
 	}
 	
 

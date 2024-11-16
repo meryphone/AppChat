@@ -5,9 +5,14 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+
+import controlador.Controlador;
+import excepciones.ExcepcionContacto;
+
 import java.awt.BorderLayout;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import java.awt.Dimension;
@@ -17,14 +22,17 @@ import java.awt.Component;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-public class AlertaAñadirContacto extends JFrame {
+public class AlertaAñadirContacto extends JFrame implements MensajeAdvertencia{
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
-	private JTextField textField;
-	private JTextField textField_1;
-
+	private JTextField textTlf;
+	private JTextField textNombre;
+	private Controlador controlador = Controlador.getInstance();
+	private Principal principal;
 	/**
 	 * Launch the application.
 	 */
@@ -32,7 +40,7 @@ public class AlertaAñadirContacto extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					AlertaAñadirContacto frame = new AlertaAñadirContacto();
+					AlertaAñadirContacto frame = new AlertaAñadirContacto(null);
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -44,9 +52,11 @@ public class AlertaAñadirContacto extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public AlertaAñadirContacto() {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	public AlertaAñadirContacto(Principal principal) {
+		this.principal = principal;
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 492, 258);
+	    setResizable(false);             // Evita que la ventana se pueda redimensionar
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
@@ -60,13 +70,41 @@ public class AlertaAñadirContacto extends JFrame {
 		fl_abajo.setAlignOnBaseline(true);
 		abajo.setLayout(fl_abajo);
 		
-		JButton btnNewButton = new JButton("Aceptar");
-		btnNewButton.setHorizontalAlignment(SwingConstants.LEADING);
-		abajo.add(btnNewButton);
+		JButton aceptar = new JButton("Aceptar");
+		aceptar.setHorizontalAlignment(SwingConstants.LEADING);
+		abajo.add(aceptar);
 		
-		JButton btnNewButton_1 = new JButton("Cancelar");
-		btnNewButton_1.setHorizontalAlignment(SwingConstants.LEADING);
-		abajo.add(btnNewButton_1);
+		//PREGUNTAR SI ESTÁ BIEN QUE LA VISTA ACCEDA A LAS EXCEPCIONES
+		aceptar.addActionListener(ev -> {
+			try {
+				boolean agregarContacto = controlador.agregarContacto(textTlf.getText(), textNombre.getText());
+				if(agregarContacto) {
+					mostrarConfirmacion("Contacto añadido correctamente", contentPane);
+					Contactos contactos = new Contactos(principal);
+					contactos.setVisible(true);
+					dispose(); //cierra la ventana actual
+				}
+			} catch (ExcepcionContacto e) {
+		        mostrarError(e.getMessage(), contentPane);
+		    } catch (Exception e) {
+		        mostrarError("No se ha podido agregar el contacto", contentPane);
+		        e.printStackTrace(); // Para depuración
+		    }
+		});
+		
+		JButton cancelar= new JButton("Cancelar");
+		cancelar.setHorizontalAlignment(SwingConstants.LEADING);
+		abajo.add(cancelar);
+		
+		cancelar.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Contactos contactos = new Contactos(principal);
+				contactos.setVisible(true);
+				dispose(); //cierra la ventana actual
+			}			
+		});		
 		
 		JPanel centro = new JPanel();
 		contentPane.add(centro, BorderLayout.CENTER);
@@ -93,13 +131,13 @@ public class AlertaAñadirContacto extends JFrame {
 		nombre.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
 		JLabel lblNewLabel = new JLabel("Nombre:");
-		lblNewLabel.setPreferredSize(new Dimension(54, 17));
+		lblNewLabel.setPreferredSize(new Dimension(67, 17));
 		lblNewLabel.setFont(new Font("Corbel", Font.BOLD, 13));
 		nombre.add(lblNewLabel);
 		
-		textField_1 = new JTextField();
-		nombre.add(textField_1);
-		textField_1.setColumns(10);
+		textNombre = new JTextField();
+		nombre.add(textNombre);
+		textNombre.setColumns(10);
 		
 		JPanel teléfono = new JPanel();
 		centro.add(teléfono);
@@ -109,12 +147,20 @@ public class AlertaAñadirContacto extends JFrame {
 		lblNewLabel_1.setFont(new Font("Corbel", Font.BOLD, 13));
 		teléfono.add(lblNewLabel_1);
 		
-		textField = new JTextField();
-		teléfono.add(textField);
-		textField.setColumns(10);
+		textTlf = new JTextField();
+		teléfono.add(textTlf);
+		textTlf.setColumns(10);
 		
 		Component rigidArea_2 = Box.createRigidArea(new Dimension(20, 20));
 		contentPane.add(rigidArea_2, BorderLayout.NORTH);
 	}
+	 @Override
+	    public void mostrarError(String mensaje, Component parentComponent) {
+	        JOptionPane.showMessageDialog(parentComponent, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
+	    }
 
+	    @Override
+	    public void mostrarConfirmacion(String mensaje, Component parentComponent) {
+	        JOptionPane.showMessageDialog(parentComponent, mensaje, "Confirmación", JOptionPane.INFORMATION_MESSAGE);
+	    }
 }

@@ -41,6 +41,7 @@ public class AlertaNoExisteContacto extends JFrame {
 	public AlertaNoExisteContacto() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 398, 201);
+	    setResizable(false);             // Evita que la ventana se pueda redimensionar
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 

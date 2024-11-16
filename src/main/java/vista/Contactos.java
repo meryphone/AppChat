@@ -4,12 +4,17 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.border.TitledBorder;
+
+import controlador.Controlador;
 import dominio.ContactoIndividual;
 import dominio.Usuario;
+import excepciones.ExcepcionContacto;
+
 import javax.swing.border.LineBorder;
 import java.awt.Color;
 import javax.swing.JScrollPane;
@@ -20,11 +25,19 @@ import java.awt.Component;
 import javax.swing.Box;
 import java.awt.Dimension;
 import java.awt.SystemColor;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.List;
 
-public class Contactos extends JFrame {
+public class Contactos extends JFrame implements MensajeAdvertencia{
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
+	private Controlador controlador = Controlador.getInstance();
+	private JList<ContactoIndividual> listaContactos;
+	private Principal principal;
 
 	/**
 	 * Launch the application.
@@ -33,7 +46,7 @@ public class Contactos extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					Contactos frame = new Contactos();
+					Contactos frame = new Contactos(null);
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -45,9 +58,10 @@ public class Contactos extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public Contactos() {
+	public Contactos(Principal principal) {
+		this.principal = principal;
 		setBackground(SystemColor.window);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 665, 422);
 		contentPane = new JPanel();
 		contentPane.setBackground(UIManager.getColor("List.dropCellBackground"));
@@ -65,24 +79,39 @@ public class Contactos extends JFrame {
 		JScrollPane scrollPane = new JScrollPane();
 		izq.add(scrollPane, BorderLayout.CENTER);
 		
-		// Para probar Jlist
-				DefaultListModel<ContactoIndividual> modelo = new DefaultListModel<>();
-				modelo.addElement(new ContactoIndividual("Jose", "123", new Usuario()));
-				modelo.addElement(new ContactoIndividual("Ana", "321", new Usuario()));
-				modelo.addElement(new ContactoIndividual("María","456", new Usuario()));
-				JList<ContactoIndividual> listaContactos = new JList<ContactoIndividual>(modelo);
-				listaContactos.setCellRenderer(new ContactoIndividualCellRenderer());
-				/////////////////////////////////////////////////////////////
-		
-		scrollPane.setViewportView(listaContactos);
+		listaContactos = new JList<>();
+	    listaContactos.setCellRenderer(new ContactoIndividualCellRenderer());
+	    scrollPane.setViewportView(listaContactos);
 				
 		JPanel abajoIzq = new JPanel();
 		abajoIzq.setBackground(UIManager.getColor("List.dropCellBackground"));
 		izq.add(abajoIzq, BorderLayout.SOUTH);
 		
-		JButton AñadirContacto = new JButton("Añadir contacto");
-		abajoIzq.add(AñadirContacto);
-		
+		JButton anadirContacto = new JButton("Añadir contacto");
+		abajoIzq.add(anadirContacto);
+		anadirContacto.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				dispose();
+				AlertaAñadirContacto contacto = new AlertaAñadirContacto(principal);
+				contacto.setVisible(true);		
+			    actualizarListaContactos();
+			}
+		});
+		//Para asegurarnos de que se actualizan los contactos
+	    actualizarListaContactos();
+	    
+	    //WindowListener para detectar el cierre de la ventana Contactos
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if (principal != null) {
+                    principal.actualizarListaContactos(); // Actualiza la lista en Principal al cerrar Contactos
+                }
+            }
+        });
+	    
 		JPanel centro = new JPanel();
 		centro.setBackground(UIManager.getColor("List.dropCellBackground"));
 		contentPane.add(centro);
@@ -95,8 +124,8 @@ public class Contactos extends JFrame {
 		glue.setMaximumSize(new Dimension(20, 20));
 		centro.add(glue);
 		
-		JButton button = new JButton("<---");
-		centro.add(button);
+		JButton DerIzq = new JButton("<---");
+		centro.add(DerIzq);
 		
 		JPanel der = new JPanel();
 		der.setBackground(UIManager.getColor("List.dropCellBackground"));
@@ -113,17 +142,29 @@ public class Contactos extends JFrame {
 		JScrollPane scrollPane_1 = new JScrollPane();
 		der.add(scrollPane_1, BorderLayout.CENTER);
 		
-		// Para probar Jlist
-		DefaultListModel<ContactoIndividual> modelo1 = new DefaultListModel<>();
-		modelo1.addElement(new ContactoIndividual("Jose", "123", new Usuario()));
-		modelo1.addElement(new ContactoIndividual("Ana", "321", new Usuario()));
-		modelo1.addElement(new ContactoIndividual("María","456", new Usuario()));
-		JList<ContactoIndividual> listaContactos1 = new JList<ContactoIndividual>(modelo1);
-		listaContactos1.setCellRenderer(new ContactoIndividualCellRenderer());
-		/////////////////////////////////////////////////////////////
-		
-		scrollPane_1.setViewportView(listaContactos1);
+		JPanel grupos = new JPanel();
+		scrollPane_1.setViewportView(grupos);
 		
 	}
+	
+	private void actualizarListaContactos() {
+	    List<ContactoIndividual> contactos = controlador.obtenerContactos();
+	    
+	    DefaultListModel<ContactoIndividual> modelo = new DefaultListModel<>();
+	    for (ContactoIndividual contacto : contactos) {
+	        modelo.addElement(contacto);
+	    }
+	    listaContactos.setModel(modelo);
+	}
+	
+	 @Override
+	 public void mostrarError(String mensaje, Component parentComponent) {
+	     JOptionPane.showMessageDialog(parentComponent, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
+	 }
+
+	 @Override
+	 public void mostrarConfirmacion(String mensaje, Component parentComponent) {
+	     JOptionPane.showMessageDialog(parentComponent, mensaje, "Confirmación", JOptionPane.INFORMATION_MESSAGE);
+	 }
 
 }

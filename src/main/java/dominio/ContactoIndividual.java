@@ -22,21 +22,28 @@ public class ContactoIndividual extends Contacto {
     public String getTelefono() {
         return telefono;
     }
-
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
-    }
+	/*public void setTelefono(String telefono) {
+		this.telefono = telefono;
+	}*/
 
     public Usuario getUsuarioCreador() {
         return usuarioCreador;
     }
 
-    public void setUsuarioCreador(Usuario usuarioCreador) {
-        this.usuarioCreador = usuarioCreador;
-    }
 
     // Método específico para verificar si el contacto pertenece a una lista de un usuario (si fuera necesario)
     public boolean perteneceAUsuario(Usuario usuario) {
         return this.usuarioCreador.equals(usuario);
     }
+	/*public void setUsuarioCreador(Usuario usuarioCreador) {
+		this.usuarioCreador = usuarioCreador;
+	}*/
+	
+	
+	
+/* Metodo que comprobaria si un contaco en especifivo pertenece a la lista de contactos de alguien. (no se si hace falta)
+ * public boolean isAgregado() {
+		return !nombre.isEmpty();
+ */
+	
 }
