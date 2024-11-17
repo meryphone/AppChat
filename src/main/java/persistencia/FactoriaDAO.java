@@ -1,10 +1,6 @@
 package persistencia;
-
+// COMENTAR
 import excepciones.ExcepcionDAO;
-import persistencia.interfaces.IAdaptadorContactoDAO;
-import persistencia.interfaces.IAdaptadorGrupoDAO;
-import persistencia.interfaces.IAdaptadorMensajeDAO;
-import persistencia.interfaces.IAdaptadorUsuarioDAO;
 
 public abstract class FactoriaDAO {
 	
@@ -17,6 +13,7 @@ private static FactoriaDAO unicaInstancia;
 	 * Solo existe el tipo TDSFactoriaDAO
 	 */
 	
+	@SuppressWarnings("deprecation")
 	public static FactoriaDAO getInstance(String tipo) throws ExcepcionDAO{
 		if (unicaInstancia == null)
 			try { unicaInstancia=(FactoriaDAO) Class.forName(tipo).newInstance();

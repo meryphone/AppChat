@@ -1,7 +1,5 @@
 package persistencia;
-
-import persistencia.interfaces.*;
-import tds.driver.ServicioPersistencia;
+// COMENTAR
 
 public class TDSFactoriaDAO extends FactoriaDAO {
 	
@@ -17,7 +15,7 @@ public class TDSFactoriaDAO extends FactoriaDAO {
 
 	@Override
 	public AdaptadorMensajeDAO getMensajeDAO() {
-		return AdaptadorMensaje.getInstance();
+		return AdaptadorMensajeDAO.getInstance();
 	}
 
 	@Override
@@ -27,7 +25,7 @@ public class TDSFactoriaDAO extends FactoriaDAO {
 
 	@Override
 	public AdaptadorGrupoDAO getGrupoDAO() {
-		return AdaptadorGrupo.getInstance();
+		return AdaptadorGrupoDAO.getInstance();
 	}
 
 }

@@ -1,25 +1,21 @@
 package dominio;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.StringTokenizer;
 
-import excepciones.ExcepcionDAO;
-import persistencia.AdaptadorContactoDAO;
-import persistencia.TDSFactoriaDAO;
+
 
 public class Usuario {
 
 	public static final String IMAGEN_POR_DEFECTO = "/resources/nueva_cuenta(1).png"; // CREAR CLASE CON TODAS LAS CONSTANTES???
 	
 	private int codigo;
-	private final String nombreCompleto;
-	private final String movil;
-	private final String contrasena;
-	private final String email;
+	private  String nombreCompleto;
+	private String movil;
+	private  String contrasena;
+	private  String email;
 	private Optional<Date> fechaNacimiento;
 	private String pathImagen;
 	private boolean premium = false;
@@ -77,11 +73,7 @@ public class Usuario {
 	/**
 	 * Agrega un contacto pasado como parametro la lista de contactos del usuario.
 	 * @param nuevoContacto
-	 */
-	//ESTO CREO QUE VA EN EL CONTROLADOR
-	public void anadirContacto(ContactoIndividual nuevoContacto) {
-		listaContactos.add(nuevoContacto);
-	}
+	 */	
 	
 	public List<ContactoIndividual> getListaContactos() {
 		return new LinkedList<ContactoIndividual>(listaContactos);
@@ -102,49 +94,39 @@ public class Usuario {
 		return codigosContacto.trim();
 	}
 	
-	/*public List<Contacto> getListaContactosDesdeCodigos(String codigos){
-		List<Contacto> listaContactos = new LinkedList<Contacto>();
-		
-		StringTokenizer strTok = new StringTokenizer(codigos, " ");
-		AdaptadorContactoDAO adaptadorContacto = AdaptadorContactoDAO.getInstance();
-	}
 
-		
-		
-	}*/
-	
 	//Comprobar lo de los setters, si no son utilizados hay que quitarlos
 	public String getNombreCompleto() {
 		return nombreCompleto;
 	}
 
-	/*public void setNombreCompleto(String nombreCompleto) {
+	public void setNombreCompleto(String nombreCompleto) {
 		this.nombreCompleto = nombreCompleto;
-	}*/
+	}
 
 	public String getMovil() {
 		return movil;
 	}
 
-	/*public void setMovil(String movil) {
+	public void setMovil(String movil) {
 		this.movil = movil;
-	}*/
+	}
 
 	public String getContrasena() {
 		return contrasena;
 	}
 
-	/*public void setContrasena(String contrasena) {
+	public void setContrasena(String contrasena) {
 		this.contrasena = contrasena;
-	}*/
+	}
 
 	public String getEmail() {
 		return email;
 	}
 
-	/*public void setEmail(String email) {
+	public void setEmail(String email) {
 		this.email = email;
-	}*/
+	}
 
 	public Optional<Date> getFechaNacimiento() {
 		return fechaNacimiento;

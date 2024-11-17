@@ -1,5 +1,5 @@
 package persistencia;
-
+// COMENTAR
 import java.sql.Date;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -16,7 +16,6 @@ import beans.Propiedad;
 import dominio.ContactoIndividual;
 import dominio.Usuario;
 import excepciones.ExcepcionDAO;
-import excepciones.MensajesError;
 import persistencia.interfaces.IAdaptadorUsuarioDAO;
 import tds.driver.FactoriaServicioPersistencia;
 import tds.driver.ServicioPersistencia;
@@ -41,22 +40,22 @@ public class AdaptadorUsuarioDAO implements IAdaptadorUsuarioDAO {
 	public void registrarUsuario(Usuario nuevoUsuario) throws ExcepcionDAO {
 
 		Entidad eUsuario = null;
-		boolean existeEntidad = false;
+		 boolean noRegistrar = true;
 
-		try {
-			eUsuario = servicioPersistencia.recuperarEntidad(nuevoUsuario.getCodigo());
-		} catch (NullPointerException e) {
-			existeEntidad = true;
-			e.printStackTrace();
-		}
-		
-		if (existeEntidad) throw new ExcepcionDAO(MensajesError.ENTIDAD_YA_REGISTRADA.getMensaje()); // A lo mejor cambiar por return;
+	  		try {
+	  			eUsuario = servicioPersistencia.recuperarEntidad(nuevoUsuario.getCodigo());
+	  		} catch (NullPointerException e) {
+	  			noRegistrar = false;
+	  			e.printStackTrace();
+	  		}
+	  		
+	  		if (noRegistrar) throw new ExcepcionDAO("Entidad ya registrada");
+
 
 		// registrar primero los atributos que son objetos
 		// registrar lista de contactos
-		AdaptadorContactoDAO adaptadorContacto = TDSFactoriaDAO.getInstance().getContactoDAO(); // Así o
-																								// adaptadorContacto.getInstance;
-
+		AdaptadorContactoDAO adaptadorContacto = TDSFactoriaDAO.getInstance().getContactoDAO();
+		
 		for (ContactoIndividual contacto : nuevoUsuario.getListaContactos())
 			adaptadorContacto.registrarContacto(contacto);
 
@@ -79,15 +78,23 @@ public class AdaptadorUsuarioDAO implements IAdaptadorUsuarioDAO {
 		// asignar identificador unico
 		// Se aprovecha el que genera el servicio de persistencia
 		nuevoUsuario.setCodigo(eUsuario.getId());
+		
+		// Guardamos en el Pool
+	    PoolDAO.getInstance().addObjeto(nuevoUsuario.getCodigo(), nuevoUsuario);
 
 	}
+	
+	/**
+	 * Itera sobre las propiedades de la entidad (desactualizada) para actualizar cada 
+	 * una con los valores del usuario pasado como parametro.
+	 * @param usuarioModificar
+	 */
 
 	@Override
 	public void modificarUsuario(Usuario usuarioModificar) {
 		// Recuperar la entidad del usuario desde el servicio de persistencia
 		Entidad eUsuario = servicioPersistencia.recuperarEntidad(usuarioModificar.getCodigo());
-
-		// Iterar sobre las propiedades de la entidad para actualizar cada una.
+		
 		for (Propiedad prop : eUsuario.getPropiedades()) {
 
 			if (prop.getNombre().equals("nombreCompleto")) {
@@ -121,6 +128,10 @@ public class AdaptadorUsuarioDAO implements IAdaptadorUsuarioDAO {
 
 	@Override
 	public Usuario recuperarUsuario(int codigo) throws ExcepcionDAO {
+		
+		// Si la entidad esta en el pool la devuelve directamente
+		if (PoolDAO.getInstance().contiene(codigo)) return (Usuario) PoolDAO.getInstance().getObjeto(codigo);
+		
 		// Recuperar la entidad del usuario desde el servicio de persistencia
 		Entidad eUsuario = servicioPersistencia.recuperarEntidad(codigo);
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -180,7 +191,7 @@ public class AdaptadorUsuarioDAO implements IAdaptadorUsuarioDAO {
 
 	// -----------Funciones auxiliares-----------------------
 
-	private String getCodigosContactos(List<ContactoIndividual> listaContactos) {
+	String getCodigosContactos(List<ContactoIndividual> listaContactos) {
 
 		String codigosContacto = "";
 
@@ -191,7 +202,7 @@ public class AdaptadorUsuarioDAO implements IAdaptadorUsuarioDAO {
 		return codigosContacto.trim();
 	}
 
-	private List<ContactoIndividual> getListaContactosDesdeCodigos(String codigos) throws ExcepcionDAO {
+	List<ContactoIndividual> getListaContactosDesdeCodigos(String codigos) throws ExcepcionDAO {
 		List<ContactoIndividual> listaContactos = new LinkedList<ContactoIndividual>();
 
 		StringTokenizer strTok = new StringTokenizer(codigos, " ");

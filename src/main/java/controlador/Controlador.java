@@ -4,14 +4,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-
-import dominio.Contacto;
-import dominio.ContactoIndividual;
-import dominio.RepositorioUsuarios;
-import dominio.Usuario;
+import persistencia.*;
+import dominio.*;
 import excepciones.*;
 
 public class Controlador {
@@ -22,21 +16,36 @@ public class Controlador {
 	
 	// Gestores necesarios para la lógica de la aplicación.
 	private RepositorioUsuarios repositorioUsuarios;
-	//private AdaptadorUsuario adaptadorUsuario;
+	private AdaptadorUsuarioDAO adaptadorUsuario;
+	private AdaptadorContactoDAO adaptadorContacto;
+	private AdaptadorMensajeDAO adaptadorMensaje;
+	private AdaptadorGrupoDAO adaptadorGrupo;
 	
-	
-	private Controlador() {
-		repositorioUsuarios  = RepositorioUsuarios.getInstance();
-		// AdaptadorUsuario adaptadorUsuario = AdaptadorUsuario.getInstance;
-	}
-	
-	// Patrón Singleton
-	
+	// Implementación del patron Singleton	
 	public static Controlador getInstance() {
 		if(controlador == null) {
 			controlador = new Controlador();
 		}
 		return controlador;
+	}
+		
+	private Controlador() {
+		repositorioUsuarios  = RepositorioUsuarios.getInstance();
+		inicializarAdaptadores();
+	}
+	
+	private void inicializarAdaptadores() {
+		FactoriaDAO factoria = null;
+		try {
+			factoria = FactoriaDAO.getInstance(FactoriaDAO.DAO_TDS);
+		} catch (ExcepcionDAO e) {
+			e.printStackTrace();
+		}
+
+		adaptadorGrupo = factoria.getGrupoDAO();
+		adaptadorContacto = factoria.getContactoDAO();
+		adaptadorMensaje = factoria.getMensajeDAO();
+		adaptadorUsuario = factoria.getUsuarioDAO();
 	}
 	
 	/**
@@ -53,11 +62,12 @@ public class Controlador {
 	 * @param mensajeSaludo
 	 * @return
 	 * @throws ExcepcionRegistro
+	 * @throws ExcepcionDAO 
 	 */
 
 	public boolean registrarUsuario(String nombre, String apellidos, String movil, String contrasena,
             String contrasenaRepe, String email, Date fechaNacimiento,
-            String pathImagen, String mensajeSaludo) throws ExcepcionRegistro {
+            String pathImagen, String mensajeSaludo) throws ExcepcionRegistro, ExcepcionDAO {
 		
 		
 		// Si el telefono ya está registrado se lanza una excepción
@@ -76,7 +86,7 @@ public class Controlador {
 		
 		usuarioActual = usuario;
 		repositorioUsuarios.anadirUsuario(usuario);
-	 // adapatadorUsuario.registrarUsuario(usuario);
+	    adaptadorUsuario.registrarUsuario(usuario);
 		
 		return true;
 	}
@@ -110,8 +120,9 @@ public class Controlador {
 	 * @param nombreContacto El nombre personalizado para el contacto
 	 * @return true si el contacto se agregó correctamente
 	 * @throws ExcepcionContacto si el contacto ya existe o el usuario no está registrado
+	 * @throws ExcepcionDAO 
 	 */
-	public boolean agregarContacto(String tlf, String nombreContacto) throws ExcepcionContacto {
+	public boolean agregarContacto(String tlf, String nombreContacto) throws ExcepcionContacto, ExcepcionDAO {
 	    // Verifica si el usuario existe en el repositorio por teléfono
 		if (usuarioActual == null) {
 		    throw new ExcepcionContacto("No hay un usuario actual autenticado.");
@@ -127,10 +138,11 @@ public class Controlador {
 	            }
 	        });
 
-	        // Agrega el contacto si no se ha lanzado ninguna excepción
-	        usuarioActual.anadirContacto(new ContactoIndividual(nombreContacto, tlf, usuarioActual));
-	        // Llama a adaptadorContacto para añadir el contacto si es necesario
-	        // adaptadorContacto.anadirContacto(nombreContacto, tlf);
+	        // Agrega el contacto si no se ha lanzado ninguna excepción	        
+	        ContactoIndividual nuevoContacto = new ContactoIndividual(nombreContacto, tlf, usuarioActual);
+	        usuarioActual.getListaContactos().add(nuevoContacto);	   
+	        adaptadorContacto.registrarContacto(nuevoContacto);
+			adaptadorUsuario.modificarUsuario(usuarioActual);
 
 	    } else {
 	        throw new ExcepcionContacto("El usuario no existe");
@@ -141,7 +153,7 @@ public class Controlador {
 	
 	public List<ContactoIndividual> obtenerContactos() {
 	    if (usuarioActual != null) {
-	        return usuarioActual.getListaContactos(); // Asegúrate de que `getContactos` devuelva una lista de ContactoIndividual
+	        return usuarioActual.getListaContactos(); 
 	    }
 	    return new LinkedList<>(); // Devuelve una lista vacía si no hay un usuario autenticado
 	}
