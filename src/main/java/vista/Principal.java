@@ -132,8 +132,8 @@ public class Principal extends JFrame implements MensajeAdvertencia {
 		arriba.add(btnPremium);
 		
 		ImageIcon imagenPerfil = hacerCircularYRedimensionar(controlador.getImagenUsuario(),24,24);
-		 lblUsuario = new JLabel("Maria Capilla Zapata"); // Texto del usuario
-		    lblUsuario.setIcon(imagenPerfil); // Asignar la imagen como icono
+		 lblUsuario = new JLabel(controlador.getNombreUsuario()); // Texto del usuario
+		    lblUsuario.setIcon(new ImageIcon(Principal.class.getResource("/resources/usuario(1).png"))); // Asignar la imagen como icono
 		    lblUsuario.setIconTextGap(10); // Ajustar el espacio entre el icono y el texto
 		    lblUsuario.setHorizontalTextPosition(SwingConstants.RIGHT); // Texto a la derecha del icono
 		    lblUsuario.setVerticalTextPosition(SwingConstants.CENTER); // Centrar texto verticalmente
