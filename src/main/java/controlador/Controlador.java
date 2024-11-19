@@ -1,5 +1,6 @@
 package controlador;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -67,7 +68,7 @@ public class Controlador {
 
 	public boolean registrarUsuario(String nombre, String apellidos, String movil, String contrasena,
             String contrasenaRepe, String email, Date fechaNacimiento,
-            String pathImagen, String mensajeSaludo) throws ExcepcionRegistro, ExcepcionDAO {
+            String pathImagen, String mensajeSaludo) throws ExcepcionRegistro {
 		
 		
 		// Si el telefono ya está registrado se lanza una excepción
@@ -81,12 +82,17 @@ public class Controlador {
 		validarEmail(email);		
 
 		Usuario usuario = new Usuario(nombre + " " + apellidos, movil, contrasena, email);
+		usuarioActual = usuario;
 		
 		configurarOpcionales(usuario, fechaNacimiento, pathImagen, mensajeSaludo);
-		
-		usuarioActual = usuario;
 		repositorioUsuarios.anadirUsuario(usuario);
-	    adaptadorUsuario.registrarUsuario(usuario);
+		
+	    try {
+			adaptadorUsuario.registrarUsuario(usuario);
+		} catch (ExcepcionRegistroDuplicado e) {
+			e.printStackTrace();
+			throw new ExcepcionRegistro("Usuario ya registrado");
+		}
 		
 		return true;
 	}
@@ -99,18 +105,22 @@ public class Controlador {
 	 * @throws ExcepcionLogin
 	 */
 	
-	public Usuario loguearUsuario(String telefono, String contrasena) throws ExcepcionLogin {
+	public boolean loguearUsuario(String telefono, String contrasena) throws ExcepcionLogin {
 	    
-	    if (repositorioUsuarios.getUsuarioPorTelefono(telefono).isEmpty()) {
-	        throw new ExcepcionLogin("El teléfono no está registrado.");
-	    }
-	    Usuario user = repositorioUsuarios.getUsuarioPorTelefono(telefono).get();
-	    if (!user.getContrasena().equals(contrasena)) {
+		repositorioUsuarios.getUsuarioPorTelefono(telefono)
+	    .ifPresentOrElse(
+	        u -> usuarioActual = u, // Si el usuario existe, asignarlo
+	        () -> { throw new ExcepcionLogin("El teléfono no está registrado."); } // Si no, lanzar la excepción
+	    );
+	        	    
+	
+	    if (!usuarioActual.getContrasena().equals(contrasena)) {
 	        throw new ExcepcionLogin("La contraseña es incorrecta.");
 	    }
 	    
-	    //Si todo es correcto, devuelve el usuario
-	    return user;
+	    
+	    //Si todo es correcto, devuelve el true
+	    return true;
 	}
 
 	
@@ -122,47 +132,59 @@ public class Controlador {
 	 * @throws ExcepcionContacto si el contacto ya existe o el usuario no está registrado
 	 * @throws ExcepcionDAO 
 	 */
-	public boolean agregarContacto(String tlf, String nombreContacto) throws ExcepcionContacto, ExcepcionDAO {
-	    // Verifica si el usuario existe en el repositorio por teléfono
-		if (usuarioActual == null) {
-		    throw new ExcepcionContacto("No hay un usuario actual autenticado.");
-		}
+	public boolean agregarContacto(String tlf, String nombreContacto) throws ExcepcionContacto {
+	    // Verifica si hay un usuario autenticado
+	    if (usuarioActual == null) {
+	        throw new ExcepcionContacto("No hay un usuario actual autenticado.");
+	    }
 
-	    if (!repositorioUsuarios.getUsuarioPorTelefono(usuarioActual.getMovil()).isEmpty()) {
-	        // Si el contacto ya existe, lanza una excepción
-	        usuarioActual.getContactoPorTelefono(tlf).ifPresent(contacto -> {
-	            try {
-	                throw new ExcepcionContacto("El contacto ya está agregado.");
-	            } catch (ExcepcionContacto e) {
-	                throw new RuntimeException(e); 
-	            }
-	        });
+	    // Verifica si el usuario actual existe en el repositorio
+	    Optional<Usuario> usuarioRepositorio = repositorioUsuarios.getUsuarioPorTelefono(usuarioActual.getMovil());
+	    if (usuarioRepositorio.isEmpty()) {
+	        throw new ExcepcionContacto("El usuario actual no existe en el repositorio.");
+	    }
 
-	        // Agrega el contacto si no se ha lanzado ninguna excepción	        
-	        ContactoIndividual nuevoContacto = new ContactoIndividual(nombreContacto, tlf, usuarioActual);
-	        usuarioActual.getListaContactos().add(nuevoContacto);	   
+	    // Verifica si el contacto ya está en la lista de contactos del usuario actual
+	    if (usuarioActual.getContactoPorTelefono(tlf).isPresent()) {
+	        throw new ExcepcionContacto("El contacto ya está agregado.");
+	    }
+
+	    // Si no existe, crea y registra el nuevo contacto
+	    ContactoIndividual nuevoContacto = new ContactoIndividual(nombreContacto, tlf);
+	    usuarioActual.getListaContactos().add(nuevoContacto);
+
+	    try {
+	        // Registra el contacto en el adaptador de contactos
 	        adaptadorContacto.registrarContacto(nuevoContacto);
-			adaptadorUsuario.modificarUsuario(usuarioActual);
-
-	    } else {
-	        throw new ExcepcionContacto("El usuario no existe");
+	        // Actualiza el usuario con el nuevo contacto en el adaptador de usuarios
+	        adaptadorUsuario.modificarUsuario(usuarioActual);
+	    } catch (ExcepcionRegistroDuplicado e) {
+	    	e.printStackTrace();
+	        throw new ExcepcionContacto("Error al registrar el contacto: contacto duplicado.");
 	    }
 
 	    return true;
 	}
 	
+	
+	
 	public List<ContactoIndividual> obtenerContactos() {
 	    if (usuarioActual != null) {
 	        return usuarioActual.getListaContactos(); 
 	    }
-	    return new LinkedList<>(); // Devuelve una lista vacía si no hay un usuario autenticado
+	    return new ArrayList<>(); // Devuelve una lista vacía si no hay un usuario autenticado
 	}
 
 
 	
 	
-
+	public String getImagenUsuario() {
+		return usuarioActual.getPathImagen();
+	}
 	
+	public String getNombreUsuario() {
+		return usuarioActual.getNombreCompleto();
+	}
 	
 	/**
 	 * Encargado de validar que todos los campos obligatorios no esten vacíos.

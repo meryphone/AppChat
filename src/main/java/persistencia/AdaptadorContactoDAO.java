@@ -2,15 +2,13 @@ package persistencia;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.StringTokenizer;
 import java.util.List;
-import dominio.Mensaje;
+
 import beans.Entidad;
 import beans.Propiedad;
 import dominio.ContactoIndividual;
 import excepciones.ExcepcionDAO;
-import excepciones.MensajesError;
+import excepciones.ExcepcionRegistroDuplicado;
 import tds.driver.FactoriaServicioPersistencia;
 import tds.driver.ServicioPersistencia;
 
@@ -58,20 +56,20 @@ public class AdaptadorContactoDAO {
      * Registra un nuevo contacto individual en la base de datos.
      * 
      * @param nuevoContacto ContactoIndividual a registrar.
-     * @throws ExcepcionDAO Si el contacto ya está registrado.
+     * @throws ExcepcionRegistroDuplicado Si el contacto ya está registrado.
      */
-    public void registrarContacto(ContactoIndividual nuevoContacto) throws ExcepcionDAO {
+    public void registrarContacto(ContactoIndividual nuevoContacto) throws ExcepcionRegistroDuplicado {
         Entidad eContacto = null;
-        boolean noRegistrar = true;
+        boolean noRegistrar = false;
 
         try {
             eContacto = servicioPersistencia.recuperarEntidad(nuevoContacto.getCodigo());
         } catch (NullPointerException e) {
-            noRegistrar = false;
+            noRegistrar = true;
             e.printStackTrace();
         }
 
-        if (noRegistrar) throw new ExcepcionDAO("Entidad ya registrada");
+        if (noRegistrar) throw new ExcepcionRegistroDuplicado("Entidad ya registrada");
 
         // Crear la entidad para el nuevo contacto
         eContacto = new Entidad();
@@ -81,11 +79,9 @@ public class AdaptadorContactoDAO {
         eContacto.setPropiedades(new ArrayList<Propiedad>(
                 Arrays.asList(
                     new Propiedad("nombre", nuevoContacto.getNombre()),
-                    new Propiedad("mensajes", obtenerCodigosMensajes(nuevoContacto.getMensajes())),
-                    new Propiedad("telefono", nuevoContacto.getTelefono()),
-                    new Propiedad("usuarioCreador", String.valueOf(nuevoContacto.getUsuarioCreador().getCodigo()))
-                )
-        ));
+                    new Propiedad("mensajes", PersistenciaUtils.obtenerCodigosMensajes(nuevoContacto.getMensajes())),
+                    new Propiedad("telefono", nuevoContacto.getTelefono()))));
+                   // new Propiedad("usuarioCreador", String.valueOf(nuevoContacto.getUsuarioCreador().getCodigo()
 
         // Registrar la entidad en el servicio de persistencia
         eContacto = servicioPersistencia.registrarEntidad(eContacto);
@@ -99,79 +95,42 @@ public class AdaptadorContactoDAO {
 
     /**
      * Recupera un contacto individual desde la base de datos dado su código.
-     * 
+     *
      * @param codigo Código del contacto individual.
      * @return ContactoIndividual correspondiente al código.
-     * @throws ExcepcionDAO Si ocurre un error al recuperar el contacto.
+     * @throws ExcepcionRegistroDuplicado Si ocurre un error al recuperar el contacto.
+     * @throws ExcepcionDAO 
      */
-    public ContactoIndividual recuperarContacto(int codigo) throws ExcepcionDAO {
+    public ContactoIndividual recuperarContacto(int codigo){
+    	
         // Si la entidad está en el pool, la devuelve directamente
         if (PoolDAO.getInstance().contiene(codigo)) return (ContactoIndividual) PoolDAO.getInstance().getObjeto(codigo);
 
         ContactoIndividual contacto = new ContactoIndividual();
         Entidad eContacto = servicioPersistencia.recuperarEntidad(codigo);
-        AdaptadorUsuarioDAO adaptadorUsuario = TDSFactoriaDAO.getInstance().getUsuarioDAO();
+        //AdaptadorUsuarioDAO adaptadorUsuario = TDSFactoriaDAO.getInstance().getUsuarioDAO();
 
         // Establecemos el resto de propiedades
+        contacto.setNombre(contacto.getNombre());
         contacto.setCodigo(codigo);
-        contacto.setMensajes(obtenerMensajesDesdeCódigos(servicioPersistencia.recuperarPropiedadEntidad(eContacto, "mensajes")));
+        contacto.setMensajes(PersistenciaUtils.obtenerMensajesDesdeCódigos(servicioPersistencia.recuperarPropiedadEntidad(eContacto, "mensajes")));
         contacto.setTelefono(servicioPersistencia.recuperarPropiedadEntidad(eContacto, "telefono"));
-        contacto.setUsuarioCreador(adaptadorUsuario.recuperarUsuario(Integer.parseInt(servicioPersistencia.recuperarPropiedadEntidad(eContacto, "usuarioCreador"))));
+        //contacto.setUsuarioCreador(adaptadorUsuario.recuperarUsuario(Integer.parseInt(servicioPersistencia.recuperarPropiedadEntidad(eContacto, "usuarioCreador"))));
 
         return contacto;
     }
+    
+	public List<ContactoIndividual> recuperarTodosContactos() {
+		List<ContactoIndividual> contactos = new ArrayList<>();
+		List<Entidad> eContacts = servicioPersistencia.recuperarEntidades("Contacto");
 
-    /**
-     * Recupera todos los contactos individuales registrados en la base de datos.
-     * 
-     * @return Lista de ContactoIndividual.
-     * @throws ExcepcionDAO Si ocurre un error al recuperar los contactos.
-     */
-    public List<ContactoIndividual> recuperarTodosContactos() throws ExcepcionDAO {
-        List<ContactoIndividual> contactos = new LinkedList<>();
-        List<Entidad> eContacts = servicioPersistencia.recuperarEntidades("ContactoIndividual");
+		for (Entidad eContact : eContacts) {
+			contactos.add(recuperarContacto(eContact.getId()));
+		}
+		
+		return contactos;
+	}
 
-        for (Entidad eContact : eContacts) {
-            contactos.add(recuperarContacto(eContact.getId()));
-        }
 
-        return contactos;
-    }
-
-    // --------Funciones auxiliares----------
-
-    /**
-     * Convierte una lista de mensajes en una cadena de códigos separados por espacios.
-     * 
-     * @param mensajes Lista de mensajes.
-     * @return Cadena de códigos de los mensajes.
-     */
-    String obtenerCodigosMensajes(List<Mensaje> mensajes) {
-        String idMensajes = "";
-
-        for (Mensaje mensaje : mensajes) {
-            idMensajes += mensaje.getCodigo() + " ";
-        }
-
-        return idMensajes.trim();
-    }
-
-    /**
-     * Convierte una cadena de códigos de mensajes en una lista de mensajes.
-     * 
-     * @param codigosMensajes Cadena de códigos de mensajes.
-     * @return Lista de mensajes.
-     * @throws ExcepcionDAO Si ocurre un error al recuperar un mensaje.
-     */
-    List<Mensaje> obtenerMensajesDesdeCódigos(String codigosMensajes) throws ExcepcionDAO {
-        List<Mensaje> listaMensajes = new LinkedList<>();
-        StringTokenizer srtTok = new StringTokenizer(codigosMensajes, " ");
-        AdaptadorMensajeDAO adaptadorMensaje = TDSFactoriaDAO.getInstance().getMensajeDAO();
-
-        while (srtTok.hasMoreTokens()) {
-            listaMensajes.add(adaptadorMensaje.recuperarMensaje(Integer.parseInt(srtTok.nextToken())));
-        }
-
-        return listaMensajes;
-    }
+  
 }

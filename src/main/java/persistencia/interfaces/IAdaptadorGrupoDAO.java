@@ -2,13 +2,13 @@ package persistencia.interfaces;
 
 import java.util.List;
 import dominio.Grupo;
-import excepciones.ExcepcionDAO;
+import excepciones.ExcepcionRegistroDuplicado;
 
 public interface IAdaptadorGrupoDAO {
 	
-	public void registrarGrupo(Grupo nuevoGrupo) throws ExcepcionDAO;
-	public Grupo recuperarGrupo(int codigo) throws  ExcepcionDAO;
-	public void modificarGrupo(Grupo grupoModificar) throws ExcepcionDAO;
-	public List<Grupo> recuperarTodosGrupos() throws ExcepcionDAO;
+	public void registrarGrupo(Grupo nuevoGrupo) throws ExcepcionRegistroDuplicado;
+	public Grupo recuperarGrupo(int codigo) ;
+	public void modificarGrupo(Grupo grupoModificar);
+	public List<Grupo> recuperarTodosGrupos() ;
 
 }

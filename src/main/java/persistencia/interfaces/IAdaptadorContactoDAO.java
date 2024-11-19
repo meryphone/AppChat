@@ -3,11 +3,11 @@ package persistencia.interfaces;
 import java.util.List;
 
 import dominio.ContactoIndividual;
-import excepciones.ExcepcionDAO;
+import excepciones.ExcepcionRegistroDuplicado;
 
 public interface IAdaptadorContactoDAO {
 	
-	public void registrarContacto(ContactoIndividual nuevoContacto) throws ExcepcionDAO;
-	public ContactoIndividual recuperarContacto(int codigo) throws ExcepcionDAO;
-	public List<ContactoIndividual> recuperarTodosContactos() throws ExcepcionDAO;
+	public void registrarContacto(ContactoIndividual nuevoContacto) throws ExcepcionRegistroDuplicado;
+	public ContactoIndividual recuperarContacto(int codigo);
+	public List<ContactoIndividual> recuperarTodosContactos();
 }

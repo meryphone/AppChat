@@ -12,6 +12,7 @@ import java.awt.BorderLayout;
 import javax.swing.BoxLayout;
 import java.awt.GridBagLayout;
 import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.GridBagConstraints;
 import java.awt.Dimension;
 import javax.swing.border.BevelBorder;
@@ -49,6 +50,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JScrollBar;
 import java.awt.FlowLayout;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 public class Principal extends JFrame implements MensajeAdvertencia {
 
@@ -64,8 +66,7 @@ public class Principal extends JFrame implements MensajeAdvertencia {
 	public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
             try {
-                ImageIcon icono = new ImageIcon(Principal.class.getResource("/resources/usuario(1).png"));
-                Principal frame = new Principal("Usuario", icono);
+                Principal frame = new Principal();
                 frame.setVisible(true);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -76,7 +77,7 @@ public class Principal extends JFrame implements MensajeAdvertencia {
 	/**
 	 * Create the frame.
 	 */
-	public Principal(String nombreUsuario, ImageIcon imagenUsuario) {
+	public Principal() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 839, 512);
 		contentPane = new JPanel();
@@ -104,11 +105,6 @@ public class Principal extends JFrame implements MensajeAdvertencia {
 		atras.setIcon(new ImageIcon(Principal.class.getResource("/resources/enviar(2)(3).png")));
 		arriba.add(atras);
 
-		/*
-		 * atras.addActionListener(ev -> { dispose(); Login login = new Login();
-		 * login.setVisible(true); });
-		 */
-
 		JButton buscar = new JButton("");
 		buscar.setIcon(new ImageIcon(Principal.class.getResource("/resources/buscar(1).png")));
 		arriba.add(buscar);
@@ -135,10 +131,13 @@ public class Principal extends JFrame implements MensajeAdvertencia {
 		btnPremium.setIcon(new ImageIcon(Principal.class.getResource("/resources/dolar(2)(1).png")));
 		arriba.add(btnPremium);
 		
-		lblUsuario = new JLabel(nombreUsuario);
-		lblUsuario.setIcon(imagenUsuario);
-		lblUsuario.setIconTextGap(10);
-		arriba.add(lblUsuario);
+		ImageIcon imagenPerfil = hacerCircularYRedimensionar(controlador.getImagenUsuario(),24,24);
+		 lblUsuario = new JLabel("Maria Capilla Zapata"); // Texto del usuario
+		    lblUsuario.setIcon(imagenPerfil); // Asignar la imagen como icono
+		    lblUsuario.setIconTextGap(10); // Ajustar el espacio entre el icono y el texto
+		    lblUsuario.setHorizontalTextPosition(SwingConstants.RIGHT); // Texto a la derecha del icono
+		    lblUsuario.setVerticalTextPosition(SwingConstants.CENTER); // Centrar texto verticalmente
+		    arriba.add(lblUsuario); // Añadir el JLabel al panel
 		
 		//MouseListener para cambiar la imagen de perfil al hacer clic
         lblUsuario.addMouseListener(new MouseAdapter() {
@@ -216,7 +215,7 @@ public class Principal extends JFrame implements MensajeAdvertencia {
 		        @Override
 		        public void mouseClicked(MouseEvent e) {
 		        	
-		            BubbleText burbujaEmoticono = new BubbleText(chat, index, Color.GREEN, nombreUsuario, BubbleText.SENT,18); 
+		            BubbleText burbujaEmoticono = new BubbleText(chat, index, Color.GREEN, controlador.getNombreUsuario(), BubbleText.SENT,18); 
 		            chat.add(burbujaEmoticono);
 		            chat.revalidate();
 		            chat.repaint();
@@ -247,7 +246,7 @@ public class Principal extends JFrame implements MensajeAdvertencia {
 		    		    
 		    if (!mensajeTexto.isEmpty()) {
 		    	
-		        BubbleText burbuja = new BubbleText(chat, mensajeTexto, Color.GREEN, nombreUsuario, BubbleText.SENT);
+		        BubbleText burbuja = new BubbleText(chat, mensajeTexto, Color.GREEN, controlador.getNombreUsuario(), BubbleText.SENT);
 		        chat.add(burbuja);
 
 		        //Para que se actualice la interfaz
@@ -270,19 +269,41 @@ public class Principal extends JFrame implements MensajeAdvertencia {
 	 * @param imagen
 	 * @return imagenCircular
 	 */
-	private Image imagenCircular(Image imagen) {
 
-		BufferedImage imagenCircular = new BufferedImage(24, 24, BufferedImage.TYPE_4BYTE_ABGR);
+	public ImageIcon hacerCircularYRedimensionar(String pathImagen, int ancho, int alto) {
+	    // Validar el path
+	    if (pathImagen == null || pathImagen.isEmpty()) {
+	        throw new IllegalArgumentException("El path de la imagen no puede ser nulo o vacío.");
+	    }
 
-		Graphics2D graficos = imagenCircular.createGraphics();
-		Ellipse2D.Double forma = new Ellipse2D.Double(0, 0, 24, 24);
-		graficos.setClip(forma);
-		graficos.drawImage(imagen, 0, 0, 24, 24, null);
-		graficos.dispose();
+	    // Cargar la imagen desde el path
+	    ImageIcon iconoOriginal = new ImageIcon(pathImagen);
+	    if (iconoOriginal.getImage() == null) {
+	        throw new IllegalArgumentException("No se pudo cargar la imagen desde el path especificado: " + pathImagen);
+	    }
 
-		return imagenCircular;
+	    // Escalar la imagen al tamaño especificado
+	    Image imagenEscalada = iconoOriginal.getImage().getScaledInstance(ancho, alto, Image.SCALE_SMOOTH);
 
+	    // Crear un BufferedImage circular
+	    BufferedImage imagenCircular = new BufferedImage(ancho, alto, BufferedImage.TYPE_INT_ARGB);
+	    Graphics2D graficos = imagenCircular.createGraphics();
+
+	    // Dibujar la forma circular
+	    Ellipse2D.Double forma = new Ellipse2D.Double(0, 0, ancho, alto);
+	    graficos.setClip(forma);
+	    graficos.drawImage(imagenEscalada, 0, 0, ancho, alto, null);
+
+	    // Aplicar antialiasing para bordes suaves
+	    graficos.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+	    graficos.dispose();
+
+	    // Devolver el resultado como ImageIcon
+	    return new ImageIcon(imagenCircular);
 	}
+
+
 	
 	/**
 	 * Método para cambiar la foto de perfil.
@@ -297,19 +318,30 @@ public class Principal extends JFrame implements MensajeAdvertencia {
 	    if (resultado == JFileChooser.APPROVE_OPTION) {
 	        File archivoSeleccionado = fileChooser.getSelectedFile();
 	        try {
+	            // Validar que el archivo seleccionado es una imagen
 	            BufferedImage imagenOriginal = ImageIO.read(archivoSeleccionado);
 	            if (imagenOriginal == null) {
-					throw new Exception("El archivo seleccionado no es una imagen válida.");
-				}
-	            Image imagenRedimensionada = imagenOriginal.getScaledInstance(24, 24, Image.SCALE_SMOOTH); //tamaño 24x24
-	            ImageIcon imagenCircular = new ImageIcon(imagenCircular(imagenRedimensionada));
-	            lblUsuario.setIcon(imagenCircular);  //actualizo la imagen en lblUsuario
+	                throw new Exception("El archivo seleccionado no es una imagen válida.");
+	            }
+
+	            // Obtener el path del archivo seleccionado
+	            String pathImagen = archivoSeleccionado.getAbsolutePath();
+
+	            // Crear un ImageIcon circular desde el path
+	            ImageIcon imagenCircular = hacerCircularYRedimensionar(pathImagen,24,24);
+
+	            // Actualizar la imagen en lblUsuario
+	            lblUsuario.setIcon(imagenCircular);
+
 	        } catch (Exception e) {
-				e.printStackTrace();
-				mostrarError(e.getMessage(), contentPane);
-			}
+	            e.printStackTrace();
+	        }
 	    }
 	}
+
+	
+	
+	
 	/**
 	 * Método para actualizar la lista de contactos
 	 * 

@@ -14,9 +14,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
-
 import controlador.Controlador;
-import dominio.Usuario;
 import excepciones.ExcepcionLogin;
 
 import javax.swing.border.LineBorder;
@@ -98,12 +96,8 @@ public class Login extends JFrame implements MensajeAdvertencia{
         
         btnLogin.addActionListener(ev -> {
             try {
-            	//PREGUNTAR SI ES CORRECTO QUE AQUÍ PUEDA CREAR UN OBJETO USUARIO
-            	Usuario usuarioAutenticado = controlador.loguearUsuario(telefono.getText(), new String(contrasena.getPassword()));
-                
-                ImageIcon imagenPerfil = new ImageIcon(usuarioAutenticado.getPathImagen());
-                Principal ventanaMain = new Principal(usuarioAutenticado.getNombreCompleto(), imagenPerfil);
-                
+                controlador.loguearUsuario(telefono.getText(), new String(contrasena.getPassword()));                
+                Principal ventanaMain = new Principal();               
                 ventanaMain.setVisible(true);
                 dispose();
             } catch (ExcepcionLogin e) {

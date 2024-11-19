@@ -12,6 +12,7 @@ import dominio.ContactoIndividual;
 import dominio.Grupo;
 import dominio.Mensaje;
 import excepciones.ExcepcionDAO;
+import excepciones.ExcepcionRegistroDuplicado;
 import tds.driver.FactoriaServicioPersistencia;
 import tds.driver.ServicioPersistencia;
 
@@ -20,6 +21,9 @@ public class AdaptadorMensajeDAO {
 
 	public static AdaptadorMensajeDAO adaptadorMensaje;
 	private ServicioPersistencia servicioPersistencia;
+	private AdaptadorContactoDAO adaptadorContacto;
+	private AdaptadorUsuarioDAO adaptadorUsuario;
+	private AdaptadorGrupoDAO adaptadorGrupo;
 
 	public static AdaptadorMensajeDAO getInstance() {
 		if (adaptadorMensaje == null) {
@@ -30,27 +34,36 @@ public class AdaptadorMensajeDAO {
 
 	private AdaptadorMensajeDAO() {
 		servicioPersistencia = FactoriaServicioPersistencia.getInstance().getServicioPersistencia();
+		try {
+			adaptadorContacto = TDSFactoriaDAO.getInstance().getContactoDAO();
+			adaptadorUsuario = TDSFactoriaDAO.getInstance().getUsuarioDAO();
+			adaptadorGrupo = TDSFactoriaDAO.getInstance().getGrupoDAO();
+		} catch (ExcepcionDAO e) {
+			e.printStackTrace();
+		}
 	}
 	
-	public void registrarMensaje(Mensaje mensaje) throws ExcepcionDAO {
+	public void registrarMensaje(Mensaje mensaje) throws ExcepcionRegistroDuplicado {
 		 
 	    Entidad eMensaje = null;
-	    boolean noRegistrar = true;
+	    boolean noRegistrar = false;
 
 		try {
 			eMensaje = servicioPersistencia.recuperarEntidad(mensaje.getCodigo());
 		} catch (NullPointerException e) {
-			noRegistrar = false;
+			noRegistrar = true;
 			e.printStackTrace();
 		}
 		
-		if (noRegistrar) throw new ExcepcionDAO("Entidad ya registrada");
+		if (noRegistrar) throw new ExcepcionRegistroDuplicado("Entidad ya registrada");
 	    
 	    eMensaje.setNombre("Mensaje");
 	    
 	    // Primero registramos entidades que son objetos
 	    
-	    TDSFactoriaDAO.getInstance().getUsuarioDAO().registrarUsuario(mensaje.getEmisor()); //NO SE SI QUITAR
+	    adaptadorUsuario.registrarUsuario(mensaje.getEmisor());
+		    
+	    //NO SE SI QUITAR
 	    registrarReceptorNoAgregado(mensaje.getReceptor());
 	    
 	    boolean grupo = false;
@@ -77,7 +90,7 @@ public class AdaptadorMensajeDAO {
 	    		
 	}
 	
-	public Mensaje recuperarMensaje(int codigo) throws ExcepcionDAO {
+	public Mensaje recuperarMensaje(int codigo) {
 		
 		// Si la entidad esta en el pool la devuelve directamente
 		if (PoolDAO.getInstance().contiene(codigo)) return (Mensaje) PoolDAO.getInstance().getObjeto(codigo);
@@ -94,7 +107,7 @@ public class AdaptadorMensajeDAO {
 		 mensaje.setFechaYhora(LocalDateTime.parse(servicioPersistencia.recuperarPropiedadEntidad(eMensaje, "fechaYhora")));
 		 
 		 // Recuperamos las propiedades que son objetos
-		 AdaptadorUsuarioDAO adaptadorUsuario = TDSFactoriaDAO.getInstance().getUsuarioDAO();		 
+
 		 mensaje.setEmisor(adaptadorUsuario.recuperarUsuario(Integer.parseInt(servicioPersistencia.recuperarPropiedadEntidad(eMensaje, "emisor"))));
 		 
 		 boolean toGrupo = Boolean.parseBoolean(servicioPersistencia.recuperarPropiedadEntidad(eMensaje, "toGrupo"));
@@ -103,9 +116,10 @@ public class AdaptadorMensajeDAO {
 		 Contacto receptor;
 		 
 		 if(toGrupo) {
-			 receptor = TDSFactoriaDAO.getInstance().getGrupoDAO().recuperarGrupo(codigoReceptor);
+				receptor = adaptadorGrupo.recuperarGrupo(codigoReceptor);
+
 		}else {
-			 receptor = TDSFactoriaDAO.getInstance().getContactoDAO().recuperarContacto(codigoReceptor);
+				receptor = adaptadorContacto.recuperarContacto(codigoReceptor);
 		}
 		
 		 mensaje.setReceptor(receptor);
@@ -114,7 +128,7 @@ public class AdaptadorMensajeDAO {
 		
 	}
 	
-	public List<Mensaje> recuperarTodosMensajes() throws ExcepcionDAO {
+	public List<Mensaje> recuperarTodosMensajes() throws ExcepcionRegistroDuplicado {
 		List<Mensaje> mensajes = new LinkedList<>();
 		List<Entidad> eMensajes = servicioPersistencia.recuperarEntidades("Mensaje");
 
@@ -131,9 +145,9 @@ public class AdaptadorMensajeDAO {
      * Si el receptor del mensaje no esta en la base de datos se registará, y si ya esta en la base de datos es porque
      * el receptor ya está agregado como contacto entonces devolverá una excepción.
      * @param contactoDesconocido
-     * @throws ExcepcionDAO 
+     * @throws ExcepcionRegistroDuplicado 
      */
-    private void registrarReceptorNoAgregado(Contacto contactoDesconocido) throws ExcepcionDAO { // Para implementar la funcion de recibir desde un contacto no agregado.
+    private void registrarReceptorNoAgregado(Contacto contactoDesconocido) throws ExcepcionRegistroDuplicado { // Para implementar la funcion de recibir desde un contacto no agregado.
     		
     	if(contactoDesconocido instanceof ContactoIndividual) {
     		AdaptadorContactoDAO.getInstance().registrarContacto( (ContactoIndividual) contactoDesconocido);

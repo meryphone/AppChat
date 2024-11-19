@@ -1,21 +1,21 @@
 package persistencia;
 // COMENTAR
-import java.sql.Date;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
-import java.util.StringTokenizer;
-
 import beans.Entidad;
 import beans.Propiedad;
 import dominio.ContactoIndividual;
 import dominio.Usuario;
 import excepciones.ExcepcionDAO;
+import excepciones.ExcepcionRegistroDuplicado;
 import persistencia.interfaces.IAdaptadorUsuarioDAO;
 import tds.driver.FactoriaServicioPersistencia;
 import tds.driver.ServicioPersistencia;
@@ -37,24 +37,30 @@ public class AdaptadorUsuarioDAO implements IAdaptadorUsuarioDAO {
 	}
 
 	@Override
-	public void registrarUsuario(Usuario nuevoUsuario) throws ExcepcionDAO {
+	public void registrarUsuario(Usuario nuevoUsuario) throws ExcepcionRegistroDuplicado {
 
 		Entidad eUsuario = null;
-		 boolean noRegistrar = true;
+		 boolean noRegistrar = false;
 
 	  		try {
 	  			eUsuario = servicioPersistencia.recuperarEntidad(nuevoUsuario.getCodigo());
 	  		} catch (NullPointerException e) {
-	  			noRegistrar = false;
+	  			noRegistrar = true;
 	  			e.printStackTrace();
 	  		}
 	  		
-	  		if (noRegistrar) throw new ExcepcionDAO("Entidad ya registrada");
+	  		if (noRegistrar) throw new ExcepcionRegistroDuplicado("Entidad ya registrada");
 
 
 		// registrar primero los atributos que son objetos
 		// registrar lista de contactos
-		AdaptadorContactoDAO adaptadorContacto = TDSFactoriaDAO.getInstance().getContactoDAO();
+		AdaptadorContactoDAO adaptadorContacto = null;
+		try {
+			adaptadorContacto = TDSFactoriaDAO.getInstance().getContactoDAO(); // <-- revisar si PONER COMO ATTRIBUTO
+		} catch (ExcepcionDAO e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		for (ContactoIndividual contacto : nuevoUsuario.getListaContactos())
 			adaptadorContacto.registrarContacto(contacto);
@@ -72,7 +78,7 @@ public class AdaptadorUsuarioDAO implements IAdaptadorUsuarioDAO {
 						new Propiedad("imagenPerfil", nuevoUsuario.getPathImagen().equals(Usuario.IMAGEN_POR_DEFECTO) ? Usuario.IMAGEN_POR_DEFECTO : nuevoUsuario.getPathImagen()),
 						new Propiedad("premium", String.valueOf(nuevoUsuario.isPremium())),
 						new Propiedad("mensajeSaludo", nuevoUsuario.getMensajeSaludo().isEmpty() ? null : nuevoUsuario.getMensajeSaludo().get()),
-						new Propiedad("listaContacto", getCodigosContactos(nuevoUsuario.getListaContactos())))));
+						new Propiedad("listaContacto", PersistenciaUtils.getCodigosContactos(nuevoUsuario.getListaContactos())))));
 		// registrar entidad venta
 		eUsuario = servicioPersistencia.registrarEntidad(eUsuario);
 		// asignar identificador unico
@@ -118,7 +124,7 @@ public class AdaptadorUsuarioDAO implements IAdaptadorUsuarioDAO {
 				prop.setValor(usuarioModificar.getMensajeSaludo().isEmpty() ? null
 						: usuarioModificar.getMensajeSaludo().get());
 			} else if (prop.getNombre().equals("listaContacto")) {
-				prop.setValor(getCodigosContactos(usuarioModificar.getListaContactos()));
+				prop.setValor(PersistenciaUtils.getCodigosContactos(usuarioModificar.getListaContactos()));
 			}
 
 			// Modificar la propiedad en la base de datos
@@ -127,14 +133,15 @@ public class AdaptadorUsuarioDAO implements IAdaptadorUsuarioDAO {
 	}
 
 	@Override
-	public Usuario recuperarUsuario(int codigo) throws ExcepcionDAO {
+	public Usuario recuperarUsuario(int codigo){
 		
 		// Si la entidad esta en el pool la devuelve directamente
 		if (PoolDAO.getInstance().contiene(codigo)) return (Usuario) PoolDAO.getInstance().getObjeto(codigo);
 		
 		// Recuperar la entidad del usuario desde el servicio de persistencia
 		Entidad eUsuario = servicioPersistencia.recuperarEntidad(codigo);
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		DateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH);
+
 
 		// Crear el objeto Usuario
 		Usuario usuario = new Usuario();
@@ -170,7 +177,7 @@ public class AdaptadorUsuarioDAO implements IAdaptadorUsuarioDAO {
 		// Recuperar y asignar la lista de contactos
 		String listaContacto = servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "listaContacto");
 		if (listaContacto != null && !listaContacto.isEmpty()) {
-			List<ContactoIndividual> contactos = getListaContactosDesdeCodigos(listaContacto);
+			List<ContactoIndividual> contactos = PersistenciaUtils.getListaContactosDesdeCodigos(listaContacto);
 			usuario.setListaContactos(contactos);
 		}
 
@@ -178,41 +185,15 @@ public class AdaptadorUsuarioDAO implements IAdaptadorUsuarioDAO {
 	}
 
 	@Override
-	public List<Usuario> recuperarUsuarios() throws ExcepcionDAO {
+	public List<Usuario> recuperarUsuarios(){
 
-		List<Usuario> usuarios = new LinkedList<Usuario>();
+		List<Usuario> usuarios = new ArrayList<Usuario>();
 		List<Entidad> eUsuarios = servicioPersistencia.recuperarEntidades("Usuario");
 
 		for (Entidad eUsuario : eUsuarios) {
 			usuarios.add(recuperarUsuario(eUsuario.getId()));
 		}
 		return usuarios;
-	}
-
-	// -----------Funciones auxiliares-----------------------
-
-	String getCodigosContactos(List<ContactoIndividual> listaContactos) {
-
-		String codigosContacto = "";
-
-		for (ContactoIndividual contacto : listaContactos) {
-			codigosContacto += contacto.getCodigo();
-		}
-
-		return codigosContacto.trim();
-	}
-
-	List<ContactoIndividual> getListaContactosDesdeCodigos(String codigos) throws ExcepcionDAO {
-		List<ContactoIndividual> listaContactos = new LinkedList<ContactoIndividual>();
-
-		StringTokenizer strTok = new StringTokenizer(codigos, " ");
-		AdaptadorContactoDAO adaptadorContacto = TDSFactoriaDAO.getInstance().getContactoDAO();
-		while (strTok.hasMoreTokens()) {
-			listaContactos.add(adaptadorContacto.recuperarContacto(Integer.parseInt(strTok.nextToken())));
-		}
-
-		return listaContactos;
-
 	}
 
 }

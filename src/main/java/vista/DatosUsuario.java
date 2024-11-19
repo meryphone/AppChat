@@ -34,7 +34,6 @@ import javax.swing.UIManager;
 import com.toedter.calendar.JDateChooser;
 
 import controlador.Controlador;
-import excepciones.ExcepcionDAO;
 import excepciones.ExcepcionRegistro;
 
 public class DatosUsuario extends JFrame implements MensajeAdvertencia {
@@ -318,12 +317,7 @@ public class DatosUsuario extends JFrame implements MensajeAdvertencia {
 		btnAceptar = new JButton("Aceptar");
 		btnAceptar.setFont(new Font("DejaVu Sans Mono", Font.BOLD, 12));
 		btnAceptar.addActionListener( e -> {
-							try {
-								llamarControladorRegistro();
-							} catch (ExcepcionDAO e1) {
-								mostrarError(e1.getMessage(), contentPane);
-								e1.printStackTrace();
-							}
+							llamarControladorRegistro();								
 						});
 		
 		GridBagConstraints gbc_btnAceptar = new GridBagConstraints();
@@ -371,7 +365,7 @@ public class DatosUsuario extends JFrame implements MensajeAdvertencia {
 		return null;		
 	}
 	
-	private void llamarControladorRegistro() throws ExcepcionDAO {		
+	private void llamarControladorRegistro() {		
 		try {
             // Intentar el registro
             boolean registroExitoso = controlador.registrarUsuario(

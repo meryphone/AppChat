@@ -1,5 +1,5 @@
 package dominio;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Contacto {
@@ -9,14 +9,14 @@ public abstract class Contacto {
 	
 	public Contacto(String nombre) {
 		this.nombre = nombre;
-		 this.mensajes = new LinkedList<Mensaje>();
+		 this.mensajes = new ArrayList<Mensaje>();
 	}
 
     /**
      * Contructor sin parametros para inicilizar un ContactoIndividual y aplicar métodos set.
      */
     public Contacto() {
-        this.mensajes = new LinkedList<>();
+        this.mensajes = new ArrayList<>();
     }
     
     // Métodos comunes a todas las subclases
@@ -31,7 +31,7 @@ public abstract class Contacto {
 
 
     public List<Mensaje> getMensajes() {			
-        return new LinkedList<Mensaje>(mensajes);
+        return new ArrayList<Mensaje>(mensajes);
     }
 
 	public void setMensajes(List<Mensaje> mensajes) {

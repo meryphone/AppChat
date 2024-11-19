@@ -1,5 +1,7 @@
 package dominio;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,7 +42,7 @@ public class Usuario {
 		fechaNacimiento = Optional.empty();
 		mensajeSaludo = Optional.empty();
 		this.pathImagen = IMAGEN_POR_DEFECTO;
-		this.listaContactos = new LinkedList<ContactoIndividual>();
+		this.listaContactos = new ArrayList<ContactoIndividual>();
 
 	}
 	
@@ -48,12 +50,13 @@ public class Usuario {
 	 * Constructor para inizializar sin parámetros.
 	 */
 	public Usuario() {
-		this.nombreCompleto = "";
-		this.movil = "";
-		this.contrasena = "";
-		this.email = "";
-		
+	    this.nombreCompleto = "";
+	    this.movil = "";
+	    this.contrasena = "";
+	    this.email = "";
+	    this.listaContactos = new ArrayList<>(); 
 	}
+
 
 	/**
 	 * Si existe el contacto cuyo teléfono es el pasado como parámetro, se devuelve un Optional que contiene dicho contacto, sino se 
@@ -64,19 +67,15 @@ public class Usuario {
 	
 	public Optional<ContactoIndividual> getContactoPorTelefono(String tlf) {
 		for(ContactoIndividual contacto : listaContactos) {
-			if(contacto.getTelefono().equals(tlf)) return Optional.of(contacto);
+			if(tlf.equals(contacto.getTelefono())) return Optional.of(contacto);
 		}
 		
 		return Optional.empty();
 	}
 	
-	/**
-	 * Agrega un contacto pasado como parametro la lista de contactos del usuario.
-	 * @param nuevoContacto
-	 */	
 	
 	public List<ContactoIndividual> getListaContactos() {
-		return new LinkedList<ContactoIndividual>(listaContactos);
+		return  listaContactos;
 	}
 
 	public void setListaContactos(List<ContactoIndividual> listaContactos) {

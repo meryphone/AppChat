@@ -3,12 +3,12 @@ package dominio;
 public class ContactoIndividual extends Contacto {
     
     private String telefono;
-    private Usuario usuarioCreador; // Para identificar en la base de datos los contactos que pertenecen a un usuario en concreto.
+   // private Usuario usuarioCreador; // Para identificar en la base de datos los contactos que pertenecen a un usuario en concreto.
 
-    public ContactoIndividual(String nombre, String telefono, Usuario usuarioCreador) {
+    public ContactoIndividual(String nombre, String telefono) {
         super(nombre);
         this.telefono = telefono;
-        this.usuarioCreador = usuarioCreador;
+      //  this.usuarioCreador = usuarioCreador;
     }
 
     /**
@@ -26,7 +26,8 @@ public class ContactoIndividual extends Contacto {
 	public void setTelefono(String telefono) {
 		this.telefono = telefono;
 	}
-
+	
+	/*
     public Usuario getUsuarioCreador() {
         return usuarioCreador;
     }
@@ -35,14 +36,14 @@ public class ContactoIndividual extends Contacto {
 	public void setUsuarioCreador(Usuario usuarioCreador) {
 		this.usuarioCreador = usuarioCreador;		
 	}
-
+	
 
     // Método específico para verificar si el contacto pertenece a una lista de un usuario (si fuera necesario)
     public boolean perteneceAUsuario(Usuario usuario) {
         return this.usuarioCreador.equals(usuario);
     }
 
-
+	*/
 	
 	
 	
