@@ -4,7 +4,6 @@
 ### Java ###
 # Compiled class file
 *.class
-ServidorPersistenciaH2/jdk-11.0.24/
 
 # Log file
 *.log
@@ -46,6 +45,10 @@ buildNumber.properties
 .project
 # JDT-specific (Eclipse Java Development Tools)
 .classpath
+
+### JDK ###
+ServidorPersistenciaH2/jdk-11.0.24/
+ServidorPersistenciaH2/jdk-11.0.24/lib/modules
 
 # End of https://www.toptal.com/developers/gitignore/api/maven,java
 
