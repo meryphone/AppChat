@@ -2,10 +2,13 @@ package controlador;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import persistencia.*;
+import persistencia.interfaces.IAdaptadorContactoDAO;
+import persistencia.interfaces.IAdaptadorGrupoDAO;
+import persistencia.interfaces.IAdaptadorMensajeDAO;
+import persistencia.interfaces.IAdaptadorUsuarioDAO;
 import dominio.*;
 import excepciones.*;
 
@@ -17,10 +20,10 @@ public class Controlador {
 	
 	// Gestores necesarios para la lógica de la aplicación.
 	private RepositorioUsuarios repositorioUsuarios;
-	private AdaptadorUsuarioDAO adaptadorUsuario;
-	private AdaptadorContactoDAO adaptadorContacto;
-	private AdaptadorMensajeDAO adaptadorMensaje;
-	private AdaptadorGrupoDAO adaptadorGrupo;
+	private IAdaptadorUsuarioDAO adaptadorUsuario;
+	private IAdaptadorContactoDAO adaptadorContacto;
+	private IAdaptadorMensajeDAO adaptadorMensaje;
+	private IAdaptadorGrupoDAO adaptadorGrupo;
 	
 	// Implementación del patron Singleton	
 	public static Controlador getInstance() {
@@ -118,8 +121,6 @@ public class Controlador {
 	        throw new ExcepcionLogin("La contraseña es incorrecta.");
 	    }
 	    
-	    
-	    //Si todo es correcto, devuelve el true
 	    return true;
 	}
 
@@ -137,12 +138,13 @@ public class Controlador {
 	    if (usuarioActual == null) {
 	        throw new ExcepcionContacto("No hay un usuario actual autenticado.");
 	    }
-
+	    
+	    /*
 	    // Verifica si el usuario actual existe en el repositorio
 	    Optional<Usuario> usuarioRepositorio = repositorioUsuarios.getUsuarioPorTelefono(usuarioActual.getMovil());
 	    if (usuarioRepositorio.isEmpty()) {
 	        throw new ExcepcionContacto("El usuario actual no existe en el repositorio.");
-	    }
+	    }*/
 
 	    // Verifica si el contacto ya está en la lista de contactos del usuario actual
 	    if (usuarioActual.getContactoPorTelefono(tlf).isPresent()) {
@@ -166,16 +168,23 @@ public class Controlador {
 	    return true;
 	}
 	
-	
-	
-	public List<ContactoIndividual> obtenerContactos() {
+	/*
+	public void enviarMensaje(String texto, Usuario emisor) {
+        for (Contacto contacto : miembros) {
+            Mensaje mensaje = new Mensaje(texto, emisor);
+            contacto.recibirMensaje(mensaje); // Suponiendo que Contacto tiene recibirMensaje
+        }
+    }
+    
+    public List<ContactoIndividual> obtenerContactos() {
 	    if (usuarioActual != null) {
 	        return usuarioActual.getListaContactos(); 
 	    }
-	    return new ArrayList<>(); // Devuelve una lista vacía si no hay un usuario autenticado
-	}
-
-
+	    return new ArrayList<>(); 
+    
+	*/
+	
+	
 	
 	
 	public String getImagenUsuario() {
@@ -185,6 +194,8 @@ public class Controlador {
 	public String getNombreUsuario() {
 		return usuarioActual.getNombreCompleto();
 	}
+	
+	// -------- Funciones auxiliares ----------
 	
 	/**
 	 * Encargado de validar que todos los campos obligatorios no esten vacíos.

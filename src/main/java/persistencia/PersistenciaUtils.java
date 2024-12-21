@@ -80,7 +80,7 @@ public class PersistenciaUtils {
 		String codigosContacto = "";
 
 		for (ContactoIndividual contacto : listaContactos) {
-			codigosContacto += contacto.getCodigo();
+			codigosContacto += contacto.getCodigo() + " ";
 		}
 
 		return codigosContacto.trim();
@@ -104,7 +104,7 @@ public class PersistenciaUtils {
 		    StringTokenizer strTok = new StringTokenizer(codigos, " ");
 
 		    while (strTok.hasMoreTokens()) {
-		            int codigo = Integer.parseInt(strTok.nextToken());
+		            int codigo = Integer.parseInt((String) strTok.nextElement());
 		            ContactoIndividual contacto = adaptadorContacto.recuperarContacto(codigo);
 		            listaContactos.add(contacto);		        
 		    }

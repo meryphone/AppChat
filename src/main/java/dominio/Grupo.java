@@ -15,8 +15,7 @@ public class Grupo extends Contacto {
 		this.miembros = new LinkedList<ContactoIndividual>();
 	}
 	
-	public Grupo() {
-		
+	public Grupo() {		
 	}
 
 	public String getImagen() {
@@ -43,8 +42,7 @@ public class Grupo extends Contacto {
 		this.propietario = propietario;
 	}
 	
-	
-	/**ESTO VA EN EL CONTROLADORS
+
 	public void agregarContacto(ContactoIndividual contacto) {
         if (!miembros.contains(contacto)) {
             miembros.add(contacto);
@@ -55,11 +53,5 @@ public class Grupo extends Contacto {
         miembros.remove(contacto);
     }
 	
-    public void enviarMensaje(String texto, Usuario emisor) {
-        for (Contacto contacto : miembros) {
-            Mensaje mensaje = new Mensaje(texto, emisor);
-            contacto.recibirMensaje(mensaje); // Suponiendo que Contacto tiene recibirMensaje
-        }
-    }
-	*/
+
 }

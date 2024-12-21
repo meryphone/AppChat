@@ -22,7 +22,10 @@ private static FactoriaDAO unicaInstancia;
 			} 
 		return unicaInstancia;
 	}
-
+	
+	/*
+	 * Patron Singleton
+	 */
 
 	public static FactoriaDAO getInstance() throws ExcepcionDAO{
 			if (unicaInstancia == null) return getInstance (FactoriaDAO.DAO_TDS);

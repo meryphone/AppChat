@@ -13,7 +13,6 @@ public class RepositorioUsuarios {
 	
 	private Map<String, Usuario> usuariosRegistrados;	// Mapa que relaciona el télefono con su usuario correspondiente.
 	private static RepositorioUsuarios repositorioUsuarios;
-	private AdaptadorUsuarioDAO adaptadorUsuario;
 	private FactoriaDAO factoriaTDS;
 		
 	public RepositorioUsuarios() {
@@ -23,7 +22,6 @@ public class RepositorioUsuarios {
 		} catch (ExcepcionDAO e) {
 			e.printStackTrace();
 		}
-		adaptadorUsuario = factoriaTDS.getUsuarioDAO();
 		this.cargarRepositorio();
 	}
 	
@@ -68,7 +66,7 @@ public class RepositorioUsuarios {
 	// ------- Funcion Auxiliar----------
 	
 	private void cargarRepositorio() {
-		List<Usuario> usuariosBD = adaptadorUsuario.recuperarUsuarios();
+		List<Usuario> usuariosBD = factoriaTDS.getUsuarioDAO().recuperarUsuarios();
 		for (Usuario user : usuariosBD)
 			usuariosRegistrados.put(user.getMovil(), user);
 	}

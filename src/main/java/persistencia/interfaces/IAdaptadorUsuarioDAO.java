@@ -3,6 +3,7 @@ package persistencia.interfaces;
 import java.util.List;
 
 import dominio.Usuario;
+import excepciones.ExcepcionDAO;
 import excepciones.ExcepcionRegistroDuplicado;
 
 /**

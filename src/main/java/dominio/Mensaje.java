@@ -20,8 +20,6 @@ public class Mensaje implements Comparable<Mensaje> {
 		fechaYhora=LocalDateTime.now();
 	}
 	
-	
-	
 	public int getTipo() {
 		return tipo;
 	}

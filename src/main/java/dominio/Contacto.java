@@ -12,14 +12,11 @@ public abstract class Contacto {
 		 this.mensajes = new ArrayList<Mensaje>();
 	}
 
-    /**
-     * Contructor sin parametros para inicilizar un ContactoIndividual y aplicar métodos set.
-     */
+
     public Contacto() {
         this.mensajes = new ArrayList<>();
     }
     
-    // Métodos comunes a todas las subclases
     
     public String getNombre() {
         return nombre;

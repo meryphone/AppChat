@@ -66,6 +66,9 @@ public class Usuario {
 	 */
 	
 	public Optional<ContactoIndividual> getContactoPorTelefono(String tlf) {
+		
+		if(listaContactos.isEmpty()) return Optional.empty();
+		
 		for(ContactoIndividual contacto : listaContactos) {
 			if(tlf.equals(contacto.getTelefono())) return Optional.of(contacto);
 		}
@@ -80,19 +83,7 @@ public class Usuario {
 
 	public void setListaContactos(List<ContactoIndividual> listaContactos) {
 		this.listaContactos = listaContactos;
-	}
-
-	public String getCodigosContactos(List<ContactoIndividual> listaContactos) {
-		
-		String codigosContacto = "";
-		
-		for(ContactoIndividual contacto : listaContactos) {
-			codigosContacto += contacto.getCodigo();
-		}
-		
-		return codigosContacto.trim();
-	}
-	
+	}	
 
 	//Comprobar lo de los setters, si no son utilizados hay que quitarlos
 	public String getNombreCompleto() {

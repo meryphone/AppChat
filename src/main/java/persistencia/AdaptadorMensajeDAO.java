@@ -1,10 +1,11 @@
 package persistencia;
-// COMENTAR
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+
 import beans.Entidad;
 import beans.Propiedad;
 import dominio.Contacto;
@@ -13,146 +14,180 @@ import dominio.Grupo;
 import dominio.Mensaje;
 import excepciones.ExcepcionDAO;
 import excepciones.ExcepcionRegistroDuplicado;
+import persistencia.interfaces.IAdaptadorMensajeDAO;
 import tds.driver.FactoriaServicioPersistencia;
 import tds.driver.ServicioPersistencia;
 
+/**
+ * Clase AdaptadorMensajeDAO
+ * 
+ * Esta clase actúa como un puente entre los objetos de dominio Mensaje
+ * y su representación en la base de datos, utilizando un servicio de persistencia.
+ * Implementa los métodos necesarios para registrar, recuperar y gestionar mensajes.
+ */
 
-public class AdaptadorMensajeDAO {
+public class AdaptadorMensajeDAO implements IAdaptadorMensajeDAO{
 
-	public static AdaptadorMensajeDAO adaptadorMensaje;
-	private ServicioPersistencia servicioPersistencia;
-	private AdaptadorContactoDAO adaptadorContacto;
-	private AdaptadorUsuarioDAO adaptadorUsuario;
-	private AdaptadorGrupoDAO adaptadorGrupo;
+    private static AdaptadorMensajeDAO adaptadorMensaje;
+    private ServicioPersistencia servicioPersistencia;
+    private AdaptadorContactoDAO adaptadorContacto;
+    private AdaptadorUsuarioDAO adaptadorUsuario;
+    private AdaptadorGrupoDAO adaptadorGrupo;
 
-	public static AdaptadorMensajeDAO getInstance() {
-		if (adaptadorMensaje == null) {
-			adaptadorMensaje = new AdaptadorMensajeDAO();
-		}
-		return adaptadorMensaje;
-	}
-
-	private AdaptadorMensajeDAO() {
-		servicioPersistencia = FactoriaServicioPersistencia.getInstance().getServicioPersistencia();
-		try {
-			adaptadorContacto = TDSFactoriaDAO.getInstance().getContactoDAO();
-			adaptadorUsuario = TDSFactoriaDAO.getInstance().getUsuarioDAO();
-			adaptadorGrupo = TDSFactoriaDAO.getInstance().getGrupoDAO();
-		} catch (ExcepcionDAO e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void registrarMensaje(Mensaje mensaje) throws ExcepcionRegistroDuplicado {
-		 
-	    Entidad eMensaje = null;
-	    boolean noRegistrar = false;
-
-		try {
-			eMensaje = servicioPersistencia.recuperarEntidad(mensaje.getCodigo());
-		} catch (NullPointerException e) {
-			noRegistrar = true;
-			e.printStackTrace();
-		}
-		
-		if (noRegistrar) throw new ExcepcionRegistroDuplicado("Entidad ya registrada");
-	    
-	    eMensaje.setNombre("Mensaje");
-	    
-	    // Primero registramos entidades que son objetos
-	    
-	    adaptadorUsuario.registrarUsuario(mensaje.getEmisor());
-		    
-	    //NO SE SI QUITAR
-	    registrarReceptorNoAgregado(mensaje.getReceptor());
-	    
-	    boolean grupo = false;
-		if (mensaje.getReceptor() instanceof Grupo) {
-			grupo = true;
-		}
-
-		eMensaje.setPropiedades(new ArrayList<Propiedad>(Arrays.asList(new Propiedad("texto", mensaje.getTexto()),
-				new Propiedad("fechaYhora", mensaje.getFechaYhora().toString()),
-				new Propiedad("emoticono", String.valueOf(mensaje.getEmoticono())),
-				new Propiedad("receptor", String.valueOf(mensaje.getReceptor().getCodigo())),
-				new Propiedad("toGrupo", String.valueOf(grupo)),
-				new Propiedad("emisor", String.valueOf(mensaje.getEmisor().getCodigo())), 
-				new Propiedad("tipo", String.valueOf(mensaje.getTipo())))));
-		
-		 // Registrar la entidad en el servicio de persistencia
-	    eMensaje = servicioPersistencia.registrarEntidad(eMensaje);
-	    
-	    // Asignar el identificador único generado por el servicio de persistencia al mensaje
-	    mensaje.setCodigo(eMensaje.getId());
-	    
-	 // Guardamos en el pool
-	 PoolDAO.getInstance().addObjeto(mensaje.getCodigo(), mensaje);
-	    		
-	}
-	
-	public Mensaje recuperarMensaje(int codigo) {
-		
-		// Si la entidad esta en el pool la devuelve directamente
-		if (PoolDAO.getInstance().contiene(codigo)) return (Mensaje) PoolDAO.getInstance().getObjeto(codigo);
-		
-		Entidad eMensaje = servicioPersistencia.recuperarEntidad(codigo);
-		
-		// Crear el objeto Usuario
-		 Mensaje mensaje = new Mensaje();
-		
-		 // Establecemos las propiedades al objeto mensaje
-		 mensaje.setCodigo(codigo);
-		 mensaje.setTexto(servicioPersistencia.recuperarPropiedadEntidad(eMensaje, "texto"));
-		 mensaje.setEmoticono(Integer.parseInt(servicioPersistencia.recuperarPropiedadEntidad(eMensaje, "emoticono")));
-		 mensaje.setFechaYhora(LocalDateTime.parse(servicioPersistencia.recuperarPropiedadEntidad(eMensaje, "fechaYhora")));
-		 
-		 // Recuperamos las propiedades que son objetos
-
-		 mensaje.setEmisor(adaptadorUsuario.recuperarUsuario(Integer.parseInt(servicioPersistencia.recuperarPropiedadEntidad(eMensaje, "emisor"))));
-		 
-		 boolean toGrupo = Boolean.parseBoolean(servicioPersistencia.recuperarPropiedadEntidad(eMensaje, "toGrupo"));
-		 
-		 int codigoReceptor = Integer.parseInt(servicioPersistencia.recuperarPropiedadEntidad(eMensaje, "receptor"));
-		 Contacto receptor;
-		 
-		 if(toGrupo) {
-				receptor = adaptadorGrupo.recuperarGrupo(codigoReceptor);
-
-		}else {
-				receptor = adaptadorContacto.recuperarContacto(codigoReceptor);
-		}
-		
-		 mensaje.setReceptor(receptor);
-		
-		 return mensaje;
-		
-	}
-	
-	public List<Mensaje> recuperarTodosMensajes() throws ExcepcionRegistroDuplicado {
-		List<Mensaje> mensajes = new LinkedList<>();
-		List<Entidad> eMensajes = servicioPersistencia.recuperarEntidades("Mensaje");
-
-		for (Entidad eMensaje : eMensajes) {
-			mensajes.add(recuperarMensaje(eMensaje.getId()));
-		}
-		return mensajes;
-	}
-	
-	
-	  //---------Funciones Auxiliares-------------
-    
     /**
-     * Si el receptor del mensaje no esta en la base de datos se registará, y si ya esta en la base de datos es porque
-     * el receptor ya está agregado como contacto entonces devolverá una excepción.
-     * @param contactoDesconocido
-     * @throws ExcepcionRegistroDuplicado 
+     * Obtiene la instancia única del adaptador (patrón Singleton).
      */
-    private void registrarReceptorNoAgregado(Contacto contactoDesconocido) throws ExcepcionRegistroDuplicado { // Para implementar la funcion de recibir desde un contacto no agregado.
-    		
-    	if(contactoDesconocido instanceof ContactoIndividual) {
-    		AdaptadorContactoDAO.getInstance().registrarContacto( (ContactoIndividual) contactoDesconocido);
-    	}
-    	
+    public static AdaptadorMensajeDAO getInstance() {
+        if (adaptadorMensaje == null) {
+            adaptadorMensaje = new AdaptadorMensajeDAO();
+        }
+        return adaptadorMensaje;
     }
-	
+
+    /**
+     * Constructor que inicializa el servicio de persistencia y los adaptadores de usuario, contacto y grupo.
+     */
+    private AdaptadorMensajeDAO() {
+        servicioPersistencia = FactoriaServicioPersistencia.getInstance().getServicioPersistencia();
+        try {
+            adaptadorContacto = TDSFactoriaDAO.getInstance().getContactoDAO();
+            adaptadorUsuario = TDSFactoriaDAO.getInstance().getUsuarioDAO();
+            adaptadorGrupo = TDSFactoriaDAO.getInstance().getGrupoDAO();
+        } catch (ExcepcionDAO e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Convierte un Mensaje a una Entidad.
+     */
+    private Entidad mensajeToEntidad(Mensaje mensaje) {
+        Entidad eMensaje = new Entidad();
+        eMensaje.setNombre("Mensaje");
+
+        // Determinamos si el receptor es un grupo
+        boolean esGrupo = mensaje.getReceptor() instanceof Grupo;
+
+        // Establecemos las propiedades de la entidad mensaje
+        eMensaje.setPropiedades(new ArrayList<>(Arrays.asList(
+            new Propiedad("texto", mensaje.getTexto()),
+            new Propiedad("fechaYhora", mensaje.getFechaYhora().toString()),
+            new Propiedad("emoticono", String.valueOf(mensaje.getEmoticono())),
+            new Propiedad("receptor", String.valueOf(mensaje.getReceptor().getCodigo())),
+            new Propiedad("toGrupo", String.valueOf(esGrupo)),
+            new Propiedad("emisor", String.valueOf(mensaje.getEmisor().getCodigo())),
+            new Propiedad("tipo", String.valueOf(mensaje.getTipo()))
+        )));
+        return eMensaje;
+    }
+
+    /**
+     * Convierte una Entidad a un Mensaje.
+     */
+    private Mensaje entidadToMensaje(Entidad eMensaje) {
+        Mensaje mensaje = new Mensaje();
+        mensaje.setCodigo(eMensaje.getId());
+        mensaje.setTexto(servicioPersistencia.recuperarPropiedadEntidad(eMensaje, "texto"));
+        mensaje.setEmoticono(Integer.parseInt(servicioPersistencia.recuperarPropiedadEntidad(eMensaje, "emoticono")));
+        mensaje.setFechaYhora(LocalDateTime.parse(servicioPersistencia.recuperarPropiedadEntidad(eMensaje, "fechaYhora")));
+
+        // Recuperamos las propiedades que son objetos
+        mensaje.setEmisor(adaptadorUsuario.recuperarUsuario(Integer.parseInt(servicioPersistencia.recuperarPropiedadEntidad(eMensaje, "emisor"))));
+
+        boolean esGrupo = Boolean.parseBoolean(servicioPersistencia.recuperarPropiedadEntidad(eMensaje, "toGrupo"));
+        int codigoReceptor = Integer.parseInt(servicioPersistencia.recuperarPropiedadEntidad(eMensaje, "receptor"));
+        Contacto receptor;
+
+        // Si el receptor es un grupo, lo recuperamos con el adaptador de grupos
+        if (esGrupo) {
+            receptor = adaptadorGrupo.recuperarGrupo(codigoReceptor);
+        } else {
+            // Si el receptor es un contacto individual, lo recuperamos con el adaptador de contactos
+            receptor = adaptadorContacto.recuperarContacto(codigoReceptor);
+        }
+
+        mensaje.setReceptor(receptor);
+        return mensaje;
+    }
+
+    /**
+     * Registra un nuevo mensaje en la base de datos.
+     * 
+     * @param mensaje Mensaje a registrar.
+     * @throws ExcepcionRegistroDuplicado Si el mensaje ya está registrado.
+     */
+    public void registrarMensaje(Mensaje mensaje) throws ExcepcionRegistroDuplicado {
+        Entidad eMensaje = null;
+        boolean noRegistrar = false;
+
+        try {
+            eMensaje = servicioPersistencia.recuperarEntidad(mensaje.getCodigo());
+        } catch (NullPointerException e) {
+            noRegistrar = true;
+        }
+
+        if (noRegistrar) throw new ExcepcionRegistroDuplicado("Entidad ya registrada");
+
+        // Registrar al emisor (usuario) si no está registrado
+        adaptadorUsuario.registrarUsuario(mensaje.getEmisor());
+
+        // Registrar al receptor si no está registrado
+        registrarReceptorNoAgregado(mensaje.getReceptor());
+
+        // Convertir el mensaje a entidad y registrar
+        eMensaje = mensajeToEntidad(mensaje);
+        eMensaje = servicioPersistencia.registrarEntidad(eMensaje);
+
+        // Asignar el identificador único generado por el servicio de persistencia al mensaje
+        mensaje.setCodigo(eMensaje.getId());
+
+        // Guardamos en el Pool
+        PoolDAO.getInstance().addObjeto(mensaje.getCodigo(), mensaje);
+    }
+
+    /**
+     * Recupera un mensaje desde la base de datos dado su código.
+     * 
+     * @param codigo Código del mensaje a recuperar.
+     * @return El mensaje correspondiente al código.
+     */
+    public Mensaje recuperarMensaje(int codigo) {
+        // Si la entidad está en el pool, la devolvemos directamente
+        if (PoolDAO.getInstance().contiene(codigo)) return (Mensaje) PoolDAO.getInstance().getObjeto(codigo);
+
+        // Recuperar la entidad del mensaje desde el servicio de persistencia
+        Entidad eMensaje = servicioPersistencia.recuperarEntidad(codigo);
+
+        // Convertir la entidad en un objeto Mensaje
+        return entidadToMensaje(eMensaje);
+    }
+
+    /**
+     * Recupera todos los mensajes de la base de datos.
+     * 
+     * @return Lista de todos los mensajes.
+     * @throws ExcepcionRegistroDuplicado
+     */
+    public List<Mensaje> recuperarTodosMensajes()  {
+        List<Mensaje> mensajes = new LinkedList<>();
+        List<Entidad> eMensajes = servicioPersistencia.recuperarEntidades("Mensaje");
+
+        for (Entidad eMensaje : eMensajes) {
+            mensajes.add(recuperarMensaje(eMensaje.getId()));
+        }
+        return mensajes;
+    }
+
+    /**
+     * Si el receptor del mensaje no está registrado, se registrará; si ya está registrado, 
+     * se lanza una excepción.
+     * 
+     * @param receptor El contacto receptor del mensaje.
+     * @throws ExcepcionRegistroDuplicado Si el receptor ya está registrado.
+     */
+    private void registrarReceptorNoAgregado(Contacto receptor) throws ExcepcionRegistroDuplicado {
+        if (receptor instanceof ContactoIndividual) {
+            adaptadorContacto.registrarContacto((ContactoIndividual) receptor);
+        }
+    }
 }

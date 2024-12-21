@@ -1,15 +1,13 @@
 package persistencia;
-// COMENTAR
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
+
 import beans.Entidad;
 import beans.Propiedad;
 import dominio.ContactoIndividual;
@@ -20,180 +18,178 @@ import persistencia.interfaces.IAdaptadorUsuarioDAO;
 import tds.driver.FactoriaServicioPersistencia;
 import tds.driver.ServicioPersistencia;
 
+/**
+ * Clase AdaptadorUsuarioDAO
+ * 
+ * Esta clase actúa como un puente entre los objetos de dominio Usuario
+ * y su representación en la base de datos, utilizando un servicio de persistencia.
+ * Implementa los métodos necesarios para registrar, recuperar y gestionar usuarios
+ * , asegurando la consistencia entre el modelo de datos y el sistema persistente.
+ */
+
 public class AdaptadorUsuarioDAO implements IAdaptadorUsuarioDAO {
 
-	public static ServicioPersistencia servicioPersistencia;
-	private static AdaptadorUsuarioDAO adaptadorUsuario;
+    public static ServicioPersistencia servicioPersistencia;
+    private static AdaptadorUsuarioDAO adaptadorUsuario;
 
-	// Patron Singletons
-	public static AdaptadorUsuarioDAO getInstance() {
-		if (adaptadorUsuario == null)
-			adaptadorUsuario = new AdaptadorUsuarioDAO();
-		return adaptadorUsuario;
-	}
+    // Patrón Singleton
+    public static AdaptadorUsuarioDAO getInstance() {
+        if (adaptadorUsuario == null)
+            adaptadorUsuario = new AdaptadorUsuarioDAO();
+        return adaptadorUsuario;
+    }
 
-	private AdaptadorUsuarioDAO() {
-		servicioPersistencia = FactoriaServicioPersistencia.getInstance().getServicioPersistencia();
-	}
+    private AdaptadorUsuarioDAO() {
+        servicioPersistencia = FactoriaServicioPersistencia.getInstance().getServicioPersistencia();
+    }
 
-	@Override
-	public void registrarUsuario(Usuario nuevoUsuario) throws ExcepcionRegistroDuplicado {
+    // Método para convertir de Usuario a Entidad
+    private Entidad usuarioToEntidad(Usuario usuario) {
+        Entidad eUsuario = new Entidad();
+        eUsuario.setNombre("Usuario");
+        eUsuario.setPropiedades(new ArrayList<>(Arrays.asList(
+                new Propiedad("nombreCompleto", usuario.getNombreCompleto()),
+                new Propiedad("movil", usuario.getMovil()),
+                new Propiedad("contrasena", usuario.getContrasena()),
+                new Propiedad("email", usuario.getEmail()),
+                new Propiedad("imagenPerfil", usuario.getPathImagen()),
+                new Propiedad("premium", String.valueOf(usuario.isPremium())),
+                new Propiedad("mensajeSaludo", usuario.getMensajeSaludo().orElse("")),
+                new Propiedad("listaContacto", PersistenciaUtils.getCodigosContactos(usuario.getListaContactos())),
+                new Propiedad("fechaNacimiento", usuario.getFechaNacimiento().map(date -> new SimpleDateFormat("dd/MM/yyyy").format(date)).orElse(null))
+        )));
+        return eUsuario;
+    }
 
-		Entidad eUsuario = null;
-		 boolean noRegistrar = false;
+    // Método para convertir de Entidad a Usuario
+    private Usuario entidadToUsuario(Entidad eUsuario) {
+        Usuario usuario = new Usuario();
+        usuario.setCodigo(eUsuario.getId());
+        usuario.setNombreCompleto(servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "nombreCompleto"));
+        usuario.setMovil(servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "movil"));
+        usuario.setContrasena(servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "contrasena"));
+        usuario.setEmail(servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "email"));
+        usuario.setPathImagen(servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "imagenPerfil"));
+        usuario.setPremium(Boolean.parseBoolean(servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "premium")));
 
-	  		try {
-	  			eUsuario = servicioPersistencia.recuperarEntidad(nuevoUsuario.getCodigo());
-	  		} catch (NullPointerException e) {
-	  			noRegistrar = true;
-	  			e.printStackTrace();
-	  		}
-	  		
-	  		if (noRegistrar) throw new ExcepcionRegistroDuplicado("Entidad ya registrada");
+        // Recuperar y asignar la fecha de nacimiento
+        String fechaNacimientoStr = servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "fechaNacimiento");
+        if (fechaNacimientoStr != null && !fechaNacimientoStr.isEmpty()) {
+            try {
+            	SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+                Date fechaNacimiento = dateFormat.parse(fechaNacimientoStr);
+                usuario.setFechaNacimiento(fechaNacimiento);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
 
+        // Recuperar lista de contactos
+        String listaContacto = servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "listaContacto");
+        if (listaContacto != null && !listaContacto.isEmpty()) {
+            List<ContactoIndividual> contactos = PersistenciaUtils.getListaContactosDesdeCodigos(listaContacto);
+            usuario.setListaContactos(contactos);
+        }
 
-		// registrar primero los atributos que son objetos
-		// registrar lista de contactos
-		AdaptadorContactoDAO adaptadorContacto = null;
+        // Recuperar mensaje saludo (opcional)
+        Optional.ofNullable(servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "mensajeSaludo"))
+                .ifPresent(usuario::setMensajeSaludo);
+
+        return usuario;
+    }
+
+    @Override
+    public void registrarUsuario(Usuario nuevoUsuario) throws ExcepcionRegistroDuplicado{
+        Entidad eUsuario = null;
+        boolean noRegistrar = false;
+
+        try {
+            eUsuario = servicioPersistencia.recuperarEntidad(nuevoUsuario.getCodigo());
+        } catch (NullPointerException e) {
+            noRegistrar = true;
+        }
+
+        if (noRegistrar) throw new ExcepcionRegistroDuplicado("Entidad ya registrada");
+
+        // Registrar los atributos que son objetos
+        AdaptadorContactoDAO adaptadorContacto = null;
 		try {
-			adaptadorContacto = TDSFactoriaDAO.getInstance().getContactoDAO(); // <-- revisar si PONER COMO ATTRIBUTO
+			adaptadorContacto = TDSFactoriaDAO.getInstance().getContactoDAO();
 		} catch (ExcepcionDAO e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		for (ContactoIndividual contacto : nuevoUsuario.getListaContactos())
-			adaptadorContacto.registrarContacto(contacto);
+        for (ContactoIndividual contacto : nuevoUsuario.getListaContactos()) {
+            adaptadorContacto.registrarContacto(contacto);
+        }
 
-		// Crear entidad usuario
-		eUsuario = new Entidad();
+        // Crear y registrar la entidad Usuario
+        eUsuario = usuarioToEntidad(nuevoUsuario);
+        eUsuario = servicioPersistencia.registrarEntidad(eUsuario);
 
-		eUsuario.setNombre("Usuario");
-		eUsuario.setPropiedades(new ArrayList<Propiedad>(
-				Arrays.asList(new Propiedad("nombreCompleto", nuevoUsuario.getNombreCompleto()),
-						new Propiedad("movil", nuevoUsuario.getMovil()),
-						new Propiedad("contrasena", nuevoUsuario.getContrasena()),
-						new Propiedad("email", nuevoUsuario.getEmail()),
-						new Propiedad("fechaNacimiento",nuevoUsuario.getFechaNacimiento().isEmpty() ? null : String.valueOf(nuevoUsuario.getFechaNacimiento().get())),
-						new Propiedad("imagenPerfil", nuevoUsuario.getPathImagen().equals(Usuario.IMAGEN_POR_DEFECTO) ? Usuario.IMAGEN_POR_DEFECTO : nuevoUsuario.getPathImagen()),
-						new Propiedad("premium", String.valueOf(nuevoUsuario.isPremium())),
-						new Propiedad("mensajeSaludo", nuevoUsuario.getMensajeSaludo().isEmpty() ? null : nuevoUsuario.getMensajeSaludo().get()),
-						new Propiedad("listaContacto", PersistenciaUtils.getCodigosContactos(nuevoUsuario.getListaContactos())))));
-		// registrar entidad venta
-		eUsuario = servicioPersistencia.registrarEntidad(eUsuario);
-		// asignar identificador unico
-		// Se aprovecha el que genera el servicio de persistencia
-		nuevoUsuario.setCodigo(eUsuario.getId());
-		
-		// Guardamos en el Pool
-	    PoolDAO.getInstance().addObjeto(nuevoUsuario.getCodigo(), nuevoUsuario);
+        // Asignar el ID generado por el servicio de persistencia al Usuario
+        nuevoUsuario.setCodigo(eUsuario.getId());
 
-	}
-	
-	/**
-	 * Itera sobre las propiedades de la entidad (desactualizada) para actualizar cada 
-	 * una con los valores del usuario pasado como parametro.
-	 * @param usuarioModificar
-	 */
+        // Guardamos en el Pool
+        PoolDAO.getInstance().addObjeto(nuevoUsuario.getCodigo(), nuevoUsuario);
+    }
 
-	@Override
-	public void modificarUsuario(Usuario usuarioModificar) {
-		// Recuperar la entidad del usuario desde el servicio de persistencia
-		Entidad eUsuario = servicioPersistencia.recuperarEntidad(usuarioModificar.getCodigo());
-		
-		for (Propiedad prop : eUsuario.getPropiedades()) {
+    @Override
+    public void modificarUsuario(Usuario usuarioModificar) {
+    	
+        // Recuperar la entidad del usuario desde el servicio de persistencia
+        Entidad eUsuario = servicioPersistencia.recuperarEntidad(usuarioModificar.getCodigo());
 
-			if (prop.getNombre().equals("nombreCompleto")) {
-				prop.setValor(usuarioModificar.getNombreCompleto());
-			} else if (prop.getNombre().equals("movil")) {
-				prop.setValor(usuarioModificar.getMovil());
-			} else if (prop.getNombre().equals("contrasena")) {
-				prop.setValor(usuarioModificar.getContrasena());
-			} else if (prop.getNombre().equals("email")) {
-				prop.setValor(usuarioModificar.getEmail());
-			} else if (prop.getNombre().equals("fechaNacimiento")) {
-				prop.setValor(usuarioModificar.getFechaNacimiento().isEmpty() ? null
-						: String.valueOf(usuarioModificar.getFechaNacimiento().get()));
-			} else if (prop.getNombre().equals("imagenPerfil")) {
-				prop.setValor(
-						usuarioModificar.getPathImagen().equals(Usuario.IMAGEN_POR_DEFECTO) ? Usuario.IMAGEN_POR_DEFECTO
-								: usuarioModificar.getPathImagen());
-			} else if (prop.getNombre().equals("premium")) {
-				prop.setValor(String.valueOf(usuarioModificar.isPremium()));
-			} else if (prop.getNombre().equals("mensajeSaludo")) {
-				prop.setValor(usuarioModificar.getMensajeSaludo().isEmpty() ? null
-						: usuarioModificar.getMensajeSaludo().get());
-			} else if (prop.getNombre().equals("listaContacto")) {
-				prop.setValor(PersistenciaUtils.getCodigosContactos(usuarioModificar.getListaContactos()));
-			}
+        // Iterar sobre las propiedades de la entidad (actualización de datos)
+        for (Propiedad prop : eUsuario.getPropiedades()) {
+            if (prop.getNombre().equals("nombreCompleto")) {
+                prop.setValor(usuarioModificar.getNombreCompleto());
+            } else if (prop.getNombre().equals("movil")) {
+                prop.setValor(usuarioModificar.getMovil());
+            } else if (prop.getNombre().equals("contrasena")) {
+                prop.setValor(usuarioModificar.getContrasena());
+            } else if (prop.getNombre().equals("email")) {
+                prop.setValor(usuarioModificar.getEmail());
+            } else if (prop.getNombre().equals("fechaNacimiento")) {
+                prop.setValor(usuarioModificar.getFechaNacimiento().isEmpty() ? null
+                        : new SimpleDateFormat("dd/MM/yyyy").format(usuarioModificar.getFechaNacimiento().get()));
+            } else if (prop.getNombre().equals("imagenPerfil")) {
+                prop.setValor(
+                        usuarioModificar.getPathImagen().equals(Usuario.IMAGEN_POR_DEFECTO) ? Usuario.IMAGEN_POR_DEFECTO
+                                : usuarioModificar.getPathImagen());
+            } else if (prop.getNombre().equals("premium")) {
+                prop.setValor(String.valueOf(usuarioModificar.isPremium()));
+            } else if (prop.getNombre().equals("mensajeSaludo")) {
+                prop.setValor(usuarioModificar.getMensajeSaludo().orElse(null));
+            } else if (prop.getNombre().equals("listaContacto")) {
+                prop.setValor(PersistenciaUtils.getCodigosContactos(usuarioModificar.getListaContactos()));
+            }
 
-			// Modificar la propiedad en la base de datos
-			servicioPersistencia.modificarPropiedad(prop);
-		}
-	}
+            // Modificar la propiedad en la base de datos
+            servicioPersistencia.modificarPropiedad(prop);
+        }
+    }
 
-	@Override
-	public Usuario recuperarUsuario(int codigo){
-		
-		// Si la entidad esta en el pool la devuelve directamente
-		if (PoolDAO.getInstance().contiene(codigo)) return (Usuario) PoolDAO.getInstance().getObjeto(codigo);
-		
-		// Recuperar la entidad del usuario desde el servicio de persistencia
-		Entidad eUsuario = servicioPersistencia.recuperarEntidad(codigo);
-		DateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH);
+    @Override
+    public Usuario recuperarUsuario(int codigo) {
+    	
+        // Si la entidad está en el Pool, la devolvemos directamente
+        if (PoolDAO.getInstance().contiene(codigo)) return (Usuario) PoolDAO.getInstance().getObjeto(codigo);
 
+        // Recuperar la entidad del usuario desde el servicio de persistencia
+        Entidad eUsuario = servicioPersistencia.recuperarEntidad(codigo);
+        
+        // Convertir la entidad en Usuario
+        return entidadToUsuario(eUsuario);
+    }
 
-		// Crear el objeto Usuario
-		Usuario usuario = new Usuario();
+    @Override
+    public List<Usuario> recuperarUsuarios() {
+        List<Usuario> usuarios = new ArrayList<>();
+        List<Entidad> eUsuarios = servicioPersistencia.recuperarEntidades("Usuario");
 
-		// Recuperar y asignar cada propiedad del usuario
-		usuario.setCodigo(codigo);
-		usuario.setNombreCompleto(servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "nombreCompleto"));
-		usuario.setMovil(servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "movil"));
-		usuario.setContrasena(servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "contrasena"));
-		usuario.setEmail(servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "email"));
-
-		// Recuperar y asignar la fecha de nacimiento
-		Optional.ofNullable(servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "fechaNacimiento"))
-				.filter(fechaNacimientoStr -> !fechaNacimientoStr.isEmpty()).ifPresent(fechaNacimientoStr -> {
-					try {
-						Date fechaNacimiento = (Date) dateFormat.parse(fechaNacimientoStr);
-						usuario.setFechaNacimiento(fechaNacimiento);
-					} catch (ParseException e) {
-						e.printStackTrace();
-					}
-				});
-
-		// Recuperar y asignar la imagen de perfil
-		usuario.setPathImagen(servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "imagenPerfil"));
-
-		// Recuperar y asignar el estado de la suscripción Premium
-		usuario.setPremium(Boolean.parseBoolean(servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "premium")));
-
-		// Recuperar y asignar el mensaje de saludo
-		Optional.ofNullable(servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "mensajeSaludo"))
-				.filter(mensajeSaludo -> !mensajeSaludo.isEmpty()).ifPresent(usuario::setMensajeSaludo);
-
-		// Recuperar y asignar la lista de contactos
-		String listaContacto = servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "listaContacto");
-		if (listaContacto != null && !listaContacto.isEmpty()) {
-			List<ContactoIndividual> contactos = PersistenciaUtils.getListaContactosDesdeCodigos(listaContacto);
-			usuario.setListaContactos(contactos);
-		}
-
-		return usuario;
-	}
-
-	@Override
-	public List<Usuario> recuperarUsuarios(){
-
-		List<Usuario> usuarios = new ArrayList<Usuario>();
-		List<Entidad> eUsuarios = servicioPersistencia.recuperarEntidades("Usuario");
-
-		for (Entidad eUsuario : eUsuarios) {
-			usuarios.add(recuperarUsuario(eUsuario.getId()));
-		}
-		return usuarios;
-	}
-
+        for (Entidad eUsuario : eUsuarios) {
+            usuarios.add(recuperarUsuario(eUsuario.getId()));
+        }
+        return usuarios;
+    }
 }
