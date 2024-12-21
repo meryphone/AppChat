@@ -175,14 +175,14 @@ public class Controlador {
             contacto.recibirMensaje(mensaje); // Suponiendo que Contacto tiene recibirMensaje
         }
     }
-    
+    */
     public List<ContactoIndividual> obtenerContactos() {
 	    if (usuarioActual != null) {
 	        return usuarioActual.getListaContactos(); 
 	    }
 	    return new ArrayList<>(); 
-    
-	*/
+    }
+	
 	
 	
 	

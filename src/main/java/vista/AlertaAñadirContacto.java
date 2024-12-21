@@ -82,14 +82,12 @@ public class AlertaAñadirContacto extends JFrame implements MensajeAdvertencia{
 					mostrarConfirmacion("Contacto añadido correctamente", contentPane);
 					Contactos contactos = new Contactos(principal);
 					contactos.setVisible(true);
-					dispose(); //cierra la ventana actual
+					dispose(); 
 				}
 			} catch (ExcepcionContacto e) {
 		        mostrarError(e.getMessage(), contentPane);
-		    } catch (Exception e) {
-		        mostrarError("No se ha podido agregar el contacto", contentPane);
-		        e.printStackTrace(); // Para depuración
-		    }
+		        e.printStackTrace();
+		    } 
 		});
 		
 		JButton cancelar= new JButton("Cancelar");

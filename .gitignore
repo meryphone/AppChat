@@ -4,6 +4,7 @@
 ### Java ###
 # Compiled class file
 *.class
+ServidorPersistenciaH2/jdk-11.0.24/
 
 # Log file
 *.log

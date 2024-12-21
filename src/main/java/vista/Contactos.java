@@ -36,7 +36,8 @@ public class Contactos extends JFrame implements MensajeAdvertencia{
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private Controlador controlador = Controlador.getInstance();
-	private JList<ContactoIndividual> listaContactos;
+	private JList<ContactoIndividual> listaContactos = new JList<>();
+	private JList<ContactoIndividual> listaContactosGrupo = new JList<>();
 	private Principal principal;
 
 	/**
@@ -119,6 +120,9 @@ public class Contactos extends JFrame implements MensajeAdvertencia{
 		
 		JButton IzqDer = new JButton("--->");
 		centro.add(IzqDer);
+		IzqDer.addActionListener(ev -> {
+			
+		});
 		
 		Component glue = Box.createGlue();
 		glue.setMaximumSize(new Dimension(20, 20));
@@ -144,6 +148,12 @@ public class Contactos extends JFrame implements MensajeAdvertencia{
 		
 		JPanel grupos = new JPanel();
 		scrollPane_1.setViewportView(grupos);
+		
+		JScrollPane scrollPane_2 = new JScrollPane();
+		grupos.add(scrollPane_2);
+		
+		listaContactosGrupo.setCellRenderer(new ContactoIndividualCellRenderer());
+		scrollPane_2.setViewportView(listaContactosGrupo);
 		
 	}
 	

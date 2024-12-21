@@ -350,6 +350,7 @@ public class Principal extends JFrame implements MensajeAdvertencia {
 	public void actualizarListaContactos() {
 	    // Obtener la lista de contactos desde el controlador
 	    List<ContactoIndividual> contactos = controlador.obtenerContactos();
+	    
 	    // Crear un modelo para el JList y añadir los contactos
 	    DefaultListModel<ContactoIndividual> modelo = new DefaultListModel<>();
 	    for (ContactoIndividual contacto : contactos) {
