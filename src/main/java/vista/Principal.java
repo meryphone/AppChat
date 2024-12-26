@@ -117,11 +117,11 @@ public class Principal extends JFrame implements MensajeAdvertencia {
 		lblNewLabel.setIcon(new ImageIcon(Principal.class.getResource("/resources/Appchatlogominecraft(3).png")));
 		arriba.add(lblNewLabel);
 
-		JButton btnContactos = new JButton("Contactos");
+		JButton btnContactos = new JButton("Agregar contacto");
 		btnContactos.setIcon(new ImageIcon(Principal.class.getResource("/resources/libreta-de-contactos.png")));
 		arriba.add(btnContactos);
 		btnContactos.addActionListener(ev -> {
-			Contactos contactos = new Contactos(this);
+			AñadirContacto contactos = new AñadirContacto(this);
 			contactos.setVisible(true);
 			actualizarListaContactos();
 
@@ -183,8 +183,7 @@ public class Principal extends JFrame implements MensajeAdvertencia {
 
 		JPanel der = new JPanel();
 		der.setMinimumSize(new Dimension(200, 200));
-		der.setBorder(new TitledBorder(new LineBorder(new Color(99, 130, 191), 2), "Chat con Blas04",
-				TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		der.setBorder(new TitledBorder(new LineBorder(new Color(99, 130, 191), 2), "Chat", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(51, 51, 51)));
 		
 		der.setBackground(UIManager.getColor("Tree.dropCellBackground"));
 		der.setMaximumSize(getMaximumSize()); 

@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public class Usuario {
 
-	public static final String IMAGEN_POR_DEFECTO = "/resources/nueva_cuenta(1).png"; // CREAR CLASE CON TODAS LAS CONSTANTES???
+	public static final String IMAGEN_POR_DEFECTO = "/resources/nueva_cuenta(1).png";
 	
 	private int codigo;
 	private  String nombreCompleto;
@@ -25,7 +25,7 @@ public class Usuario {
 	private List<ContactoIndividual> listaContactos;
 	
 	/**
-	 * Constructor de un contacto.
+	 * Constructor de un usuario.
 	 * @param nombreCompleto
 	 * @param movil
 	 * @param contrasena
@@ -85,7 +85,6 @@ public class Usuario {
 		this.listaContactos = listaContactos;
 	}	
 
-	//Comprobar lo de los setters, si no son utilizados hay que quitarlos
 	public String getNombreCompleto() {
 		return nombreCompleto;
 	}

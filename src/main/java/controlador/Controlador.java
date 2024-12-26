@@ -138,13 +138,6 @@ public class Controlador {
 	    if (usuarioActual == null) {
 	        throw new ExcepcionContacto("No hay un usuario actual autenticado.");
 	    }
-	    
-	    /*
-	    // Verifica si el usuario actual existe en el repositorio
-	    Optional<Usuario> usuarioRepositorio = repositorioUsuarios.getUsuarioPorTelefono(usuarioActual.getMovil());
-	    if (usuarioRepositorio.isEmpty()) {
-	        throw new ExcepcionContacto("El usuario actual no existe en el repositorio.");
-	    }*/
 
 	    // Verifica si el contacto ya está en la lista de contactos del usuario actual
 	    if (usuarioActual.getContactoPorTelefono(tlf).isPresent()) {
@@ -168,6 +161,12 @@ public class Controlador {
 	    return true;
 	}
 	
+	public void crearGrupo(List<Grupo> listaMiembros) {
+		
+		
+		
+	}
+	
 	/*
 	public void enviarMensaje(String texto, Usuario emisor) {
         for (Contacto contacto : miembros) {
@@ -182,10 +181,7 @@ public class Controlador {
 	    }
 	    return new ArrayList<>(); 
     }
-	
-	
-	
-	
+		
 	
 	public String getImagenUsuario() {
 		return usuarioActual.getPathImagen();
