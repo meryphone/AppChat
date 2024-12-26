@@ -5,77 +5,120 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import dominio.ContactoIndividual;
+import dominio.Grupo;
 import dominio.Mensaje;
 import excepciones.ExcepcionDAO;
 import excepciones.ExcepcionRegistroDuplicado;
 
 public class PersistenciaUtils {
-	
-	private static AdaptadorMensajeDAO adaptadorMensaje;  // Preguntar si esto es legal
+
+	private static AdaptadorMensajeDAO adaptadorMensaje;
 	private static AdaptadorContactoDAO adaptadorContacto;
-	
+	private static AdaptadorGrupoDAO adaptadorGrupo;
+
 	static {
 		try {
 			adaptadorMensaje = TDSFactoriaDAO.getInstance().getMensajeDAO();
 			adaptadorContacto = TDSFactoriaDAO.getInstance().getContactoDAO();
+			adaptadorGrupo = TDSFactoriaDAO.getInstance().getGrupoDAO();
 		} catch (ExcepcionDAO e) {
 			e.printStackTrace();
 		}
 	}
-	
-	 /**
-     * Convierte una cadena de códigos de mensajes en una lista de mensajes.
+		
+	/**
+     * Convierte una cadena de códigos de grupos en una lista de objetos Grupo.
      * 
-     * @param codigosMensajes Cadena de códigos de mensajes.
-     * @return Lista de mensajes.
-     * @throws ExcepcionDAO Si ocurre un error al recuperar un mensaje.
+     * @param codigosGrupos Cadena de códigos separados por espacios.
+     * @return Lista de grupos.
      */
 	
-	static List<Mensaje> obtenerMensajesDesdeCódigos(String codigosMensajes) {
-	    List<Mensaje> listaMensajes = new ArrayList<>();
-	    
-	    // Validar si la cadena es nula o vacía
-	    if (codigosMensajes == null || codigosMensajes.trim().isEmpty()) {
-	        return listaMensajes; // Retornar lista vacía
-	    }
+	public static List<Grupo> obtenerGruposDesdeCodigos(String codigosGrupos) {
+		List<Grupo> listaGrupos = new ArrayList<>();
 
-	    StringTokenizer srtTok = new StringTokenizer(codigosMensajes, " ");
+		if (codigosGrupos == null || codigosGrupos.trim().isEmpty()) {
+			return listaGrupos; 
+		}
 
-	    while (srtTok.hasMoreTokens()) {
-	            int codigo = Integer.parseInt(srtTok.nextToken());
-	            Mensaje mensaje = adaptadorMensaje.recuperarMensaje(codigo);
-	            listaMensajes.add(mensaje);
-	    }
+		StringTokenizer srtTok = new StringTokenizer(codigosGrupos, " ");
 
-	    return listaMensajes;
+		while (srtTok.hasMoreTokens()) {
+			int codigo = Integer.parseInt(srtTok.nextToken());
+			Grupo grupo = adaptadorGrupo.recuperarGrupo(codigo); 
+			listaGrupos.add(grupo);
+		}
+
+		return listaGrupos;
+	}
+
+	/**
+	 * Convierte una lista de grupos en una cadena de códigos separados por
+	 * espacios.
+	 * 
+	 * @param grupos Lista de grupos.
+	 * @return Cadena de códigos de los grupos.
+	 */
+	public static String obtenerCodigosGrupos(List<Grupo> grupos) {
+		StringBuilder codigos = new StringBuilder();
+
+		for (Grupo grupo : grupos) {
+			codigos.append(grupo.getCodigo()).append(" ");
+		}
+
+		return codigos.toString().trim(); 
 	}
 
 
+	/**
+	 * Convierte una cadena de códigos de mensajes en una lista de mensajes.
+	 * 
+	 * @param codigosMensajes Cadena de códigos de mensajes.
+	 * @return Lista de mensajes.
+	 */
 
-    /**
-     * Convierte una lista de mensajes en una cadena de códigos separados por espacios.
-     * 
-     * @param mensajes Lista de mensajes.
-     * @return Cadena de códigos de los mensajes.
-     */
-    static String obtenerCodigosMensajes(List<Mensaje> mensajes) {
-        String idMensajes = "";
+	static List<Mensaje> obtenerMensajesDesdeCódigos(String codigosMensajes) {
+		List<Mensaje> listaMensajes = new ArrayList<>();
 
-        for (Mensaje mensaje : mensajes) {
-            idMensajes += mensaje.getCodigo() + " ";
-        }
+		// Validar si la cadena es nula o vacía
+		if (codigosMensajes == null || codigosMensajes.trim().isEmpty()) {
+			return listaMensajes; // Retornar lista vacía
+		}
 
-        return idMensajes.trim();
-    }
-   	
-   	/**
-   	 * 
-   	 * @param listaContactos
-   	 * @return
-   	 */
-   
-   
-	 static String getCodigosContactos(List<ContactoIndividual> listaContactos) {
+		StringTokenizer srtTok = new StringTokenizer(codigosMensajes, " ");
+
+		while (srtTok.hasMoreTokens()) {
+			int codigo = Integer.parseInt(srtTok.nextToken());
+			Mensaje mensaje = adaptadorMensaje.recuperarMensaje(codigo);
+			listaMensajes.add(mensaje);
+		}
+
+		return listaMensajes;
+	}
+
+	/**
+	 * Convierte una lista de mensajes en una cadena de códigos separados por
+	 * espacios.
+	 * 
+	 * @param mensajes Lista de mensajes.
+	 * @return Cadena de códigos de los mensajes.
+	 */
+	static String obtenerCodigosMensajes(List<Mensaje> mensajes) {
+		String idMensajes = "";
+
+		for (Mensaje mensaje : mensajes) {
+			idMensajes += mensaje.getCodigo() + " ";
+		}
+
+		return idMensajes.trim();
+	}
+
+	/**
+	 * 
+	 * @param listaContactos
+	 * @return
+	 */
+
+	static String getCodigosContactos(List<ContactoIndividual> listaContactos) {
 
 		String codigosContacto = "";
 
@@ -85,7 +128,7 @@ public class PersistenciaUtils {
 
 		return codigosContacto.trim();
 	}
-	
+
 	/**
 	 * 
 	 * @param codigos
@@ -93,25 +136,23 @@ public class PersistenciaUtils {
 	 * @throws ExcepcionRegistroDuplicado
 	 */
 
-	 static List<ContactoIndividual> getListaContactosDesdeCodigos(String codigos) {
-		    List<ContactoIndividual> listaContactos = new ArrayList<>();
+	static List<ContactoIndividual> getListaContactosDesdeCodigos(String codigos) {
+		List<ContactoIndividual> listaContactos = new ArrayList<>();
 
-		    // Validar si la cadena es nula o vacía
-		    if (codigos == null || codigos.trim().isEmpty()) {
-		        return listaContactos; // Retornar lista vacía
-		    }
-
-		    StringTokenizer strTok = new StringTokenizer(codigos, " ");
-
-		    while (strTok.hasMoreTokens()) {
-		            int codigo = Integer.parseInt((String) strTok.nextElement());
-		            ContactoIndividual contacto = adaptadorContacto.recuperarContacto(codigo);
-		            listaContactos.add(contacto);		        
-		    }
-
-		    return listaContactos;
+		// Validar si la cadena es nula o vacía
+		if (codigos == null || codigos.trim().isEmpty()) {
+			return listaContactos; // Retornar lista vacía
 		}
-   
-   
+
+		StringTokenizer strTok = new StringTokenizer(codigos, " ");
+
+		while (strTok.hasMoreTokens()) {
+			int codigo = Integer.parseInt((String) strTok.nextElement());
+			ContactoIndividual contacto = adaptadorContacto.recuperarContacto(codigo);
+			listaContactos.add(contacto);
+		}
+
+		return listaContactos;
+	}
 
 }

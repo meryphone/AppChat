@@ -64,8 +64,6 @@ public class AdaptadorContactoDAO implements IAdaptadorContactoDAO {
                 new Propiedad("nombre", contacto.getNombre()),
                 new Propiedad("telefono", contacto.getTelefono()),
                 new Propiedad("mensajes", PersistenciaUtils.obtenerCodigosMensajes(contacto.getMensajes())) 
-                // Descomentar si es necesario el usuario creador
-                // new Propiedad("usuarioCreador", String.valueOf(contacto.getUsuarioCreador().getCodigo()))
         )));
         return eContacto;
     }

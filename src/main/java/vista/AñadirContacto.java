@@ -8,7 +8,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.border.EmptyBorder;
 
 import controlador.Controlador;
-import excepciones.ExcepcionContacto;
+import excepciones.ExcepcionAgregarContacto;
 
 import java.awt.BorderLayout;
 import javax.swing.BoxLayout;
@@ -79,8 +79,9 @@ public class AñadirContacto extends JFrame implements MensajeAdvertencia {
 
         JMenuItem crearGrupo = new JMenuItem("Crear grupo");
        crearGrupo.addActionListener(ev -> {
-    	   new ModificarGrupo(principal);
+    	   ModificarGrupo modificar = new ModificarGrupo(principal);
     	   dispose();
+    	   modificar.setVisible(true);
        });
        
         menuGrupos.add(crearGrupo);
@@ -149,7 +150,7 @@ public class AñadirContacto extends JFrame implements MensajeAdvertencia {
 					contactos.setVisible(true);
 					dispose();
 				}
-			} catch (ExcepcionContacto e) {
+			} catch (ExcepcionAgregarContacto e) {
 				mostrarError(e.getMessage(), contentPane);
 				e.printStackTrace();
 			}

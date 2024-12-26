@@ -13,7 +13,7 @@ import javax.swing.border.TitledBorder;
 import controlador.Controlador;
 import dominio.ContactoIndividual;
 import dominio.Usuario;
-import excepciones.ExcepcionContacto;
+import excepciones.ExcepcionAgregarContacto;
 
 import javax.swing.border.LineBorder;
 import java.awt.Color;
@@ -63,7 +63,7 @@ public class ModificarGrupo extends JFrame implements MensajeAdvertencia{
 		this.principal = principal;
 		setBackground(SystemColor.window);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 665, 422);
+		setBounds(100, 100, 716, 499);
 		contentPane = new JPanel();
 		contentPane.setBackground(UIManager.getColor("List.dropCellBackground"));
 		contentPane.setForeground(new Color(0, 0, 0));
@@ -88,17 +88,12 @@ public class ModificarGrupo extends JFrame implements MensajeAdvertencia{
 		abajoIzq.setBackground(UIManager.getColor("List.dropCellBackground"));
 		izq.add(abajoIzq, BorderLayout.SOUTH);
 		
-		JButton anadirContacto = new JButton("Añadir contacto");
+		JButton anadirContacto = new JButton("Añadir grupo");
 		abajoIzq.add(anadirContacto);
-		anadirContacto.addActionListener(new ActionListener() {
+		anadirContacto.addActionListener(ev -> {
 
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				dispose();
-				AñadirContacto contacto = new AñadirContacto(principal);
-				contacto.setVisible(true);		
-			    actualizarListaContactos();
-			}
+				//LLMAR
+			
 		});
 		//Para asegurarnos de que se actualizan los contactos
 	    actualizarListaContactos();
@@ -147,10 +142,10 @@ public class ModificarGrupo extends JFrame implements MensajeAdvertencia{
 		abajoDer.setBackground(UIManager.getColor("List.dropCellBackground"));
 		der.add(abajoDer, BorderLayout.SOUTH);
 		
-		JButton btnAnadirGrupo = new JButton("Añadir grupo");
-		abajoDer.add(btnAnadirGrupo);
-		btnAnadirGrupo.addActionListener(ev -> {
-			//LLAMAR AL CREAR GRUPO
+		JButton cancelar = new JButton("Cancelar\n");
+		abajoDer.add(cancelar);
+		cancelar.addActionListener(ev -> {
+			dispose();
 		});
 		
 		JScrollPane scrollPane_1 = new JScrollPane();

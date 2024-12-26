@@ -56,7 +56,8 @@ public class AdaptadorUsuarioDAO implements IAdaptadorUsuarioDAO {
                 new Propiedad("premium", String.valueOf(usuario.isPremium())),
                 new Propiedad("mensajeSaludo", usuario.getMensajeSaludo().orElse("")),
                 new Propiedad("listaContacto", PersistenciaUtils.getCodigosContactos(usuario.getListaContactos())),
-                new Propiedad("fechaNacimiento", usuario.getFechaNacimiento().map(date -> new SimpleDateFormat("dd/MM/yyyy").format(date)).orElse(null))
+                new Propiedad("fechaNacimiento", usuario.getFechaNacimiento().map(date -> new SimpleDateFormat("dd/MM/yyyy").format(date)).orElse(null)),
+                new Propiedad("grupos", PersistenciaUtils.obtenerCodigosGrupos(usuario.getGrupos()))
         )));
         return eUsuario;
     }
@@ -71,7 +72,8 @@ public class AdaptadorUsuarioDAO implements IAdaptadorUsuarioDAO {
         usuario.setEmail(servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "email"));
         usuario.setPathImagen(servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "imagenPerfil"));
         usuario.setPremium(Boolean.parseBoolean(servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "premium")));
-
+        usuario.setGrupos(PersistenciaUtils.obtenerGruposDesdeCodigos(servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "grupos")));
+        
         // Recuperar y asignar la fecha de nacimiento
         String fechaNacimientoStr = servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "fechaNacimiento");
         if (fechaNacimientoStr != null && !fechaNacimientoStr.isEmpty()) {
@@ -118,6 +120,7 @@ public class AdaptadorUsuarioDAO implements IAdaptadorUsuarioDAO {
 		} catch (ExcepcionDAO e) {
 			e.printStackTrace();
 		}
+		
         for (ContactoIndividual contacto : nuevoUsuario.getListaContactos()) {
             adaptadorContacto.registrarContacto(contacto);
         }
@@ -162,6 +165,8 @@ public class AdaptadorUsuarioDAO implements IAdaptadorUsuarioDAO {
                 prop.setValor(usuarioModificar.getMensajeSaludo().orElse(null));
             } else if (prop.getNombre().equals("listaContacto")) {
                 prop.setValor(PersistenciaUtils.getCodigosContactos(usuarioModificar.getListaContactos()));
+            } else if(prop.getNombre().equals("grupos")) {
+            	prop.setValor(PersistenciaUtils.obtenerCodigosGrupos(usuarioModificar.getGrupos()));
             }
 
             // Modificar la propiedad en la base de datos

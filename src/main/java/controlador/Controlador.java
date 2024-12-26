@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
+import javax.swing.DefaultListModel;
+
 import persistencia.*;
 import persistencia.interfaces.IAdaptadorContactoDAO;
 import persistencia.interfaces.IAdaptadorGrupoDAO;
@@ -133,15 +136,15 @@ public class Controlador {
 	 * @throws ExcepcionContacto si el contacto ya existe o el usuario no está registrado
 	 * @throws ExcepcionDAO 
 	 */
-	public boolean agregarContacto(String tlf, String nombreContacto) throws ExcepcionContacto {
+	public boolean agregarContacto(String tlf, String nombreContacto) throws ExcepcionAgregarContacto {
 	    // Verifica si hay un usuario autenticado
 	    if (usuarioActual == null) {
-	        throw new ExcepcionContacto("No hay un usuario actual autenticado.");
+	        throw new ExcepcionAgregarContacto("No hay un usuario actual autenticado.");
 	    }
 
 	    // Verifica si el contacto ya está en la lista de contactos del usuario actual
 	    if (usuarioActual.getContactoPorTelefono(tlf).isPresent()) {
-	        throw new ExcepcionContacto("El contacto ya está agregado.");
+	        throw new ExcepcionAgregarContacto("El contacto ya está agregado.");
 	    }
 
 	    // Si no existe, crea y registra el nuevo contacto
@@ -155,16 +158,33 @@ public class Controlador {
 	        adaptadorUsuario.modificarUsuario(usuarioActual);
 	    } catch (ExcepcionRegistroDuplicado e) {
 	    	e.printStackTrace();
-	        throw new ExcepcionContacto("Error al registrar el contacto: contacto duplicado.");
+	        throw new ExcepcionAgregarContacto("Error al registrar el contacto: contacto duplicado.");
 	    }
 
 	    return true;
 	}
 	
-	public void crearGrupo(List<Grupo> listaMiembros) {
+	public boolean crearGrupo(String nombreGrupo, DefaultListModel<ContactoIndividual> listaMiembros) throws ExcepcionCrearGrupo {
 		
+		List<ContactoIndividual> miembrosGrupo = new ArrayList<ContactoIndividual>();
 		
-		
+		  for (int i = 0; i < listaMiembros.getSize(); i++) {
+	            miembrosGrupo.add(listaMiembros.getElementAt(i));
+	        }
+		  
+		  Grupo grupoNuevo = new Grupo(nombreGrupo, usuarioActual, miembrosGrupo);
+		  usuarioActual.addGrupo(grupoNuevo);
+		  
+		  
+		  try {
+			adaptadorGrupo.registrarGrupo(grupoNuevo);
+			adaptadorUsuario.modificarUsuario(usuarioActual);
+		} catch (ExcepcionRegistroDuplicado e) {
+			e.printStackTrace();
+			throw new ExcepcionCrearGrupo("El grupo ya ha sido registrado"); 
+		}
+		  
+		return true;
 	}
 	
 	/*

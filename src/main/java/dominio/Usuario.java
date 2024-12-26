@@ -1,9 +1,7 @@
 package dominio;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +21,7 @@ public class Usuario {
 	private boolean premium = false;
 	private Optional<String> mensajeSaludo;
 	private List<ContactoIndividual> listaContactos;
+	private List<Grupo> grupos;
 	
 	/**
 	 * Constructor de un usuario.
@@ -43,6 +42,7 @@ public class Usuario {
 		mensajeSaludo = Optional.empty();
 		this.pathImagen = IMAGEN_POR_DEFECTO;
 		this.listaContactos = new ArrayList<ContactoIndividual>();
+		this.grupos = new ArrayList<Grupo>();
 
 	}
 	
@@ -55,6 +55,8 @@ public class Usuario {
 	    this.contrasena = "";
 	    this.email = "";
 	    this.listaContactos = new ArrayList<>(); 
+	    this.pathImagen = IMAGEN_POR_DEFECTO;
+		this.grupos = new ArrayList<Grupo>();
 	}
 
 
@@ -156,5 +158,19 @@ public class Usuario {
 	public void setCodigo(int codigo) {
 		this.codigo = codigo;
 	}
+
+	public List<Grupo> getGrupos() {
+		return grupos;
+	}
+
+	public void setGrupos(List<Grupo> grupos) {
+		this.grupos = grupos;
+	}
+	
+	public void addGrupo(Grupo grupo) {
+		grupos.add(grupo);
+	}
+	
+	
 
 }

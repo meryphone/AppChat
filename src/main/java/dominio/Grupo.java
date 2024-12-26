@@ -5,17 +5,22 @@ import java.util.List;
 
 public class Grupo extends Contacto {
 	
+	public static final String IMAGEN_POR_DEFECTO_GRUPO = "/resources/personas(2)(1)(1).png";
+	
 	private String imagen;
 	private List<ContactoIndividual> miembros;
 	private Usuario propietario; 
 
-	public Grupo(String nombre, Usuario propietario) {
+	public Grupo(String nombre, Usuario propietario, List<ContactoIndividual> listaMiembros) {
 		super(nombre);
 		this.propietario = propietario;
-		this.miembros = new LinkedList<ContactoIndividual>();
+		this.miembros = listaMiembros;
+		imagen = IMAGEN_POR_DEFECTO_GRUPO;
 	}
 	
-	public Grupo() {		
+	public Grupo() {
+		this.miembros = new LinkedList<ContactoIndividual>();
+		imagen = IMAGEN_POR_DEFECTO_GRUPO;
 	}
 
 	public String getImagen() {
