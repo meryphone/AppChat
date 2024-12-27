@@ -1,17 +1,28 @@
 package dominio;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+import excepciones.ExcepcionDAO;
+import persistencia.AdaptadorUsuarioDAO;
+import persistencia.FactoriaDAO;
 
 public class RepositorioUsuarios {
 	
-	private HashMap<String, Usuario> usuariosRegistrados;	// Mapa que relaciona el télefono con su usuario correspondiente.
+	private Map<String, Usuario> usuariosRegistrados;	// Mapa que relaciona el télefono con su usuario correspondiente.
 	private static RepositorioUsuarios repositorioUsuarios;
-
+	private FactoriaDAO factoriaTDS;
 		
 	public RepositorioUsuarios() {
 		usuariosRegistrados = new HashMap<String, Usuario>();
-		// Inicializar repositorio con recuperarRepoUsuario)definir aquí)
+		try {
+			factoriaTDS = FactoriaDAO.getInstance(FactoriaDAO.DAO_TDS);
+		} catch (ExcepcionDAO e) {
+			e.printStackTrace();
+		}
+		this.cargarRepositorio();
 	}
 	
 	// Patrón Singleton 
@@ -22,7 +33,8 @@ public class RepositorioUsuarios {
 	        }
 	        return repositorioUsuarios; 
 	}
-	//TODOS ESTOS METODOS VAN EN EL CONTROLADOR
+	
+	
 	/**
 	 * Añade a la lista de usuarios registrados el usuario pasado como párametro.
 	 * @param nuevoUsuario
@@ -51,6 +63,13 @@ public class RepositorioUsuarios {
 		return Optional.ofNullable(usuariosRegistrados.get(tlf));
 	}
 	
+	// ------- Funcion Auxiliar----------
+	
+	private void cargarRepositorio() {
+		List<Usuario> usuariosBD = factoriaTDS.getUsuarioDAO().recuperarUsuarios();
+		for (Usuario user : usuariosBD)
+			usuariosRegistrados.put(user.getMovil(), user);
+	}
 	
 	
 

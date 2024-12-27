@@ -1,50 +1,152 @@
 package persistencia;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import beans.Entidad;
+import beans.Propiedad;
 import dominio.ContactoIndividual;
-import dominio.excepciones.ExcepcionDAO;
+import excepciones.ExcepcionDAO;
+import excepciones.ExcepcionRegistroDuplicado;
+import persistencia.interfaces.IAdaptadorContactoDAO;
 import tds.driver.FactoriaServicioPersistencia;
 import tds.driver.ServicioPersistencia;
 
-public class AdaptadorContactoDAO {
+/**
+ * Clase AdaptadorContactoDAO
+ * 
+ * Esta clase actúa como un puente entre los objetos de dominio ContactoIndividual
+ * y su representación en la base de datos, utilizando un servicio de persistencia.
+ * Implementa los métodos necesarios para registrar, recuperar y gestionar contactos
+ * individuales, asegurando la consistencia entre el modelo de datos y el sistema persistente.
+ */
 
-	public static AdaptadorContactoDAO adaptadorContacto;
-	private ServicioPersistencia servicioPersistencia;
+public class AdaptadorContactoDAO implements IAdaptadorContactoDAO {
 
-	public static AdaptadorContactoDAO getInstance() {
-		if (adaptadorContacto == null) {
-			adaptadorContacto = new AdaptadorContactoDAO();
-		}
-		return adaptadorContacto;
-	}
+    /**
+     * Instancia única de la clase (implementación Singleton).
+     */
+    public static AdaptadorContactoDAO adaptadorContacto;
 
-	private AdaptadorContactoDAO() {
-		servicioPersistencia = FactoriaServicioPersistencia.getInstance().getServicioPersistencia();
-	}
-	
-	public void registrarContacto(ContactoIndividual contacto) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	
-	public ContactoIndividual recuperarContacto(int codigo) throws ExcepcionDAO {
-		
-		ContactoIndividual contacto = null;
-		Entidad eContacto = servicioPersistencia.recuperarEntidad(codigo);
-		AdaptadorUsuarioDAO adaptadorUsuario = TDSFactoriaDAO.getInstance().getUsuarioDAO();
-		
-		contacto.setCodigo(codigo);
-		contacto.setTelefono(servicioPersistencia.recuperarPropiedadEntidad(eContacto, "telefono"));
-		contacto.setUsuarioCreador(adaptadorUsuario.recuperarUsuario(Integer.parseInt(servicioPersistencia.recuperarPropiedadEntidad(eContacto,"usuarioCreador"))));
-		
-		
-		return null;
-		
-	}
+    /**
+     * Servicio de persistencia utilizado para interactuar con la base de datos.
+     */
+    private ServicioPersistencia servicioPersistencia;
 
-	
-	
-	
+    /**
+     * Obtiene la instancia única de la clase.
+     * 
+     * @return Instancia de AdaptadorContactoDAO.
+     */
+    public static AdaptadorContactoDAO getInstance() {
+        if (adaptadorContacto == null) {
+            adaptadorContacto = new AdaptadorContactoDAO();
+        }
+        return adaptadorContacto;
+    }
 
+    /**
+     * Constructor privado para implementar el patrón Singleton.
+     * Inicializa el servicio de persistencia.
+     */
+    private AdaptadorContactoDAO() {
+        servicioPersistencia = FactoriaServicioPersistencia.getInstance().getServicioPersistencia();
+    }
+
+    /**
+     * Método para convertir de ContactoIndividual a Entidad
+     */
+    private Entidad contactoToEntidad(ContactoIndividual contacto) {
+        Entidad eContacto = new Entidad();
+        eContacto.setNombre("ContactoIndividual");
+        eContacto.setPropiedades(new ArrayList<>(Arrays.asList(
+                new Propiedad("nombre", contacto.getNombre()),
+                new Propiedad("telefono", contacto.getTelefono()),
+                new Propiedad("mensajes", PersistenciaUtils.obtenerCodigosMensajes(contacto.getMensajes())) 
+                // Descomentar si es necesario el usuario creador
+                // new Propiedad("usuarioCreador", String.valueOf(contacto.getUsuarioCreador().getCodigo()))
+        )));
+        return eContacto;
+    }
+
+    /**
+     * Método para convertir de Entidad a ContactoIndividual
+     */
+    private ContactoIndividual entidadToContacto(Entidad eContacto) {
+        ContactoIndividual contacto = new ContactoIndividual();
+        contacto.setNombre(servicioPersistencia.recuperarPropiedadEntidad(eContacto, "nombre"));
+        contacto.setTelefono(servicioPersistencia.recuperarPropiedadEntidad(eContacto, "telefono"));
+        contacto.setMensajes(PersistenciaUtils.obtenerMensajesDesdeCódigos(servicioPersistencia.recuperarPropiedadEntidad(eContacto, "mensajes")));
+        // Descomentar si es necesario el usuario creador
+        // contacto.setUsuarioCreador(adaptadorUsuario.recuperarUsuario(Integer.parseInt(servicioPersistencia.recuperarPropiedadEntidad(eContacto, "usuarioCreador"))));
+        return contacto;
+    }
+
+    /**
+     * Registra un nuevo contacto individual en la base de datos.
+     * 
+     * @param nuevoContacto ContactoIndividual a registrar.
+     * @throws ExcepcionRegistroDuplicado Si el contacto ya está registrado.
+     */
+    public void registrarContacto(ContactoIndividual nuevoContacto) throws ExcepcionRegistroDuplicado {
+        Entidad eContacto = null;
+        boolean noRegistrar = false;
+
+        try {
+            eContacto = servicioPersistencia.recuperarEntidad(nuevoContacto.getCodigo());
+        } catch (NullPointerException e) {
+            noRegistrar = true;
+        }
+
+        if (noRegistrar) throw new ExcepcionRegistroDuplicado("Entidad ya registrada");
+
+        // Crear la entidad para el nuevo contacto
+        eContacto = contactoToEntidad(nuevoContacto);
+
+        // Registrar la entidad en el servicio de persistencia
+        eContacto = servicioPersistencia.registrarEntidad(eContacto);
+
+        // Asignar el identificador único generado por el servicio de persistencia al contacto
+        nuevoContacto.setCodigo(eContacto.getId());
+
+        // Guardamos en el Pool
+        PoolDAO.getInstance().addObjeto(nuevoContacto.getCodigo(), nuevoContacto);
+    }
+
+    /**
+     * Recupera un contacto individual desde la base de datos dado su código.
+     *
+     * @param codigo Código del contacto individual.
+     * @return ContactoIndividual correspondiente al código.
+     * @throws ExcepcionDAO
+     */
+    public ContactoIndividual recuperarContacto(int codigo) {
+        // Si la entidad está en el pool, la devuelve directamente
+        if (PoolDAO.getInstance().contiene(codigo)) return (ContactoIndividual) PoolDAO.getInstance().getObjeto(codigo);
+
+        // Recuperar la entidad del contacto desde el servicio de persistencia
+        Entidad eContacto = servicioPersistencia.recuperarEntidad(codigo);
+
+        // Convertir la entidad en un objeto ContactoIndividual
+        ContactoIndividual contacto = entidadToContacto(eContacto);
+        contacto.setCodigo(codigo);
+        return contacto;
+    }
+
+    /**
+     * Recupera todos los contactos de la base de datos.
+     *
+     * @return Lista de todos los contactos.
+     */
+    public List<ContactoIndividual> recuperarTodosContactos() {
+        List<ContactoIndividual> contactos = new ArrayList<>();
+        List<Entidad> eContacts = servicioPersistencia.recuperarEntidades("ContactoIndividual");
+
+        for (Entidad eContact : eContacts) {
+            contactos.add(recuperarContacto(eContact.getId()));
+        }
+
+        return contactos;
+    }
 }

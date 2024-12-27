@@ -1,5 +1,5 @@
 package persistencia;
-
+// COMENTAR
 import java.util.HashMap;
 
 /*Esta clase implementa un pool para los adaptadores que lo necesiten*/
@@ -12,7 +12,7 @@ public class PoolDAO {
 		poolDAO = new HashMap<Integer, Object>();
 	}
 
-	public static PoolDAO getpool() {
+	public static PoolDAO getInstance() {
 		if (pool == null)
 			pool = new PoolDAO();
 		return pool;
@@ -31,4 +31,5 @@ public class PoolDAO {
 	public boolean contiene(int id) {
 		return poolDAO.containsKey(id);
 	}
+
 }

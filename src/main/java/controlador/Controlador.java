@@ -1,16 +1,16 @@
 package controlador;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
-
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-
-import dominio.Contacto;
-import dominio.ContactoIndividual;
-import dominio.RepositorioUsuarios;
-import dominio.Usuario;
-import dominio.excepciones.*;
+import persistencia.*;
+import persistencia.interfaces.IAdaptadorContactoDAO;
+import persistencia.interfaces.IAdaptadorGrupoDAO;
+import persistencia.interfaces.IAdaptadorMensajeDAO;
+import persistencia.interfaces.IAdaptadorUsuarioDAO;
+import dominio.*;
+import excepciones.*;
 
 public class Controlador {
 	
@@ -20,21 +20,36 @@ public class Controlador {
 	
 	// Gestores necesarios para la lógica de la aplicación.
 	private RepositorioUsuarios repositorioUsuarios;
-	//private AdaptadorUsuario adaptadorUsuario;
+	private IAdaptadorUsuarioDAO adaptadorUsuario;
+	private IAdaptadorContactoDAO adaptadorContacto;
+	private IAdaptadorMensajeDAO adaptadorMensaje;
+	private IAdaptadorGrupoDAO adaptadorGrupo;
 	
-	
-	private Controlador() {
-		repositorioUsuarios  = RepositorioUsuarios.getInstance();
-		// AdaptadorUsuario adaptadorUsuario = AdaptadorUsuario.getInstance;
-	}
-	
-	// Patrón Singleton
-	
+	// Implementación del patron Singleton	
 	public static Controlador getInstance() {
 		if(controlador == null) {
 			controlador = new Controlador();
 		}
 		return controlador;
+	}
+		
+	private Controlador() {
+		repositorioUsuarios  = RepositorioUsuarios.getInstance();
+		inicializarAdaptadores();
+	}
+	
+	private void inicializarAdaptadores() {
+		FactoriaDAO factoria = null;
+		try {
+			factoria = FactoriaDAO.getInstance(FactoriaDAO.DAO_TDS);
+		} catch (ExcepcionDAO e) {
+			e.printStackTrace();
+		}
+
+		adaptadorGrupo = factoria.getGrupoDAO();
+		adaptadorContacto = factoria.getContactoDAO();
+		adaptadorMensaje = factoria.getMensajeDAO();
+		adaptadorUsuario = factoria.getUsuarioDAO();
 	}
 	
 	/**
@@ -51,6 +66,7 @@ public class Controlador {
 	 * @param mensajeSaludo
 	 * @return
 	 * @throws ExcepcionRegistro
+	 * @throws ExcepcionDAO 
 	 */
 
 	public boolean registrarUsuario(String nombre, String apellidos, String movil, String contrasena,
@@ -59,7 +75,7 @@ public class Controlador {
 		
 		
 		// Si el telefono ya está registrado se lanza una excepción
-		if(repositorioUsuarios.getUsuarioPorTelefono(movil).isEmpty()) {
+		if(!repositorioUsuarios.getUsuarioPorTelefono(movil).isEmpty()) {
 			throw new ExcepcionRegistro("El teléfono ya está registrado");
 		}
 		
@@ -69,12 +85,17 @@ public class Controlador {
 		validarEmail(email);		
 
 		Usuario usuario = new Usuario(nombre + " " + apellidos, movil, contrasena, email);
+		usuarioActual = usuario;
 		
 		configurarOpcionales(usuario, fechaNacimiento, pathImagen, mensajeSaludo);
-		
-		usuarioActual = usuario;
 		repositorioUsuarios.anadirUsuario(usuario);
-	 // adapatadorUsuario.registrarUsuario(usuario);
+		
+	    try {
+			adaptadorUsuario.registrarUsuario(usuario);
+		} catch (ExcepcionRegistroDuplicado e) {
+			e.printStackTrace();
+			throw new ExcepcionRegistro("Usuario ya registrado");
+		}
 		
 		return true;
 	}
@@ -88,17 +109,21 @@ public class Controlador {
 	 */
 	
 	public boolean loguearUsuario(String telefono, String contrasena) throws ExcepcionLogin {
-
-	    return repositorioUsuarios.getUsuarioPorTelefono(telefono)
-	            .map(usuario -> {
-	                if (usuario.getContrasena().equals(contrasena)) {	// Aplica la acción al contenido del Optional si este no está vacio.
-	                    return true; 
-	                } else {
-	                    throw new ExcepcionLogin("La contraseña es incorrecta"); 
-	                }
-	            })
-	            .orElseThrow(() -> new ExcepcionLogin("El teléfono no se encuentra registrado"));
+	    
+		repositorioUsuarios.getUsuarioPorTelefono(telefono)
+	    .ifPresentOrElse(
+	        u -> usuarioActual = u, // Si el usuario existe, asignarlo
+	        () -> { throw new ExcepcionLogin("El teléfono no está registrado."); } // Si no, lanzar la excepción
+	    );
+	        	    
+	
+	    if (!usuarioActual.getContrasena().equals(contrasena)) {
+	        throw new ExcepcionLogin("La contraseña es incorrecta.");
+	    }
+	    
+	    return true;
 	}
+
 	
 	/**
 	 * Método para añadir un nuevo contacto al usuario cuyo teléfono se pasa como parámetro.
@@ -106,32 +131,71 @@ public class Controlador {
 	 * @param nombreContacto El nombre personalizado para el contacto
 	 * @return true si el contacto se agregó correctamente
 	 * @throws ExcepcionContacto si el contacto ya existe o el usuario no está registrado
+	 * @throws ExcepcionDAO 
 	 */
 	public boolean agregarContacto(String tlf, String nombreContacto) throws ExcepcionContacto {
-		
-	    if(!repositorioUsuarios.getUsuarioPorTelefono(tlf).isEmpty()){ // Si existe el contacto.
-	    	
-	    	 usuarioActual.getContactoPorTelefono(tlf).
-	    	 ifPresent(contacto -> {
-	    		 try {
-	    			 throw new ExcepcionContacto("El contacto ya está agregado.");
-	    		 }catch(ExcepcionContacto e) {
-	    		        throw new RuntimeException(e); // Envolver en RuntimeException
-	    		 }
-             });
-	    	 
-	    	 usuarioActual.anadirContacto( new ContactoIndividual(nombreContacto,tlf,usuarioActual));
-	    	 // adaptadorCOntacto.nañadorCOnatcto
-	    	 
-	    }else {
-	    	throw new ExcepcionContacto("El usuario no existe");
+	    // Verifica si hay un usuario autenticado
+	    if (usuarioActual == null) {
+	        throw new ExcepcionContacto("No hay un usuario actual autenticado.");
 	    }
 	    
-		return true;
-	           
+	    /*
+	    // Verifica si el usuario actual existe en el repositorio
+	    Optional<Usuario> usuarioRepositorio = repositorioUsuarios.getUsuarioPorTelefono(usuarioActual.getMovil());
+	    if (usuarioRepositorio.isEmpty()) {
+	        throw new ExcepcionContacto("El usuario actual no existe en el repositorio.");
+	    }*/
+
+	    // Verifica si el contacto ya está en la lista de contactos del usuario actual
+	    if (usuarioActual.getContactoPorTelefono(tlf).isPresent()) {
+	        throw new ExcepcionContacto("El contacto ya está agregado.");
+	    }
+
+	    // Si no existe, crea y registra el nuevo contacto
+	    ContactoIndividual nuevoContacto = new ContactoIndividual(nombreContacto, tlf);
+	    usuarioActual.getListaContactos().add(nuevoContacto);
+
+	    try {
+	        // Registra el contacto en el adaptador de contactos
+	        adaptadorContacto.registrarContacto(nuevoContacto);
+	        // Actualiza el usuario con el nuevo contacto en el adaptador de usuarios
+	        adaptadorUsuario.modificarUsuario(usuarioActual);
+	    } catch (ExcepcionRegistroDuplicado e) {
+	    	e.printStackTrace();
+	        throw new ExcepcionContacto("Error al registrar el contacto: contacto duplicado.");
+	    }
+
+	    return true;
 	}
-
-
+	
+	/*
+	public void enviarMensaje(String texto, Usuario emisor) {
+        for (Contacto contacto : miembros) {
+            Mensaje mensaje = new Mensaje(texto, emisor);
+            contacto.recibirMensaje(mensaje); // Suponiendo que Contacto tiene recibirMensaje
+        }
+    }
+    */
+    public List<ContactoIndividual> obtenerContactos() {
+	    if (usuarioActual != null) {
+	        return usuarioActual.getListaContactos(); 
+	    }
+	    return new ArrayList<>(); 
+    }
+	
+	
+	
+	
+	
+	public String getImagenUsuario() {
+		return usuarioActual.getPathImagen();
+	}
+	
+	public String getNombreUsuario() {
+		return usuarioActual.getNombreCompleto();
+	}
+	
+	// -------- Funciones auxiliares ----------
 	
 	/**
 	 * Encargado de validar que todos los campos obligatorios no esten vacíos.

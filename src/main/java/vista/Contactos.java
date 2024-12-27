@@ -4,17 +4,20 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.border.TitledBorder;
 
-import dominio.Contacto;
+import controlador.Controlador;
+import dominio.ContactoIndividual;
+import dominio.Usuario;
+import excepciones.ExcepcionContacto;
 
 import javax.swing.border.LineBorder;
 import java.awt.Color;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import java.awt.BorderLayout;
 import javax.swing.JButton;
 import javax.swing.UIManager;
@@ -22,11 +25,20 @@ import java.awt.Component;
 import javax.swing.Box;
 import java.awt.Dimension;
 import java.awt.SystemColor;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.List;
 
-public class Contactos extends JFrame {
+public class Contactos extends JFrame implements MensajeAdvertencia{
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
+	private Controlador controlador = Controlador.getInstance();
+	private JList<ContactoIndividual> listaContactos = new JList<>();
+	private JList<ContactoIndividual> listaContactosGrupo = new JList<>();
+	private Principal principal;
 
 	/**
 	 * Launch the application.
@@ -35,7 +47,7 @@ public class Contactos extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					Contactos frame = new Contactos();
+					Contactos frame = new Contactos(null);
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -47,9 +59,10 @@ public class Contactos extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public Contactos() {
+	public Contactos(Principal principal) {
+		this.principal = principal;
 		setBackground(SystemColor.window);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 665, 422);
 		contentPane = new JPanel();
 		contentPane.setBackground(UIManager.getColor("List.dropCellBackground"));
@@ -67,24 +80,39 @@ public class Contactos extends JFrame {
 		JScrollPane scrollPane = new JScrollPane();
 		izq.add(scrollPane, BorderLayout.CENTER);
 		
-		// Para probar Jlist
-				DefaultListModel<Contacto> modelo = new DefaultListModel<>();
-				modelo.addElement(new Contacto("Jose"));
-				modelo.addElement(new Contacto("Ana"));
-				modelo.addElement(new Contacto("María"));
-				JList<Contacto> listaContactos = new JList<Contacto>(modelo);
-				listaContactos.setCellRenderer(new ContactoCellRenderer());
-				/////////////////////////////////////////////////////////////
-		
-		scrollPane.setViewportView(listaContactos);
+		listaContactos = new JList<>();
+	    listaContactos.setCellRenderer(new ContactoIndividualCellRenderer());
+	    scrollPane.setViewportView(listaContactos);
 				
 		JPanel abajoIzq = new JPanel();
 		abajoIzq.setBackground(UIManager.getColor("List.dropCellBackground"));
 		izq.add(abajoIzq, BorderLayout.SOUTH);
 		
-		JButton AñadirContacto = new JButton("Añadir contacto");
-		abajoIzq.add(AñadirContacto);
-		
+		JButton anadirContacto = new JButton("Añadir contacto");
+		abajoIzq.add(anadirContacto);
+		anadirContacto.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				dispose();
+				AlertaAñadirContacto contacto = new AlertaAñadirContacto(principal);
+				contacto.setVisible(true);		
+			    actualizarListaContactos();
+			}
+		});
+		//Para asegurarnos de que se actualizan los contactos
+	    actualizarListaContactos();
+	    
+	    //WindowListener para detectar el cierre de la ventana Contactos
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if (principal != null) {
+                    principal.actualizarListaContactos(); // Actualiza la lista en Principal al cerrar Contactos
+                }
+            }
+        });
+	    
 		JPanel centro = new JPanel();
 		centro.setBackground(UIManager.getColor("List.dropCellBackground"));
 		contentPane.add(centro);
@@ -92,13 +120,16 @@ public class Contactos extends JFrame {
 		
 		JButton IzqDer = new JButton("--->");
 		centro.add(IzqDer);
+		IzqDer.addActionListener(ev -> {
+			
+		});
 		
 		Component glue = Box.createGlue();
 		glue.setMaximumSize(new Dimension(20, 20));
 		centro.add(glue);
 		
-		JButton button = new JButton("<---");
-		centro.add(button);
+		JButton DerIzq = new JButton("<---");
+		centro.add(DerIzq);
 		
 		JPanel der = new JPanel();
 		der.setBackground(UIManager.getColor("List.dropCellBackground"));
@@ -115,17 +146,35 @@ public class Contactos extends JFrame {
 		JScrollPane scrollPane_1 = new JScrollPane();
 		der.add(scrollPane_1, BorderLayout.CENTER);
 		
-		// Para probar Jlist
-		DefaultListModel<Contacto> modelo1 = new DefaultListModel<>();
-		modelo1.addElement(new Contacto("Jose"));
-		modelo1.addElement(new Contacto("Ana"));
-		modelo1.addElement(new Contacto("María"));
-		JList<Contacto> listaContactos1 = new JList<Contacto>(modelo1);
-		listaContactos1.setCellRenderer(new ContactoCellRenderer());
-		/////////////////////////////////////////////////////////////
+		JPanel grupos = new JPanel();
+		scrollPane_1.setViewportView(grupos);
 		
-		scrollPane_1.setViewportView(listaContactos1);
+		JScrollPane scrollPane_2 = new JScrollPane();
+		grupos.add(scrollPane_2);
+		
+		listaContactosGrupo.setCellRenderer(new ContactoIndividualCellRenderer());
+		scrollPane_2.setViewportView(listaContactosGrupo);
 		
 	}
+	
+	private void actualizarListaContactos() {
+	    List<ContactoIndividual> contactos = controlador.obtenerContactos();
+	    
+	    DefaultListModel<ContactoIndividual> modelo = new DefaultListModel<>();
+	    for (ContactoIndividual contacto : contactos) {
+	        modelo.addElement(contacto);
+	    }
+	    listaContactos.setModel(modelo);
+	}
+	
+	 @Override
+	 public void mostrarError(String mensaje, Component parentComponent) {
+	     JOptionPane.showMessageDialog(parentComponent, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
+	 }
+
+	 @Override
+	 public void mostrarConfirmacion(String mensaje, Component parentComponent) {
+	     JOptionPane.showMessageDialog(parentComponent, mensaje, "Confirmación", JOptionPane.INFORMATION_MESSAGE);
+	 }
 
 }
