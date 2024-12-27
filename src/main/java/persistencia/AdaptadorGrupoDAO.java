@@ -22,7 +22,6 @@ public class AdaptadorGrupoDAO implements IAdaptadorGrupoDAO{
     private static AdaptadorGrupoDAO adaptadorGrupo;
     private ServicioPersistencia servicioPersistencia;
     private AdaptadorUsuarioDAO adaptadorUsuario;
-    private AdaptadorContactoDAO adaptadorContacto; // NO SE SI HACE FALTA
 
     /**
      * Obtiene la instancia única del adaptador (patrón Singleton).
@@ -40,7 +39,6 @@ public class AdaptadorGrupoDAO implements IAdaptadorGrupoDAO{
     private AdaptadorGrupoDAO() {
         servicioPersistencia = FactoriaServicioPersistencia.getInstance().getServicioPersistencia();
         try {
-            adaptadorContacto = TDSFactoriaDAO.getInstance().getContactoDAO();
             adaptadorUsuario = TDSFactoriaDAO.getInstance().getUsuarioDAO();
         } catch (ExcepcionDAO e) {
             e.printStackTrace();
@@ -71,6 +69,9 @@ public class AdaptadorGrupoDAO implements IAdaptadorGrupoDAO{
         grupo.setCodigo(eGrupo.getId());
         grupo.setNombre(servicioPersistencia.recuperarPropiedadEntidad(eGrupo, "nombre"));
         grupo.setImagen(servicioPersistencia.recuperarPropiedadEntidad(eGrupo, "imagen"));
+        
+        PoolDAO.getInstance().addObjeto(grupo.getCodigo(), grupo);
+        
         grupo.setPropietario(adaptadorUsuario.recuperarUsuario(Integer.parseInt(servicioPersistencia.recuperarPropiedadEntidad(eGrupo, "propietario"))));
         grupo.setMiembros(PersistenciaUtils.getListaContactosDesdeCodigos(servicioPersistencia.recuperarPropiedadEntidad(eGrupo, "miembros")));
         grupo.setMensajes(PersistenciaUtils.obtenerMensajesDesdeCódigos(servicioPersistencia.recuperarPropiedadEntidad(eGrupo, "mensajes")));

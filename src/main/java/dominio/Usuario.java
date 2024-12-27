@@ -171,6 +171,28 @@ public class Usuario {
 		grupos.add(grupo);
 	}
 	
+	public Grupo getGrupoPorNombre(String nombre) {
+		for(Grupo g : grupos) {
+			if(g.getNombre().equals(nombre)) {
+				return g;
+			}			
+		}
+		
+		return new Grupo();
+	}
+	
+	public List<String> getNombresGrupos() {
+		 
+		List<String> nombresGrupos = new ArrayList<String>();
+		    	
+		for(Grupo g : grupos) {
+		    nombresGrupos.add(g.getNombre());
+		  }
+		    	
+		 return nombresGrupos;
+	}
+
+	
 	
 
 }

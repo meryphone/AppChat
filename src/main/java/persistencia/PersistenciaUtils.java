@@ -7,6 +7,7 @@ import java.util.StringTokenizer;
 import dominio.ContactoIndividual;
 import dominio.Grupo;
 import dominio.Mensaje;
+import dominio.Usuario;
 import excepciones.ExcepcionDAO;
 import excepciones.ExcepcionRegistroDuplicado;
 
@@ -15,12 +16,14 @@ public class PersistenciaUtils {
 	private static AdaptadorMensajeDAO adaptadorMensaje;
 	private static AdaptadorContactoDAO adaptadorContacto;
 	private static AdaptadorGrupoDAO adaptadorGrupo;
+	private static AdaptadorUsuarioDAO adaptadorUsuario;
 
 	static {
 		try {
 			adaptadorMensaje = TDSFactoriaDAO.getInstance().getMensajeDAO();
 			adaptadorContacto = TDSFactoriaDAO.getInstance().getContactoDAO();
 			adaptadorGrupo = TDSFactoriaDAO.getInstance().getGrupoDAO();
+			adaptadorUsuario = TDSFactoriaDAO.getInstance().getUsuarioDAO();
 		} catch (ExcepcionDAO e) {
 			e.printStackTrace();
 		}
@@ -34,7 +37,7 @@ public class PersistenciaUtils {
      */
 	
 	public static List<Grupo> obtenerGruposDesdeCodigos(String codigosGrupos) {
-		List<Grupo> listaGrupos = new ArrayList<>();
+		List<Grupo> listaGrupos = new ArrayList<Grupo>();
 
 		if (codigosGrupos == null || codigosGrupos.trim().isEmpty()) {
 			return listaGrupos; 
@@ -113,7 +116,7 @@ public class PersistenciaUtils {
 	}
 
 	/**
-	 * 
+	 * Convierte la lista de contactos pasada como parámetro a una lista con sus códigos correspondientes.
 	 * @param listaContactos
 	 * @return
 	 */
@@ -130,7 +133,7 @@ public class PersistenciaUtils {
 	}
 
 	/**
-	 * 
+	 * Convierte una cadena que contiene codigos de contactos a su contacto respectivo.
 	 * @param codigos
 	 * @return
 	 * @throws ExcepcionRegistroDuplicado
@@ -153,6 +156,10 @@ public class PersistenciaUtils {
 		}
 
 		return listaContactos;
+	}
+	
+	static Usuario getUsuarioDesdeCodigo(String codigo) {
+		return adaptadorUsuario.recuperarUsuario(Integer.parseInt(codigo));
 	}
 
 }

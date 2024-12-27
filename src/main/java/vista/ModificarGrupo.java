@@ -4,17 +4,13 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JList;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.border.TitledBorder;
-
 import controlador.Controlador;
 import dominio.ContactoIndividual;
-import dominio.Usuario;
-import excepciones.ExcepcionAgregarContacto;
-
+import dominio.Grupo;
 import javax.swing.border.LineBorder;
 import java.awt.Color;
 import javax.swing.JScrollPane;
@@ -25,13 +21,9 @@ import java.awt.Component;
 import javax.swing.Box;
 import java.awt.Dimension;
 import java.awt.SystemColor;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.List;
 
-public class ModificarGrupo extends JFrame implements MensajeAdvertencia{
+public class ModificarGrupo extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -39,6 +31,7 @@ public class ModificarGrupo extends JFrame implements MensajeAdvertencia{
 	private JList<ContactoIndividual> listaContactos = new JList<>();
 	private JList<ContactoIndividual> listaContactosGrupo = new JList<>();
 	private Principal principal;
+	private String grupoAmodificar;
 
 	/**
 	 * Launch the application.
@@ -47,7 +40,7 @@ public class ModificarGrupo extends JFrame implements MensajeAdvertencia{
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					ModificarGrupo frame = new ModificarGrupo(null);
+					ModificarGrupo frame = new ModificarGrupo(null, null);
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -59,8 +52,9 @@ public class ModificarGrupo extends JFrame implements MensajeAdvertencia{
 	/**
 	 * Create the frame.
 	 */
-	public ModificarGrupo(Principal principal) {
+	public ModificarGrupo(Principal principal, String grupoAmodificar) {
 		this.principal = principal;
+		this.grupoAmodificar = grupoAmodificar;
 		setBackground(SystemColor.window);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 716, 499);
@@ -87,33 +81,16 @@ public class ModificarGrupo extends JFrame implements MensajeAdvertencia{
 		JPanel abajoIzq = new JPanel();
 		abajoIzq.setBackground(UIManager.getColor("List.dropCellBackground"));
 		izq.add(abajoIzq, BorderLayout.SOUTH);
-		
-		JButton anadirContacto = new JButton("Añadir grupo");
-		abajoIzq.add(anadirContacto);
-		anadirContacto.addActionListener(ev -> {
-
-				//LLMAR
-			
-		});
-		//Para asegurarnos de que se actualizan los contactos
-	    actualizarListaContactos();
-	    
-	    //WindowListener para detectar el cierre de la ventana Contactos
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosed(WindowEvent e) {
-                if (principal != null) {
-                    principal.actualizarListaContactos(); // Actualiza la lista en Principal al cerrar Contactos
-                }
-            }
-        });
 	    
 		JPanel centro = new JPanel();
 		centro.setBackground(UIManager.getColor("List.dropCellBackground"));
 		contentPane.add(centro);
 		centro.setLayout(new BoxLayout(centro, BoxLayout.Y_AXIS));
 		
-		DefaultListModel<ContactoIndividual> miembrosGrupo = new DefaultListModel<>();
+		DefaultListModel<ContactoIndividual> miembrosGrupo = actulizarListaMiembrosGrupo();
+		listaContactosGrupo.setModel(miembrosGrupo);
+		
+		actualizarListaContactos();
 		
 		JButton IzqDer = new JButton("--->");
 		centro.add(IzqDer);
@@ -148,6 +125,18 @@ public class ModificarGrupo extends JFrame implements MensajeAdvertencia{
 			dispose();
 		});
 		
+		JButton confirmar = new JButton("Confirmar cambios");
+		abajoIzq.add(confirmar);
+		confirmar.addActionListener(ev -> {
+				
+			if(controlador.modificarGrupo(grupoAmodificar, miembrosGrupo)) {
+				MensajeAdvertencia.mostrarConfirmacion("Se ha modificado el grupo correctamente", principal);
+			}else{
+				MensajeAdvertencia.mostrarError("No se ha podido modificar el grupo", principal);
+			}
+			
+		});
+		
 		JScrollPane scrollPane_1 = new JScrollPane();
 		der.add(scrollPane_1, BorderLayout.CENTER);
 		
@@ -173,14 +162,15 @@ public class ModificarGrupo extends JFrame implements MensajeAdvertencia{
 	    listaContactos.setModel(modelo);
 	}
 	
-	 @Override
-	 public void mostrarError(String mensaje, Component parentComponent) {
-	     JOptionPane.showMessageDialog(parentComponent, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
-	 }
-
-	 @Override
-	 public void mostrarConfirmacion(String mensaje, Component parentComponent) {
-	     JOptionPane.showMessageDialog(parentComponent, mensaje, "Confirmación", JOptionPane.INFORMATION_MESSAGE);
-	 }
+	private DefaultListModel<ContactoIndividual> actulizarListaMiembrosGrupo() {
+		 Grupo grupo = controlador.getGrupoPorNombre(grupoAmodificar);
+		 List<ContactoIndividual> contactos = grupo.getMiembros();
+		 
+		 DefaultListModel<ContactoIndividual> modelo = new DefaultListModel<>();
+		    for (ContactoIndividual contacto : contactos) {
+		        modelo.addElement(contacto);
+		    }		    
+		    return modelo;
+	}
 
 }

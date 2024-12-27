@@ -11,7 +11,6 @@ import java.awt.Component;
 import javax.swing.Box;
 import java.awt.Dimension;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 import controlador.Controlador;
@@ -28,7 +27,7 @@ import javax.swing.ImageIcon;
 import javax.swing.UIManager;
 import javax.swing.JPasswordField;
 
-public class Login extends JFrame implements MensajeAdvertencia{
+public class Login extends JFrame {
     
     private static final long serialVersionUID = 1L;
     private JPanel contentPane;
@@ -101,7 +100,7 @@ public class Login extends JFrame implements MensajeAdvertencia{
                 ventanaMain.setVisible(true);
                 dispose();
             } catch (ExcepcionLogin e) {
-                mostrarError(e.getMessage(), contentPane);
+                MensajeAdvertencia.mostrarError(e.getMessage(), contentPane);
             }
         });
 
@@ -184,13 +183,4 @@ public class Login extends JFrame implements MensajeAdvertencia{
         center.add(verticalGlue_1);
     }
     
-    @Override
-    public void mostrarError(String mensaje, Component parentComponent) {
-        JOptionPane.showMessageDialog(parentComponent, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
-    }
-
-    @Override
-    public void mostrarConfirmacion(String mensaje, Component parentComponent) {
-        JOptionPane.showMessageDialog(parentComponent, mensaje, "Confirmación", JOptionPane.INFORMATION_MESSAGE);
-    }
 }

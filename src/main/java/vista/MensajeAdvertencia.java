@@ -2,9 +2,16 @@ package vista;
 
 import java.awt.Component;
 
-public interface MensajeAdvertencia {
+import javax.swing.JOptionPane;
+
+public class MensajeAdvertencia {
 	
-	public void mostrarError(String mensaje, Component parentComponent); 
-	public void mostrarConfirmacion(String mensaje, Component parenComponent); 
+	public static void mostrarError(String mensaje, Component parentComponent) {
+		 JOptionPane.showMessageDialog(parentComponent, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
+	} 
+	
+	public static void mostrarConfirmacion(String mensaje, Component parentComponent) {
+		JOptionPane.showMessageDialog(parentComponent, mensaje, "Confirmación", JOptionPane.INFORMATION_MESSAGE);
+	}
 
 }

@@ -23,9 +23,6 @@ public class Grupo extends Contacto {
 		imagen = IMAGEN_POR_DEFECTO_GRUPO;
 	}
 
-	public String getImagen() {
-		return imagen;
-	}
 
 	public List<ContactoIndividual> getMiembros() {
 		return new LinkedList<ContactoIndividual>(miembros);
@@ -35,9 +32,6 @@ public class Grupo extends Contacto {
 		return propietario;
 	}
 
-	public void setImagen(String imagen) {
-		this.imagen = imagen;
-	}
 
 	public void setMiembros(List<ContactoIndividual> miembros) {
 		this.miembros = miembros;
@@ -57,6 +51,15 @@ public class Grupo extends Contacto {
     public void eliminarContacto(Contacto contacto) {
         miembros.remove(contacto);
     }
+    
+    public String getImagen() {
+		return imagen;
+	}
+
+
+	public void setImagen(String imagen) {
+		this.imagen = imagen;
+	}
 	
 
 }

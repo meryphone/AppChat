@@ -14,7 +14,7 @@ private static FactoriaDAO unicaInstancia;
 	 */
 	
 	@SuppressWarnings("deprecation")
-	public static FactoriaDAO getInstance(String tipo) throws ExcepcionDAO{
+	public static FactoriaDAO getInstance(String tipo) throws ExcepcionDAO {
 		if (unicaInstancia == null)
 			try { unicaInstancia=(FactoriaDAO) Class.forName(tipo).newInstance();
 			} catch (Exception e) {	

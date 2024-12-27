@@ -63,7 +63,8 @@ public class AdaptadorContactoDAO implements IAdaptadorContactoDAO {
         eContacto.setPropiedades(new ArrayList<>(Arrays.asList(
                 new Propiedad("nombre", contacto.getNombre()),
                 new Propiedad("telefono", contacto.getTelefono()),
-                new Propiedad("mensajes", PersistenciaUtils.obtenerCodigosMensajes(contacto.getMensajes())) 
+                new Propiedad("mensajes", PersistenciaUtils.obtenerCodigosMensajes(contacto.getMensajes())), 
+                new Propiedad("usuario", String.valueOf(contacto.getUsuario().getCodigo()))
         )));
         return eContacto;
     }
@@ -76,8 +77,7 @@ public class AdaptadorContactoDAO implements IAdaptadorContactoDAO {
         contacto.setNombre(servicioPersistencia.recuperarPropiedadEntidad(eContacto, "nombre"));
         contacto.setTelefono(servicioPersistencia.recuperarPropiedadEntidad(eContacto, "telefono"));
         contacto.setMensajes(PersistenciaUtils.obtenerMensajesDesdeCódigos(servicioPersistencia.recuperarPropiedadEntidad(eContacto, "mensajes")));
-        // Descomentar si es necesario el usuario creador
-        // contacto.setUsuarioCreador(adaptadorUsuario.recuperarUsuario(Integer.parseInt(servicioPersistencia.recuperarPropiedadEntidad(eContacto, "usuarioCreador"))));
+        contacto.setUsuario(PersistenciaUtils.getUsuarioDesdeCodigo(servicioPersistencia.recuperarPropiedadEntidad(eContacto, "usuario")));
         return contacto;
     }
 

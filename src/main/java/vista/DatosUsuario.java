@@ -6,24 +6,17 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import java.awt.GridBagLayout;
 import java.awt.Image;
-
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-
 import java.awt.GridBagConstraints;
 import javax.swing.JTextField;
 import java.awt.Insets;
 import javax.swing.JPasswordField;
-
-import java.awt.Component;
 import java.awt.Dimension;
-
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JTextArea;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
-
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -32,11 +25,10 @@ import java.awt.Font;
 import javax.swing.border.EmptyBorder;
 import javax.swing.UIManager;
 import com.toedter.calendar.JDateChooser;
-
 import controlador.Controlador;
 import excepciones.ExcepcionRegistro;
 
-public class DatosUsuario extends JFrame implements MensajeAdvertencia {
+public class DatosUsuario extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -356,7 +348,7 @@ public class DatosUsuario extends JFrame implements MensajeAdvertencia {
 				imagenPerfil.setIcon(new ImageIcon(imagenEscalada)); // Aplicar la imagen escalada al JLabel
 			} catch (Exception e) {
 				e.printStackTrace();
-				mostrarError(e.getMessage(), contentPane);
+				MensajeAdvertencia.mostrarError(e.getMessage(), contentPane);
 			}
 			
 			return archivoSeleccionado.getAbsolutePath();
@@ -382,27 +374,18 @@ public class DatosUsuario extends JFrame implements MensajeAdvertencia {
 
             // Si el registro es exitoso, mostrar confirmación.
             if (registroExitoso) {
-                mostrarConfirmacion("Registro completado satisfactoriamente", contentPane);
+                MensajeAdvertencia.mostrarConfirmacion("Registro completado satisfactoriamente", contentPane);
                 Login login = new Login();
                 login.setVisible(true);
-                dispose(); // Cierra la ventana actual
+                dispose(); 
             }
             
         } catch (ExcepcionRegistro e1) {
-			mostrarError(e1.getMessage(), contentPane);
+        	e1.printStackTrace();
+			MensajeAdvertencia.mostrarError(e1.getMessage(), contentPane);
         }
     }
 	
-
-	@Override
-    public void mostrarError(String mensaje, Component parentComponent) {
-        JOptionPane.showMessageDialog(parentComponent, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
-    }
-
-    @Override
-    public void mostrarConfirmacion(String mensaje, Component parentComponent) {
-        JOptionPane.showMessageDialog(parentComponent, mensaje, "Confirmación", JOptionPane.INFORMATION_MESSAGE);
-    }
 		
 }
 

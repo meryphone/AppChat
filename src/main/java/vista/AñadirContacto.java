@@ -8,10 +8,13 @@ import javax.swing.JPopupMenu;
 import javax.swing.border.EmptyBorder;
 
 import controlador.Controlador;
+import dominio.ContactoIndividual;
+import dominio.Grupo;
 import excepciones.ExcepcionAgregarContacto;
 
 import java.awt.BorderLayout;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -28,8 +31,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.List;
 
-public class AñadirContacto extends JFrame implements MensajeAdvertencia {
+public class AñadirContacto extends JFrame{
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -79,19 +85,21 @@ public class AñadirContacto extends JFrame implements MensajeAdvertencia {
 
         JMenuItem crearGrupo = new JMenuItem("Crear grupo");
        crearGrupo.addActionListener(ev -> {
-    	   ModificarGrupo modificar = new ModificarGrupo(principal);
+    	   CreacionGrupos creador = new CreacionGrupos(principal);
     	   dispose();
-    	   modificar.setVisible(true);
+    	   creador.setVisible(true);
        });
        
         menuGrupos.add(crearGrupo);
 
         JMenuItem modificarGrupo = new JMenuItem("Modificar grupo");
         modificarGrupo.addActionListener(ev -> {
-     	   ModificarGrupo ModificradorGrupo = new ModificarGrupo(principal);
-     	   
-     	   dispose();
+     	  String grupoSeleccionado = SeleccionarGrupo.mostrarDialogo(principal, controlador.obtenerNombresGruposUsuario());
+     	  ModificarGrupo modificador = new ModificarGrupo(principal, grupoSeleccionado);
+     	  modificador.setVisible(true);
+     	  dispose();
         });
+        
         menuGrupos.add(modificarGrupo);
 
         JMenuItem eliminarGrupo = new JMenuItem("Eliminar grupo");
@@ -140,18 +148,16 @@ public class AñadirContacto extends JFrame implements MensajeAdvertencia {
 		aceptar.setHorizontalAlignment(SwingConstants.LEADING);
 		abajo.add(aceptar);
 
-		// PREGUNTAR SI ESTÁ BIEN QUE LA VISTA ACCEDA A LAS EXCEPCIONES
 		aceptar.addActionListener(ev -> {
 			try {
 				boolean agregarContacto = controlador.agregarContacto(textTlf.getText(), textNombre.getText());
 				if (agregarContacto) {
-					mostrarConfirmacion("Contacto añadido correctamente", contentPane);
-					ModificarGrupo contactos = new ModificarGrupo(principal);
-					contactos.setVisible(true);
+					MensajeAdvertencia.mostrarConfirmacion("Contacto añadido correctamente", contentPane);					
 					dispose();
+					
 				}
 			} catch (ExcepcionAgregarContacto e) {
-				mostrarError(e.getMessage(), contentPane);
+				MensajeAdvertencia.mostrarError(e.getMessage(), contentPane);
 				e.printStackTrace();
 			}
 		});
@@ -159,14 +165,22 @@ public class AñadirContacto extends JFrame implements MensajeAdvertencia {
 		JButton cancelar = new JButton("Cancelar");
 		cancelar.setHorizontalAlignment(SwingConstants.LEADING);
 		abajo.add(cancelar);
+			   
+	    
+	    //WindowListener para detectar el cierre de la ventana Contactos
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                if (principal != null) {
+                    principal.actualizarListaContactos(); // Actualiza la lista en Principal al cerrar la ventana para añadir contactos
+                }
+            }
+        });
 
 		cancelar.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				ModificarGrupo contactos = new ModificarGrupo(principal);
-				contactos.setVisible(true);
-				dispose(); // cierra la ventana actual
+				dispose(); 
 			}
 		});
 
@@ -218,14 +232,5 @@ public class AñadirContacto extends JFrame implements MensajeAdvertencia {
 		Component rigidArea_2 = Box.createRigidArea(new Dimension(20, 20));
 		contentPane.add(rigidArea_2, BorderLayout.NORTH);
 	}
-
-	@Override
-	public void mostrarError(String mensaje, Component parentComponent) {
-		JOptionPane.showMessageDialog(parentComponent, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
-	}
-
-	@Override
-	public void mostrarConfirmacion(String mensaje, Component parentComponent) {
-		JOptionPane.showMessageDialog(parentComponent, mensaje, "Confirmación", JOptionPane.INFORMATION_MESSAGE);
-	}
+	
 }

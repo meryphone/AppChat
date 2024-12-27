@@ -2,7 +2,7 @@ package vista;
 
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
-
+import dominio.ContactoIndividual;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -31,14 +31,13 @@ import javax.swing.ImageIcon;
 import javax.swing.border.TitledBorder;
 
 import controlador.Controlador;
-import dominio.ContactoIndividual;
+import dominio.Contacto;
 import tds.BubbleText;
 
 import javax.swing.border.LineBorder;
 import java.awt.Color;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JOptionPane;
 
 import java.awt.Component;
 
@@ -50,15 +49,16 @@ import javax.swing.JScrollPane;
 import javax.swing.JScrollBar;
 import java.awt.FlowLayout;
 import javax.swing.JTextField;
+import javax.swing.ListModel;
 import javax.swing.SwingConstants;
 
-public class Principal extends JFrame implements MensajeAdvertencia {
+public class Principal extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
-    private JLabel lblUsuario;  // Declaración de lblUsuario como variable de instancia
+    private JLabel lblUsuario;  
     private JTextField textField;
-    private JList<ContactoIndividual> listaContactos;
+    private JList<Contacto> listaContactos;
     private Controlador controlador = Controlador.getInstance();
 	/**
 	 * Launch the application.
@@ -95,15 +95,15 @@ public class Principal extends JFrame implements MensajeAdvertencia {
 		arriba.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
 		//AQUI CREO QUE VAMOS A TENER QUE UTILIZAR  SEGURAMENTE UN ITEMLISTENER
-		JComboBox comboBox = new JComboBox();
+		JComboBox<Object> comboBox = new JComboBox<Object>();
 		comboBox.setMaximumRowCount(20);
 		comboBox.setBackground(UIManager.getColor("Button.light"));
-		comboBox.setModel(new DefaultComboBoxModel(new String[] { "Contactos", "Teléfono" }));
+		comboBox.setModel(new DefaultComboBoxModel<Object>(new String[] { "Contactos", "Teléfono" }));
 		arriba.add(comboBox);
 
-		JButton atras = new JButton("");
-		atras.setIcon(new ImageIcon(Principal.class.getResource("/resources/enviar(2)(3).png")));
-		arriba.add(atras);
+		JButton enviar = new JButton("");
+		enviar.setIcon(new ImageIcon(Principal.class.getResource("/resources/enviar(2)(3).png")));
+		arriba.add(enviar);
 
 		JButton buscar = new JButton("");
 		buscar.setIcon(new ImageIcon(Principal.class.getResource("/resources/buscar(1).png")));
@@ -132,12 +132,12 @@ public class Principal extends JFrame implements MensajeAdvertencia {
 		arriba.add(btnPremium);
 		
 		ImageIcon imagenPerfil = hacerCircularYRedimensionar(controlador.getImagenUsuario(),24,24);
-		 lblUsuario = new JLabel(controlador.getNombreUsuario()); // Texto del usuario
-		    lblUsuario.setIcon(new ImageIcon(Principal.class.getResource("/resources/usuario(1).png"))); // Asignar la imagen como icono
-		    lblUsuario.setIconTextGap(10); // Ajustar el espacio entre el icono y el texto
-		    lblUsuario.setHorizontalTextPosition(SwingConstants.RIGHT); // Texto a la derecha del icono
-		    lblUsuario.setVerticalTextPosition(SwingConstants.CENTER); // Centrar texto verticalmente
-		    arriba.add(lblUsuario); // Añadir el JLabel al panel
+		 lblUsuario = new JLabel(controlador.getNombreUsuario()); 
+		    lblUsuario.setIcon(new ImageIcon(Principal.class.getResource("/resources/usuario(1).png")));
+		    lblUsuario.setIconTextGap(10); 
+		    lblUsuario.setHorizontalTextPosition(SwingConstants.RIGHT); 
+		    lblUsuario.setVerticalTextPosition(SwingConstants.CENTER); 
+		    arriba.add(lblUsuario); 
 		
 		//MouseListener para cambiar la imagen de perfil al hacer clic
         lblUsuario.addMouseListener(new MouseAdapter() {
@@ -173,7 +173,7 @@ public class Principal extends JFrame implements MensajeAdvertencia {
 		gbc_scrollPane.gridy = 0;
 		izq.add(scrollPane, gbc_scrollPane);
 
-		listaContactos = new JList<>();
+		listaContactos = new JList<Contacto>();
 		listaContactos.setCellRenderer(new ContactoIndividualCellRenderer());
 		scrollPane.setViewportView(listaContactos);
 
@@ -346,26 +346,17 @@ public class Principal extends JFrame implements MensajeAdvertencia {
 	 * 
 	 * @return void
 	 */
+	
 	public void actualizarListaContactos() {
 	    // Obtener la lista de contactos desde el controlador
-	    List<ContactoIndividual> contactos = controlador.obtenerContactos();
+	    List<Contacto> contactos = controlador.obtenerContactosYgrupos();
 	    
 	    // Crear un modelo para el JList y añadir los contactos
-	    DefaultListModel<ContactoIndividual> modelo = new DefaultListModel<>();
-	    for (ContactoIndividual contacto : contactos) {
+	    DefaultListModel<Contacto> modelo = new DefaultListModel<Contacto>();
+	    for (Contacto contacto : contactos) {
 	        modelo.addElement(contacto);
 	    }
 	    listaContactos.setModel(modelo);
 	}
-	
-	@Override
-    public void mostrarError(String mensaje, Component parentComponent) {
-        JOptionPane.showMessageDialog(parentComponent, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
-    }
-
-    @Override
-    public void mostrarConfirmacion(String mensaje, Component parentComponent) {
-        JOptionPane.showMessageDialog(parentComponent, mensaje, "Confirmación", JOptionPane.INFORMATION_MESSAGE);
-    }
 	
 }
