@@ -1,12 +1,17 @@
 package controlador;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
+import javax.imageio.ImageIO;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 
 import persistencia.*;
 import persistencia.interfaces.IAdaptadorContactoDAO;
@@ -178,16 +183,27 @@ public class Controlador {
 	 * @return true si el grupo se crea correctamente.
 	 * @throws ExcepcionCrearGrupo si el grupo ya está registrado o se produce algún error durante su creación.
 	 */
-	public boolean crearGrupo(String nombreGrupo, DefaultListModel<ContactoIndividual> listaMiembros) throws ExcepcionCrearGrupo {
+	public boolean crearGrupo(String nombreGrupo, String imagenGrupo, DefaultListModel<ContactoIndividual> listaMiembros) throws ExcepcionCrearGrupo {
 	    
+		if(nombreGrupo.equals("")) {
+			throw new ExcepcionCrearGrupo("Introduzca un nombre para grupo");
+		}
+		
 	    // Convertir la lista de miembros del modelo en una lista de ContactoIndividual
 	    List<ContactoIndividual> miembrosGrupo = new ArrayList<>();
 	    for (int i = 0; i < listaMiembros.getSize(); i++) {
 	        miembrosGrupo.add(listaMiembros.getElementAt(i));
 	    }
-
+	    
+	    Grupo grupoNuevo;
+	    
 	    // Crear un nuevo grupo con los datos proporcionados
-	    Grupo grupoNuevo = new Grupo(nombreGrupo, usuarioActual, miembrosGrupo);
+	    if(imagenGrupo != null) {
+	    	grupoNuevo = new Grupo(nombreGrupo, imagenGrupo, usuarioActual, miembrosGrupo);
+	    }else {
+	    	 grupoNuevo = new Grupo(nombreGrupo, usuarioActual, miembrosGrupo);
+	    }
+	   
 	    usuarioActual.addGrupo(grupoNuevo);
 
 	    try {
@@ -291,7 +307,10 @@ public class Controlador {
 	public String getNombreUsuario() {
 	    return usuarioActual.getNombreCompleto();
 	}
-
+	
+	public void setImagenPerfilUsuario(String pathImagen) {
+		usuarioActual.setPathImagen(pathImagen); 
+	}
 	
 	// -------- Funciones auxiliares ----------
 	

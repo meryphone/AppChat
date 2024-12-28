@@ -18,6 +18,13 @@ public class Grupo extends Contacto {
 		imagen = IMAGEN_POR_DEFECTO_GRUPO;
 	}
 	
+	public Grupo(String nombre, String pathImagen, Usuario propietario, List<ContactoIndividual> listaMiembros) {
+		super(nombre);
+		this.propietario = propietario;
+		this.miembros = listaMiembros;
+		imagen = pathImagen;
+	}
+	
 	public Grupo() {
 		this.miembros = new LinkedList<ContactoIndividual>();
 		imagen = IMAGEN_POR_DEFECTO_GRUPO;

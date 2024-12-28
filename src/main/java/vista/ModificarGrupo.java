@@ -1,176 +1,204 @@
 package vista;
 
-import java.awt.EventQueue;
-
-import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.BoxLayout;
-import javax.swing.DefaultListModel;
-import javax.swing.border.TitledBorder;
-import controlador.Controlador;
-import dominio.ContactoIndividual;
-import dominio.Grupo;
-import javax.swing.border.LineBorder;
-import java.awt.Color;
-import javax.swing.JScrollPane;
 import java.awt.BorderLayout;
-import javax.swing.JButton;
-import javax.swing.UIManager;
+import java.awt.Color;
 import java.awt.Component;
-import javax.swing.Box;
 import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.FlowLayout;
 import java.awt.SystemColor;
 import java.util.List;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.UIManager;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
+
+import controlador.Controlador;
+import dominio.ContactoIndividual;
+import dominio.Grupo;
+
 public class ModificarGrupo extends JFrame {
 
-	private static final long serialVersionUID = 1L;
-	private JPanel contentPane;
-	private Controlador controlador = Controlador.getInstance();
-	private JList<ContactoIndividual> listaContactos = new JList<>();
-	private JList<ContactoIndividual> listaContactosGrupo = new JList<>();
-	private Principal principal;
-	private String grupoAmodificar;
+    private static final long serialVersionUID = 1L;
+    private JPanel contentPane;
+    private Controlador controlador = Controlador.getInstance();
+    private Principal principal;
+    private String grupoAmodificar;
 
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					ModificarGrupo frame = new ModificarGrupo(null, null);
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+    private JPanel center;
+    private JPanel izq;
+    private JPanel flechas;
+    private JPanel der;
+    private JPanel buttom;
 
-	/**
-	 * Create the frame.
-	 */
-	public ModificarGrupo(Principal principal, String grupoAmodificar) {
-		this.principal = principal;
-		this.grupoAmodificar = grupoAmodificar;
-		setBackground(SystemColor.window);
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 716, 499);
-		contentPane = new JPanel();
-		contentPane.setBackground(UIManager.getColor("List.dropCellBackground"));
-		contentPane.setForeground(new Color(0, 0, 0));
-		contentPane.setBorder(new TitledBorder(new LineBorder(new Color(25, 25, 112), 2), "Lista contactos", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+    private JList<ContactoIndividual> listaContactos = new JList<>();
+    private JList<ContactoIndividual> listaContactosGrupo = new JList<>();
+    private JPanel panel;
+    private Component verticalGlue;
+    private Component rigidArea;
+    private Component horizontalGlue;
+    private Component horizontalGlue_1;
+    private Component horizontalGlue_2;
 
-		setContentPane(contentPane);
-		contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
-		
-		JPanel izq = new JPanel();
-		izq.setBackground(UIManager.getColor("List.dropCellBackground"));
-		contentPane.add(izq);
-		izq.setLayout(new BorderLayout(0, 0));
-		
-		JScrollPane scrollPane = new JScrollPane();
-		izq.add(scrollPane, BorderLayout.CENTER);
-		
-		listaContactos = new JList<>();
-	    listaContactos.setCellRenderer(new ContactoIndividualCellRenderer());
-	    scrollPane.setViewportView(listaContactos);
-				
-		JPanel abajoIzq = new JPanel();
-		abajoIzq.setBackground(UIManager.getColor("List.dropCellBackground"));
-		izq.add(abajoIzq, BorderLayout.SOUTH);
-	    
-		JPanel centro = new JPanel();
-		centro.setBackground(UIManager.getColor("List.dropCellBackground"));
-		contentPane.add(centro);
-		centro.setLayout(new BoxLayout(centro, BoxLayout.Y_AXIS));
-		
-		DefaultListModel<ContactoIndividual> miembrosGrupo = actulizarListaMiembrosGrupo();
-		listaContactosGrupo.setModel(miembrosGrupo);
-		
-		actualizarListaContactos();
-		
-		JButton IzqDer = new JButton("--->");
-		centro.add(IzqDer);
-		IzqDer.addActionListener(ev -> {
-			miembrosGrupo.addElement(listaContactos.getSelectedValue());
-			listaContactosGrupo.setModel(miembrosGrupo);
-		});
-		
-		Component glue = Box.createGlue();
-		glue.setMaximumSize(new Dimension(20, 20));
-		centro.add(glue);
-		
-		JButton DerIzq = new JButton("<---");
-		centro.add(DerIzq);
-		DerIzq.addActionListener(ev -> {
-			miembrosGrupo.removeElement(listaContactosGrupo.getSelectedValue());
-			listaContactosGrupo.setModel(miembrosGrupo);
-		});
-		
-		JPanel der = new JPanel();
-		der.setBackground(UIManager.getColor("List.dropCellBackground"));
-		contentPane.add(der);
-		der.setLayout(new BorderLayout(0, 0));
-		
-		JPanel abajoDer = new JPanel();
-		abajoDer.setBackground(UIManager.getColor("List.dropCellBackground"));
-		der.add(abajoDer, BorderLayout.SOUTH);
-		
-		JButton cancelar = new JButton("Cancelar\n");
-		abajoDer.add(cancelar);
-		cancelar.addActionListener(ev -> {
-			dispose();
-		});
-		
-		JButton confirmar = new JButton("Confirmar cambios");
-		abajoIzq.add(confirmar);
-		confirmar.addActionListener(ev -> {
-				
-			if(controlador.modificarGrupo(grupoAmodificar, miembrosGrupo)) {
-				MensajeAdvertencia.mostrarConfirmacion("Se ha modificado el grupo correctamente", principal);
-			}else{
-				MensajeAdvertencia.mostrarError("No se ha podido modificar el grupo", principal);
-			}
-			
-		});
-		
-		JScrollPane scrollPane_1 = new JScrollPane();
-		der.add(scrollPane_1, BorderLayout.CENTER);
-		
-		JPanel grupos = new JPanel();
-		scrollPane_1.setViewportView(grupos);
-		grupos.setLayout(new BorderLayout(0, 0));
-		
-		JScrollPane scrollPane_2 = new JScrollPane();
-		grupos.add(scrollPane_2);
-		
-		listaContactosGrupo.setCellRenderer(new ContactoIndividualCellRenderer());
-		scrollPane_2.setViewportView(listaContactosGrupo);
-		
-	}
-	
-	private void actualizarListaContactos() {
-	    List<ContactoIndividual> contactos = controlador.obtenerContactos();
-	    
-	    DefaultListModel<ContactoIndividual> modelo = new DefaultListModel<>();
-	    for (ContactoIndividual contacto : contactos) {
-	        modelo.addElement(contacto);
-	    }
-	    listaContactos.setModel(modelo);
-	}
-	
-	private DefaultListModel<ContactoIndividual> actulizarListaMiembrosGrupo() {
-		 Grupo grupo = controlador.getGrupoPorNombre(grupoAmodificar);
-		 List<ContactoIndividual> contactos = grupo.getMiembros();
-		 
-		 DefaultListModel<ContactoIndividual> modelo = new DefaultListModel<>();
-		    for (ContactoIndividual contacto : contactos) {
-		        modelo.addElement(contacto);
-		    }		    
-		    return modelo;
-	}
+    /**
+     * Launch the application.
+     */
+    public static void main(String[] args) {
+        // Inicio de la aplicación ModificarGrupoRegistro para depuración
+        EventQueue.invokeLater(() -> {
+            try {
+                ModificarGrupo frame = new ModificarGrupo(null, "Grupo de ejemplo");
+                frame.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
 
+    /**
+     * Create the frame.
+     */
+    public ModificarGrupo(Principal principal, String grupoAmodificar) {
+        this.principal = principal;
+        this.grupoAmodificar = grupoAmodificar;
+
+        setBackground(SystemColor.window);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setBounds(100, 100, 716, 499);
+        contentPane = new JPanel();
+        contentPane.setBackground(UIManager.getColor("List.dropCellBackground"));
+        contentPane.setBorder(new TitledBorder(new LineBorder(new Color(25, 25, 112), 2), "Modificar Grupo", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(51, 51, 51)));
+
+        setContentPane(contentPane);
+        contentPane.setLayout(new BorderLayout(0, 0));
+
+        // Center Panel
+        center = new JPanel();
+        center.setBackground(UIManager.getColor("List.dropCellBackground"));
+        contentPane.add(center, BorderLayout.CENTER);
+        center.setLayout(new BoxLayout(center, BoxLayout.X_AXIS));
+
+        // Panel izquierdo
+        izq = new JPanel();
+        izq.setLayout(new BorderLayout(0, 0));
+        center.add(izq);
+
+        JScrollPane scrollPaneIzq = new JScrollPane();
+        izq.add(scrollPaneIzq, BorderLayout.CENTER);
+        listaContactos.setCellRenderer(new ContactoIndividualCellRenderer());
+        scrollPaneIzq.setViewportView(listaContactos);
+
+        // Panel de las flechas
+        flechas = new JPanel();
+        flechas.setBackground(UIManager.getColor("List.dropCellBackground"));
+        flechas.setLayout(new BoxLayout(flechas, BoxLayout.Y_AXIS));
+        center.add(flechas);
+
+        JButton izqDer = new JButton("--->");
+        flechas.add(izqDer);
+        izqDer.addActionListener(ev -> {
+            DefaultListModel<ContactoIndividual> modeloGrupo = (DefaultListModel<ContactoIndividual>) listaContactosGrupo.getModel();
+            // Obtener el modelo de listaContactosGrupoRegistro para depuración
+            modeloGrupo.addElement(listaContactos.getSelectedValue());
+            listaContactosGrupo.setModel(modeloGrupo);
+        });
+        
+        verticalGlue = Box.createVerticalGlue();
+        verticalGlue.setMaximumSize(new Dimension(0, 10));
+        flechas.add(verticalGlue);
+
+        JButton derIzq = new JButton("<---");
+        flechas.add(derIzq);
+        derIzq.addActionListener(ev -> {
+            DefaultListModel<ContactoIndividual> modeloGrupo = (DefaultListModel<ContactoIndividual>) listaContactosGrupo.getModel();
+            modeloGrupo.removeElement(listaContactosGrupo.getSelectedValue());
+            listaContactosGrupo.setModel(modeloGrupo);
+        });
+
+        // Right Panel
+        der = new JPanel();
+        der.setLayout(new BorderLayout(0, 0));
+        center.add(der);
+
+        JScrollPane scrollPaneDer = new JScrollPane();
+        der.add(scrollPaneDer, BorderLayout.CENTER);
+        listaContactosGrupo.setCellRenderer(new ContactoIndividualCellRenderer());
+        scrollPaneDer.setViewportView(listaContactosGrupo);
+
+        // Bottom Panel
+        buttom = new JPanel();
+        buttom.setBackground(UIManager.getColor("List.dropCellBackground"));
+        buttom.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        contentPane.add(buttom, BorderLayout.SOUTH);
+        
+        horizontalGlue_2 = Box.createHorizontalGlue();
+        horizontalGlue_2.setPreferredSize(new Dimension(60, 0));
+        buttom.add(horizontalGlue_2);
+
+        JButton confirmar = new JButton("Confirmar cambios");
+        buttom.add(confirmar);
+        confirmar.addActionListener(ev -> {
+            DefaultListModel<ContactoIndividual> modeloGrupo = (DefaultListModel<ContactoIndividual>) listaContactosGrupo.getModel();
+            if (controlador.modificarGrupo(grupoAmodificar, modeloGrupo)) {
+                // Confirmación de modificación del grupoRegistro para depuración
+                MensajeAdvertencia.mostrarConfirmacion("Se ha modificado el grupo correctamente", principal);
+                dispose();
+            } else {
+                MensajeAdvertencia.mostrarError("No se ha podido modificar el grupo", principal);
+            }
+        });
+        
+        rigidArea = Box.createRigidArea(new Dimension(20, 20));
+        rigidArea.setPreferredSize(new Dimension(200, 20));
+        buttom.add(rigidArea);
+        
+        horizontalGlue_1 = Box.createHorizontalGlue();
+        horizontalGlue_1.setPreferredSize(new Dimension(70, 0));
+        buttom.add(horizontalGlue_1);
+
+        JButton cancelar = new JButton("Cancelar");
+        buttom.add(cancelar);
+        
+        horizontalGlue = Box.createHorizontalGlue();
+        horizontalGlue.setPreferredSize(new Dimension(90, 0));
+        buttom.add(horizontalGlue);
+        cancelar.addActionListener(ev -> dispose());
+
+        // Initial Data Loading
+        actualizarListaContactos();
+        listaContactosGrupo.setModel(actulizarListaMiembrosGrupo());
+        
+        panel = new JPanel();
+        panel.setBackground(UIManager.getColor("List.dropCellBackground"));
+        contentPane.add(panel, BorderLayout.NORTH);
+    }
+
+    private void actualizarListaContactos() {
+        List<ContactoIndividual> contactos = controlador.obtenerContactos();
+        // Obtener la lista de contactos del controladorRegistro para depuración
+        DefaultListModel<ContactoIndividual> modelo = new DefaultListModel<>();
+        for (ContactoIndividual contacto : contactos) {
+            modelo.addElement(contacto);
+        }
+        listaContactos.setModel(modelo);
+    }
+
+    private DefaultListModel<ContactoIndividual> actulizarListaMiembrosGrupo() {
+        Grupo grupo = controlador.getGrupoPorNombre(grupoAmodificar);
+        List<ContactoIndividual> contactos = grupo.getMiembros();
+        // Obtener los miembros actuales del grupoRegistro para depuración
+        DefaultListModel<ContactoIndividual> modelo = new DefaultListModel<>();
+        for (ContactoIndividual contacto : contactos) {
+            modelo.addElement(contacto);
+        }
+        return modelo;
+    }
 }

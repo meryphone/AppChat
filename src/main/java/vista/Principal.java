@@ -269,7 +269,7 @@ public class Principal extends JFrame {
 	 * @return imagenCircular
 	 */
 
-	public ImageIcon hacerCircularYRedimensionar(String pathImagen, int ancho, int alto) {
+	private ImageIcon hacerCircularYRedimensionar(String pathImagen, int ancho, int alto) {
 	    // Validar el path
 	    if (pathImagen == null || pathImagen.isEmpty()) {
 	        throw new IllegalArgumentException("El path de la imagen no puede ser nulo o vacío.");
@@ -325,7 +325,10 @@ public class Principal extends JFrame {
 
 	            // Obtener el path del archivo seleccionado
 	            String pathImagen = archivoSeleccionado.getAbsolutePath();
-
+	            
+	            // Estabezco la nueva foto de perfil al usuario
+	            controlador.setImagenPerfilUsuario(pathImagen);
+	            
 	            // Crear un ImageIcon circular desde el path
 	            ImageIcon imagenCircular = hacerCircularYRedimensionar(pathImagen,24,24);
 

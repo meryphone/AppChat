@@ -7,6 +7,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.border.TitledBorder;
 import controlador.Controlador;
 import dominio.ContactoIndividual;
@@ -17,20 +18,31 @@ import java.awt.Color;
 import javax.swing.JScrollPane;
 import java.awt.BorderLayout;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.UIManager;
 import java.awt.Component;
+
+import javax.imageio.ImageIO;
 import javax.swing.Box;
 import java.awt.Dimension;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.Ellipse2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import java.awt.FlowLayout;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.RenderingHints;
 
 public class CreacionGrupos extends JFrame {
 
@@ -56,6 +68,11 @@ public class CreacionGrupos extends JFrame {
 	private Component verticalGlue;
 	private JButton btnCancelar;
 	private Component rigidArea;
+	private JLabel lblFotoDePerfil;
+	private JLabel icono;
+	private Component horizontalGlue_3;
+	private Component horizontalGlue;
+	private String pathImagen;
 
 	/**
 	 * Launch the application.
@@ -113,21 +130,22 @@ public class CreacionGrupos extends JFrame {
 		listaContactos.setCellRenderer(new ContactoIndividualCellRenderer());
 		listaMiembrosGrupo.setCellRenderer(new ContactoIndividualCellRenderer());
 		
-		izqDer = new JButton("<----");
-		flechas.add(izqDer);
-		izqDer.addActionListener(ev -> {			
-			miembrosGrupo.removeElement(listaMiembrosGrupo.getSelectedValue());
-			listaMiembrosGrupo.setModel(miembrosGrupo);
-		});
-		
-		verticalGlue = Box.createVerticalGlue();
-		verticalGlue.setMaximumSize(new Dimension(0, 20));
-		flechas.add(verticalGlue);
-		
 		derIzq = new JButton("---->");
 		flechas.add(derIzq);
 		derIzq.addActionListener(ev -> {			
 			miembrosGrupo.addElement(listaContactos.getSelectedValue());
+			listaMiembrosGrupo.setModel(miembrosGrupo);
+		});
+		
+		verticalGlue = Box.createVerticalGlue();
+		verticalGlue.setPreferredSize(new Dimension(0, 10));
+		verticalGlue.setMaximumSize(new Dimension(0, 20));
+		flechas.add(verticalGlue);
+		
+		izqDer = new JButton("<----");
+		flechas.add(izqDer);
+		izqDer.addActionListener(ev -> {			
+			miembrosGrupo.removeElement(listaMiembrosGrupo.getSelectedValue());
 			listaMiembrosGrupo.setModel(miembrosGrupo);
 		});
 		
@@ -151,6 +169,29 @@ public class CreacionGrupos extends JFrame {
 		top.add(nombreGrupo);
 		nombreGrupo.setColumns(10);
 		
+		horizontalGlue_3 = Box.createHorizontalGlue();
+		horizontalGlue_3.setPreferredSize(new Dimension(200, 0));
+		top.add(horizontalGlue_3);
+		
+		lblFotoDePerfil = new JLabel("Foto de perfil: ");
+		top.add(lblFotoDePerfil);
+		
+		icono = new JLabel("");
+		icono.setIcon(new ImageIcon(CreacionGrupos.class.getResource("/resources/anadir-foto(1).png")));
+		top.add(icono);
+		
+		horizontalGlue = Box.createHorizontalGlue();
+		horizontalGlue.setPreferredSize(new Dimension(50, 0));
+		top.add(horizontalGlue);
+		
+		//MouseListener para cambiar la imagen de perfil al hacer clic
+        icono.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+               String pathImagen = cambiarImagenPerfil();
+            }
+        });
+		
 		buttom = new JPanel();
 		buttom.setBackground(UIManager.getColor("List.dropCellBackground"));
 		contentPane.add(buttom, BorderLayout.SOUTH);
@@ -163,17 +204,17 @@ public class CreacionGrupos extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				
 				if(miembrosGrupo.isEmpty() || miembrosGrupo.size() < 2) {
-					MensajeAdvertencia.mostrarError("Seleccione un número válido de participantes", principal);
+					MensajeAdvertencia.mostrarError("Seleccione un número válido de participantes", contentPane);
 				}else {
 					
 					try {
-						if(controlador.crearGrupo(nombreGrupo.getText(), miembrosGrupo)) {
-							MensajeAdvertencia.mostrarConfirmacion("El grupo se ha creado correctamente", principal);
+						if(controlador.crearGrupo(nombreGrupo.getText(),pathImagen, miembrosGrupo)) {
+							MensajeAdvertencia.mostrarConfirmacion("El grupo se ha creado correctamente", contentPane);
 							dispose();
 						}
 					} catch (ExcepcionCrearGrupo e1) {
 						e1.printStackTrace();
-						MensajeAdvertencia.mostrarError(e1.getMessage(), principal);
+						MensajeAdvertencia.mostrarError(e1.getMessage(), contentPane);
 					}
 				}
 				
@@ -210,5 +251,70 @@ public class CreacionGrupos extends JFrame {
 	    listaContactos.setModel(modelo);
 	}
 	
+	private ImageIcon hacerCircularYRedimensionar(String pathImagen, int ancho, int alto) {
+	    // Validar el path
+	    if (pathImagen == null || pathImagen.isEmpty()) {
+	        throw new IllegalArgumentException("El path de la imagen no puede ser nulo o vacío.");
+	    }
+
+	    // Cargar la imagen desde el path
+	    ImageIcon iconoOriginal = new ImageIcon(pathImagen);
+	    if (iconoOriginal.getImage() == null) {
+	        throw new IllegalArgumentException("No se pudo cargar la imagen desde el path especificado: " + pathImagen);
+	    }
+
+	    // Escalar la imagen al tamaño especificado
+	    Image imagenEscalada = iconoOriginal.getImage().getScaledInstance(ancho, alto, Image.SCALE_SMOOTH);
+
+	    // Crear un BufferedImage circular
+	    BufferedImage imagenCircular = new BufferedImage(ancho, alto, BufferedImage.TYPE_INT_ARGB);
+	    Graphics2D graficos = imagenCircular.createGraphics();
+
+	    // Dibujar la forma circular
+	    Ellipse2D.Double forma = new Ellipse2D.Double(0, 0, ancho, alto);
+	    graficos.setClip(forma);
+	    graficos.drawImage(imagenEscalada, 0, 0, ancho, alto, null);
+
+	    // Aplicar antialiasing para bordes suaves
+	    graficos.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+	    graficos.dispose();
+
+	    // Devolver el resultado como ImageIcon
+	    return new ImageIcon(imagenCircular);
+	}
+	
+	private String cambiarImagenPerfil() {
+	    JFileChooser fileChooser = new JFileChooser();
+	    fileChooser.setDialogTitle("Selecciona una nueva imagen de perfil");
+
+	    int resultado = fileChooser.showOpenDialog(this);
+	    if (resultado == JFileChooser.APPROVE_OPTION) {
+	        File archivoSeleccionado = fileChooser.getSelectedFile();
+	        try {
+	            // Validar que el archivo seleccionado es una imagen
+	            BufferedImage imagenOriginal = ImageIO.read(archivoSeleccionado);
+	            if (imagenOriginal == null) {
+	                throw new Exception("El archivo seleccionado no es una imagen válida.");
+	            }
+
+	            // Obtener el path del archivo seleccionado
+	            String pathImagen = archivoSeleccionado.getAbsolutePath();
+
+	            // Crear un ImageIcon circular desde el path
+	            ImageIcon imagenCircular = hacerCircularYRedimensionar(pathImagen,24,24);
+	            
+	            // Actualizar la imagen en lblUsuario
+	            icono.setIcon(imagenCircular);
+	            
+	            return pathImagen;
+
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	        
+	    }
+		return null;
+	}
 
 }
