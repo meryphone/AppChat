@@ -2,6 +2,9 @@ package persistencia;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -11,6 +14,7 @@ import java.util.Optional;
 import beans.Entidad;
 import beans.Propiedad;
 import dominio.ContactoIndividual;
+import dominio.Descuento;
 import dominio.Usuario;
 import excepciones.ExcepcionDAO;
 import excepciones.ExcepcionRegistroDuplicado;
@@ -57,13 +61,16 @@ public class AdaptadorUsuarioDAO implements IAdaptadorUsuarioDAO {
                 new Propiedad("mensajeSaludo", usuario.getMensajeSaludo().orElse("")),
                 new Propiedad("listaContacto", PersistenciaUtils.getCodigosContactos(usuario.getListaContactos())),
                 new Propiedad("fechaNacimiento", usuario.getFechaNacimiento().map(date -> new SimpleDateFormat("dd/MM/yyyy").format(date)).orElse(null)),
-                new Propiedad("grupos", PersistenciaUtils.obtenerCodigosGrupos(usuario.getGrupos()))
+                new Propiedad("grupos", PersistenciaUtils.obtenerCodigosGrupos(usuario.getGrupos())),
+                new Propiedad("descuento", !usuario.getDescuento().isEmpty() ? usuario.getDescuento().get().getClass().getName() : ""),
+                new Propiedad("fechaRegistro", usuario.getFechaRegistro().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")))                       
         )));
         return eUsuario;
     }
 
     // Método para convertir de Entidad a Usuario
-    private Usuario entidadToUsuario(Entidad eUsuario) {
+    @SuppressWarnings("deprecation")
+	private Usuario entidadToUsuario(Entidad eUsuario) {
         Usuario usuario = new Usuario();
         usuario.setCodigo(eUsuario.getId());
         usuario.setNombreCompleto(servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "nombreCompleto"));
@@ -73,6 +80,23 @@ public class AdaptadorUsuarioDAO implements IAdaptadorUsuarioDAO {
         usuario.setPathImagen(servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "imagenPerfil"));
         usuario.setPremium(Boolean.parseBoolean(servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "premium")));
         usuario.setGrupos(PersistenciaUtils.obtenerGruposDesdeCodigos(servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "grupos")));
+        
+        // Recuperamos la fecha de registro
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate fechaRegistro = LocalDate.parse(servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "fechaRegistro"), formatter);
+        usuario.setFechaRegistro(fechaRegistro);
+        
+        // Recuperar el descuento
+        String descuento = servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "descuento");
+		Descuento descuentoObj = null;
+		if (!descuento.isEmpty()) {
+			try {
+				descuentoObj = (Descuento) Class.forName(descuento).newInstance();
+				usuario.setDescuento(descuentoObj);
+			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
         
         // Recuperar y asignar la fecha de nacimiento
         String fechaNacimientoStr = servicioPersistencia.recuperarPropiedadEntidad(eUsuario, "fechaNacimiento");
@@ -167,6 +191,8 @@ public class AdaptadorUsuarioDAO implements IAdaptadorUsuarioDAO {
                 prop.setValor(PersistenciaUtils.getCodigosContactos(usuarioModificar.getListaContactos()));
             } else if(prop.getNombre().equals("grupos")) {
             	prop.setValor(PersistenciaUtils.obtenerCodigosGrupos(usuarioModificar.getGrupos()));
+            } else if(prop.getNombre().equals("descuento")) {
+            	prop.setValor(usuarioModificar.getDescuento().isPresent() ? usuarioModificar.getDescuento().get().getClass().getName() : "");
             }
 
             // Modificar la propiedad en la base de datos

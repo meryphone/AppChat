@@ -3,6 +3,8 @@ package dominio;
 import java.util.LinkedList;
 import java.util.List;
 
+import umu.tds.apps.AppChat.User;
+
 public class Grupo extends Contacto {
 	
 	public static final String IMAGEN_POR_DEFECTO_GRUPO = "/resources/personas(2)(1)(1).png";
@@ -66,6 +68,10 @@ public class Grupo extends Contacto {
 
 	public void setImagen(String imagen) {
 		this.imagen = imagen;
+	}
+
+	public boolean poseeMiembro(Usuario usuario) {
+		return miembros.stream().anyMatch(c -> c.getUsuario().equals(usuario));
 	}
 	
 

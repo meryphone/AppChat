@@ -41,7 +41,7 @@ public class ModificarGrupo extends JFrame {
 
     private JList<ContactoIndividual> listaContactos = new JList<>();
     private JList<ContactoIndividual> listaContactosGrupo = new JList<>();
-    private JPanel panel;
+    private JPanel relleno;
     private Component verticalGlue;
     private Component rigidArea;
     private Component horizontalGlue;
@@ -88,10 +88,15 @@ public class ModificarGrupo extends JFrame {
 
         // Panel izquierdo
         izq = new JPanel();
+        izq.setPreferredSize(new Dimension(250, 400));
         izq.setLayout(new BorderLayout(0, 0));
         center.add(izq);
 
         JScrollPane scrollPaneIzq = new JScrollPane();
+        scrollPaneIzq.setPreferredSize(new Dimension(250,400));
+        scrollPaneIzq.setPreferredSize(new Dimension(250,400));
+        scrollPaneIzq.setPreferredSize(new Dimension(250,400));
+
         izq.add(scrollPaneIzq, BorderLayout.CENTER);
         listaContactos.setCellRenderer(new ContactoIndividualCellRenderer());
         scrollPaneIzq.setViewportView(listaContactos);
@@ -125,10 +130,14 @@ public class ModificarGrupo extends JFrame {
 
         // Right Panel
         der = new JPanel();
+        der.setPreferredSize(new Dimension(250, 400));
         der.setLayout(new BorderLayout(0, 0));
         center.add(der);
 
         JScrollPane scrollPaneDer = new JScrollPane();
+        scrollPaneDer.setPreferredSize(new Dimension(250,400));
+        scrollPaneDer.setPreferredSize(new Dimension(250,400));
+        scrollPaneDer.setPreferredSize(new Dimension(250,400));
         der.add(scrollPaneDer, BorderLayout.CENTER);
         listaContactosGrupo.setCellRenderer(new ContactoIndividualCellRenderer());
         scrollPaneDer.setViewportView(listaContactosGrupo);
@@ -176,9 +185,9 @@ public class ModificarGrupo extends JFrame {
         actualizarListaContactos();
         listaContactosGrupo.setModel(actulizarListaMiembrosGrupo());
         
-        panel = new JPanel();
-        panel.setBackground(UIManager.getColor("List.dropCellBackground"));
-        contentPane.add(panel, BorderLayout.NORTH);
+        relleno = new JPanel();
+        relleno.setBackground(UIManager.getColor("List.dropCellBackground"));
+        contentPane.add(relleno, BorderLayout.NORTH);
     }
 
     private void actualizarListaContactos() {

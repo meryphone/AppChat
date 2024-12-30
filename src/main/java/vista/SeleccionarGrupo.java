@@ -5,7 +5,6 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
-
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -15,12 +14,12 @@ import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.UIManager;
-
-import dominio.Grupo;
+import javax.swing.border.LineBorder;
 
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Frame;
 
 public class SeleccionarGrupo extends JDialog {
 
@@ -32,64 +31,70 @@ public class SeleccionarGrupo extends JDialog {
     private String grupoSeleccionado;
 
     /**
-     * Launch the application.
-     */
-    public static void main(String[] args) {
-        try {
-            SeleccionarGrupo dialog = new SeleccionarGrupo(null, List.of("Grupo 1", "Grupo 2", "Grupo 3"));
-            dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-            dialog.setVisible(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		try {
+			SeleccionarGrupo dialog = new SeleccionarGrupo(null,null);
+			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			dialog.setVisible(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
     /**
-     * Create the dialog.
+     * Crea el diálogo de selección de grupo.
+     * 
+     * @param owner        La ventana principal (puede ser null).
+     * @param nombresGrupos Lista con los nombres de los grupos a mostrar.
      */
-    public SeleccionarGrupo(java.awt.Frame owner, List<String> nombresGrupos) {
-        super(owner, "", true);
+    public SeleccionarGrupo(Frame owner, List<String> nombresGrupos) {
+        super(owner, true); // Establece que el diálogo sea modal
         setBounds(100, 100, 413, 205);
         getContentPane().setBackground(UIManager.getColor("List.dropCellBackground"));
         getContentPane().setLayout(new BorderLayout());
-        contentPanel.setBackground(UIManager.getColor("List.dropCellBackground"));
-        contentPanel.setBorder(null);
-        getContentPane().add(contentPanel, BorderLayout.CENTER);
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         
-        // Panel superior
+        // Establecer un borde para el diálogo
+        getRootPane().setBorder(new LineBorder(UIManager.getColor("CheckBoxMenuItem.acceleratorForeground"), 4));
+
+        // Panel superior con el título
         JPanel panelTitulo = new JPanel();
         panelTitulo.setBackground(UIManager.getColor("List.dropCellBackground"));
         getContentPane().add(panelTitulo, BorderLayout.NORTH);
         panelTitulo.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+
         JLabel lblSeleccioneElGrupo = new JLabel("Seleccione el grupo a modificar");
         lblSeleccioneElGrupo.setFont(new Font("Dialog", Font.BOLD, 14));
         panelTitulo.add(lblSeleccioneElGrupo);
 
-        // Panel del comboBox
+        // Panel central con el ComboBox
         JPanel panelComboBox = new JPanel();
         panelComboBox.setBackground(UIManager.getColor("List.dropCellBackground"));
         contentPanel.add(panelComboBox);
         comboBox = new JComboBox<>(nombresGrupos.toArray(new String[0]));
         comboBox.setPreferredSize(new Dimension(250, 26));
         panelComboBox.add(comboBox);
+        getContentPane().add(contentPanel, BorderLayout.CENTER);
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 
-        // Panel inferior (botones y decoración)
+        // Panel inferior con los botones
         JPanel buttonPane = new JPanel();
         buttonPane.setBackground(UIManager.getColor("List.dropCellBackground"));
         getContentPane().add(buttonPane, BorderLayout.SOUTH);
         buttonPane.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 
+        // Botón Aceptar
         okButton = new JButton("Aceptar");
         okButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                grupoSeleccionado = (String) comboBox.getSelectedItem(); // Guardar selección
-                dispose(); // Cerrar el diálogo
+                grupoSeleccionado = (String) comboBox.getSelectedItem(); // Guarda el grupo seleccionado
+                dispose(); // Cierra el diálogo
             }
         });
-        okButton.setActionCommand("OK");
         buttonPane.add(okButton);
 
+        // Espaciadores horizontales
         Component horizontalGlue1 = Box.createHorizontalGlue();
         horizontalGlue1.setPreferredSize(new Dimension(80, 0));
         buttonPane.add(horizontalGlue1);
@@ -102,32 +107,32 @@ public class SeleccionarGrupo extends JDialog {
         horizontalGlue2.setPreferredSize(new Dimension(80, 0));
         buttonPane.add(horizontalGlue2);
 
+        // Botón Cancelar
         cancelButton = new JButton("Cancelar");
         cancelButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                grupoSeleccionado = null; // No se selecciona nada
-                dispose(); // Cerrar el diálogo
+                grupoSeleccionado = null; // No guarda ningún grupo seleccionado
+                dispose(); // Cierra el diálogo
             }
         });
-        cancelButton.setActionCommand("Cancel");
         buttonPane.add(cancelButton);
     }
 
     /**
      * Obtiene el nombre del grupo seleccionado.
      * 
-     * @return Nombre del grupo seleccionado o null si no se seleccionó ninguno.
+     * @return El nombre del grupo seleccionado o null si se canceló.
      */
     public String getGrupoSeleccionado() {
         return grupoSeleccionado;
     }
 
     /**
-     * Método para mostrar el diálogo y obtener el grupo seleccionado.
+     * Muestra el diálogo y devuelve el grupo seleccionado.
      * 
-     * @param owner        La ventana principal (puede ser null).
-     * @param nombresGrupos Lista de nombres de grupos para mostrar en el ComboBox.
-     * @return El nombre del grupo seleccionado o null si se cancela.
+     * @param owner        La ventana principal desde la que se llama.
+     * @param nombresGrupos Lista de nombres de los grupos para seleccionar.
+     * @return El grupo seleccionado o null si no se seleccionó ninguno.
      */
     public static String mostrarDialogo(java.awt.Frame owner, List<String> nombresGrupos) {
         SeleccionarGrupo dialog = new SeleccionarGrupo(owner, nombresGrupos);

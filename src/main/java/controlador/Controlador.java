@@ -1,17 +1,26 @@
 package controlador;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-
-import javax.imageio.ImageIO;
+import java.util.function.Supplier;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
-import javax.swing.JFileChooser;
+
+import com.itextpdf.text.Chunk;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.TabSettings;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import persistencia.*;
 import persistencia.interfaces.IAdaptadorContactoDAO;
@@ -34,6 +43,9 @@ public class Controlador {
 	private IAdaptadorMensajeDAO adaptadorMensaje;
 	private IAdaptadorGrupoDAO adaptadorGrupo;
 	
+	// Mapa con suppliers para crear los descuentos
+	private static Map<String,Supplier<Descuento>> supplierDescuento = new HashMap<String, Supplier<Descuento>>();
+	
 	// Implementación del patron Singleton	
 	public static Controlador getInstance() {
 		if(controlador == null) {
@@ -45,6 +57,8 @@ public class Controlador {
 	private Controlador() {
 		repositorioUsuarios  = RepositorioUsuarios.getInstance();
 		inicializarAdaptadores();
+		supplierDescuento.put("DescuentoPorMensajes", DescuentoMensajes::new);
+		supplierDescuento.put("DescuentoFechaRegistro", DescuentoFechaRegistro::new);
 	}
 	
 	private void inicializarAdaptadores() {
@@ -84,7 +98,7 @@ public class Controlador {
 		
 		
 		// Si el telefono ya está registrado se lanza una excepción
-		if(!repositorioUsuarios.getUsuarioPorTelefono(movil).isEmpty()) {
+		if(repositorioUsuarios.getUsuarioPorTelefono(movil).isPresent()) {
 			throw new ExcepcionRegistro("El teléfono ya está registrado");
 		}
 		
@@ -93,7 +107,7 @@ public class Controlador {
 		validarContrasenas(contrasena, contrasenaRepe);
 		validarEmail(email);		
 
-		Usuario usuario = new Usuario(nombre + apellidos, movil, contrasena, email);
+		Usuario usuario = new Usuario(nombre + " " + apellidos, movil, contrasena, email);
 		usuarioActual = usuario;
 		
 		configurarOpcionales(usuario, fechaNacimiento, pathImagen, mensajeSaludo);
@@ -142,9 +156,10 @@ public class Controlador {
 	 * @throws ExcepcionContacto si el contacto ya existe o el usuario no está registrado
 	 */
 	public boolean agregarContacto(String tlf, String nombreContacto) throws ExcepcionAgregarContacto {
-	    // Verifica si hay un usuario autenticado
-	    if (usuarioActual == null) {
-	        throw new ExcepcionAgregarContacto("No hay un usuario actual autenticado.");
+	    
+	    // Verifica si el nombre del contacto ya está en uso
+	    if(usuarioActual.getContactoPorNombre(nombreContacto).isPresent()) {
+	        throw new ExcepcionAgregarContacto("El nombre del contacto ya está en uso");
 	    }
 
 	    // Verifica si el contacto ya está en la lista de contactos del usuario actual
@@ -203,8 +218,9 @@ public class Controlador {
 	    }else {
 	    	 grupoNuevo = new Grupo(nombreGrupo, usuarioActual, miembrosGrupo);
 	    }
-	   
-	    usuarioActual.addGrupo(grupoNuevo);
+	    
+	    // Añadimos el grupo al usuarioActual
+	    usuarioActual.addGrupo(grupoNuevo);	    	   
 
 	    try {
 	        adaptadorGrupo.registrarGrupo(grupoNuevo); // Registrar el grupo en la base de datos
@@ -243,6 +259,109 @@ public class Controlador {
 	    return true;
 	}
 	
+	/**
+	 * Activa la suscripción premium para el usuario actual.
+	 * 
+	 * Aplica un descuento basado en el número de mensajes enviados 
+	 * o en la fecha de registro, si corresponde. Finalmente, actualiza
+	 * los datos del usuario en la persistencia.
+	 * 
+	 * @return El precio final de la suscripción premium, teniendo en cuenta el descuento aplicado.
+	 */
+	public double setPremium() {
+		
+		usuarioActual.setPremium(true);
+		
+		if(usuarioActual.getNumMensajesUltimoMes() >= 5) {		//CAMBIAR LUEGO POR NUM MAS GRANDE SI ESO			
+			usuarioActual.setDescuento(supplierDescuento.get("DescuentoMensajes").get());
+			adaptadorUsuario.modificarUsuario(usuarioActual);
+		}else if(usuarioActual.getFechaRegistro().isAfter(LocalDate.of(2024, 12, 27))) { // Si se ha registrado despues del 27 de dicmiembre
+			usuarioActual.setDescuento(supplierDescuento.get("DescuentoFechaRegistro").get());
+			adaptadorUsuario.modificarUsuario(usuarioActual);
+
+		}
+				
+		return usuarioActual.getPrecio();
+	}
+	
+	/**
+	 * Cancela la suscripción premium del usuario actual.
+	 * 
+	 * Desactiva el estado premium, elimina el descuento asociado 
+	 * y actualiza los datos del usuario en la persistencia.
+	 */
+	public void cancelarPremium() {
+		usuarioActual.setPremium(false);
+		usuarioActual.setDescuento(null);
+		adaptadorUsuario.modificarUsuario(usuarioActual);
+	}
+	
+	/**
+	 * Exporta los contactos del usuario actual a un archivo PDF en la ruta especificada.
+	 * 
+	 * @param ruta la ubicación donde se guardará el archivo PDF.
+	 * @return Devuelve true si la exportación fue exitosa y false en caso de error.
+	 */	
+	public boolean exportarPDF(String ruta, String nombreContacto) {
+	    try {
+	        // Obtener el contacto seleccionado
+	        Optional<ContactoIndividual> contactoOpt = usuarioActual.getContactoPorNombre(nombreContacto);
+	        if (contactoOpt.isEmpty()) {
+	            throw new IllegalArgumentException("El contacto indicado no existe.");
+	        }
+	        ContactoIndividual contactoSeleccionado = contactoOpt.get();
+
+	        // Verificar si la ruta es un directorio
+	        File rutaFile = new File(ruta);
+	        if (rutaFile.isDirectory() || ruta.endsWith(File.separator)) {
+	            ruta = new File(ruta, "Conversacion_" + contactoSeleccionado.getNombre().replaceAll("\\s+", "_") + ".pdf").getAbsolutePath();
+	        }
+
+	        // Crear el documento PDF
+	        FileOutputStream archivo = new FileOutputStream(ruta);
+	        Document documento = new Document();
+	        PdfWriter.getInstance(documento, archivo);
+	        documento.open();
+
+	        // Agregar título
+	        documento.add(new Paragraph("Conversación con: " + contactoSeleccionado.getNombre()));
+	        documento.add(Chunk.NEWLINE);
+
+	        // Recorrer los mensajes del contacto
+	        List<Mensaje> mensajes = contactoSeleccionado.getMensajes();
+	        mensajes.sort(Comparator.comparing(Mensaje::getFechaYhora)); // Ordenar por fecha y hora
+
+	        for (Mensaje mensaje : mensajes) {
+	            // Formatear el mensaje
+	            String emisor = mensaje.getEmisor().getNombreCompleto();
+	            String texto = mensaje.getTexto();
+	            String fecha = mensaje.getFechaYhora().toString();
+
+	            // Agregar el mensaje al documento
+	            documento.add(new Paragraph(emisor + " (" + fecha + "):"));
+	            documento.add(new Paragraph(texto));
+	            documento.add(Chunk.NEWLINE);
+	        }
+
+	        documento.close();
+	        return true;
+	    } catch (DocumentException | IOException e) {
+	        e.printStackTrace();
+	        return false;
+	    }
+	}
+
+
+	
+	
+	
+	
+	/**
+	 * Obtiene un grupo del usuario actual por su nombre.
+	 *
+	 * @param nombreGrupo El nombre del grupo a buscar.
+	 * @return El grupo correspondiente al nombre proporcionado, o un grupo vacío si no se encuentra.
+	 */	
 	public Grupo getGrupoPorNombre(String nombreGrupo){
 		return usuarioActual.getGrupoPorNombre(nombreGrupo);
 	}
@@ -274,6 +393,15 @@ public class Controlador {
 	public List<String> obtenerNombresGruposUsuario() {
 	    return usuarioActual.getNombresGrupos();
 	}
+	
+	public List<String> obtenerNombresContactos(){
+		List<String> contactos = new ArrayList<String>();
+		
+		for(ContactoIndividual co : obtenerContactos()) {
+			contactos.add(co.getNombre());
+		}
+		return contactos;
+	}
 
 	/**
 	 * Obtiene la lista de contactos individuales asociados al usuario actual.
@@ -283,7 +411,6 @@ public class Controlador {
 	public List<ContactoIndividual> obtenerContactos() {
 	    
 	    if (usuarioActual != null) {
-	        // Retornar lista de contactos si el usuario actual existe
 	        return usuarioActual.getListaContactos();
 	    }
 
@@ -308,8 +435,22 @@ public class Controlador {
 	    return usuarioActual.getNombreCompleto();
 	}
 	
+	/**
+	 * Actualiza la imagen de perfil del usuario actual.
+	 *
+	 * @param pathImagen La ruta de la nueva imagen de perfil.
+	 */
 	public void setImagenPerfilUsuario(String pathImagen) {
-		usuarioActual.setPathImagen(pathImagen); 
+	    usuarioActual.setPathImagen(pathImagen);
+	}
+
+	/**
+	 * Verifica si el usuario actual tiene una suscripción premium.
+	 *
+	 * @return {@code true} si el usuario es premium, {@code false} en caso contrario.
+	 */
+	public boolean isUsuarioPremium() {
+	    return usuarioActual.isPremium();
 	}
 	
 	// -------- Funciones auxiliares ----------
@@ -375,6 +516,8 @@ public class Controlador {
 	            .filter(icon -> !icon.equals(Usuario.IMAGEN_POR_DEFECTO))
 	            .ifPresent(icon -> usuario.setPathImagen(icon));
 	}
+
+	
 	
 
 }

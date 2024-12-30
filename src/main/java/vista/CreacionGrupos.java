@@ -58,9 +58,9 @@ public class CreacionGrupos extends JFrame {
 	private JPanel flechas;
 	private JPanel der;
 	private JPanel buttom;
-	private JScrollPane scrollPane;
+	private JScrollPane scrollPaneIzq;
 	private JList<ContactoIndividual> listaContactos = new JList<>();
-	private JScrollPane scrollPane_1;
+	private JScrollPane scrollPaneDer;
 	private JList<ContactoIndividual> listaMiembrosGrupo = new JList<>() ;
 	private JButton btnCrearGrupo;
 	private JButton izqDer;
@@ -94,7 +94,6 @@ public class CreacionGrupos extends JFrame {
 	 * Create the frame.
 	 */
 	public CreacionGrupos(Principal principal) {
-		this.principal = principal;
 		setBackground(SystemColor.window);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 716, 499);
@@ -112,13 +111,17 @@ public class CreacionGrupos extends JFrame {
 		center.setLayout(new BoxLayout(center, BoxLayout.X_AXIS));
 		
 		izq = new JPanel();
+		izq.setPreferredSize(new Dimension(250, 400));
 		center.add(izq);
 		izq.setLayout(new BorderLayout(0, 0));
 		
-		scrollPane = new JScrollPane();
-		izq.add(scrollPane, BorderLayout.CENTER);
+		scrollPaneIzq = new JScrollPane();
+		scrollPaneIzq.setPreferredSize(new Dimension(250,400));
+		scrollPaneIzq.setMinimumSize(new Dimension(250,400));
+		scrollPaneIzq.setMaximumSize(new Dimension(250,400));
+		izq.add(scrollPaneIzq, BorderLayout.CENTER);
 		
-		scrollPane.setViewportView(listaContactos);
+		scrollPaneIzq.setViewportView(listaContactos);
 		
 		flechas = new JPanel();
 		flechas.setBackground(UIManager.getColor("TabbedPane.contentAreaColor"));
@@ -132,9 +135,13 @@ public class CreacionGrupos extends JFrame {
 		
 		derIzq = new JButton("---->");
 		flechas.add(derIzq);
-		derIzq.addActionListener(ev -> {			
-			miembrosGrupo.addElement(listaContactos.getSelectedValue());
-			listaMiembrosGrupo.setModel(miembrosGrupo);
+		derIzq.addActionListener(ev -> {
+			if(miembrosGrupo.contains(listaContactos.getSelectedValue())) {
+				MensajeAdvertencia.mostrarError("El contacto ya está en el grupo", contentPane);
+			}else {
+				miembrosGrupo.addElement(listaContactos.getSelectedValue());
+				listaMiembrosGrupo.setModel(miembrosGrupo);
+			}
 		});
 		
 		verticalGlue = Box.createVerticalGlue();
@@ -150,13 +157,17 @@ public class CreacionGrupos extends JFrame {
 		});
 		
 		der = new JPanel();
+		der.setPreferredSize(new Dimension(250, 400));
 		center.add(der);
 		der.setLayout(new BorderLayout(0, 0));
 		
-		scrollPane_1 = new JScrollPane();
-		der.add(scrollPane_1, BorderLayout.CENTER);
+		scrollPaneDer = new JScrollPane();
+		scrollPaneDer.setPreferredSize(new Dimension(250,400));
+		scrollPaneDer.setMinimumSize(new Dimension(250,400));
+		scrollPaneDer.setMaximumSize(new Dimension(250,400));
+		der.add(scrollPaneDer, BorderLayout.CENTER);
 		
-		scrollPane_1.setViewportView(listaMiembrosGrupo);
+		scrollPaneDer.setViewportView(listaMiembrosGrupo);
 		
 		top = new JPanel();
 		top.setBackground(UIManager.getColor("List.dropCellBackground"));
@@ -188,7 +199,7 @@ public class CreacionGrupos extends JFrame {
         icono.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-               String pathImagen = cambiarImagenPerfil();
+                pathImagen = cambiarImagenPerfil();
             }
         });
 		
@@ -221,7 +232,7 @@ public class CreacionGrupos extends JFrame {
 			}
 		});
 		buttom.add(btnCrearGrupo);
-		
+
 		  addWindowListener(new WindowAdapter() {
 	            @Override
 	            public void windowClosed(WindowEvent e) {
@@ -230,7 +241,7 @@ public class CreacionGrupos extends JFrame {
 	                }
 	            }
 	        });
-		
+	
 		rigidArea = Box.createRigidArea(new Dimension(20, 20));
 		rigidArea.setPreferredSize(new Dimension(300, 20));
 		rigidArea.setMaximumSize(new Dimension(50, 20));
@@ -238,7 +249,9 @@ public class CreacionGrupos extends JFrame {
 		
 		btnCancelar = new JButton("Cancelar");
 		buttom.add(btnCancelar);
-		
+		btnCancelar.addActionListener(ev -> {
+			dispose();
+		});
 	}
 	
 	private void actualizarListaContactos() {

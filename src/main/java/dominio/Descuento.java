@@ -8,6 +8,7 @@ public interface Descuento  {
 	 * @param precioInicial Precio sin decuento
 	 * @return Precio tras aplicarle el descuento
 	 */
-	public double getDescuento(double precioInicial);
+	public double getDescuento(Double precioInicial);
+		
 	
 }

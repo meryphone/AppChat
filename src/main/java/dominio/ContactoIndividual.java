@@ -1,5 +1,7 @@
 package dominio;
 
+import javax.swing.ImageIcon;
+
 public class ContactoIndividual extends Contacto {
 	
     
@@ -32,7 +34,9 @@ public class ContactoIndividual extends Contacto {
 		this.usuario = usuario;
 	}
 	
-	
+	public ImageIcon getImagenPerfil() {
+		return usuario.getIconoDesdePath();
+	}
 	
 	
 }
