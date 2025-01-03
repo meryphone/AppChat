@@ -50,7 +50,7 @@ public class SeleccionarGrupo extends JDialog {
      * @param nombresGrupos Lista con los nombres de los grupos a mostrar.
      */
     public SeleccionarGrupo(Frame owner, List<String> nombresGrupos) {
-        super(owner, true); // Establece que el diálogo sea modal
+        super(owner, true); 
         setBounds(100, 100, 413, 205);
         getContentPane().setBackground(UIManager.getColor("List.dropCellBackground"));
         getContentPane().setLayout(new BorderLayout());

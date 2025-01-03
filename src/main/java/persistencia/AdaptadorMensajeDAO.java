@@ -185,7 +185,7 @@ public class AdaptadorMensajeDAO implements IAdaptadorMensajeDAO{
      * @param receptor El contacto receptor del mensaje.
      * @throws ExcepcionRegistroDuplicado Si el receptor ya está registrado.
      */
-    private void registrarReceptorNoAgregado(Contacto receptor) throws ExcepcionRegistroDuplicado {
+    private void registrarReceptorNoAgregado(Contacto receptor) throws ExcepcionRegistroDuplicado { // NO SE SI HACE FALTA
         if (receptor instanceof ContactoIndividual) {
             adaptadorContacto.registrarContacto((ContactoIndividual) receptor);
         }

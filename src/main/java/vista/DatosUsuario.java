@@ -232,10 +232,6 @@ public class DatosUsuario extends JFrame {
 		contentPane.add(lblNewLabel, gbc_lblNewLabel);
 
 		fechaNacimiento = new JDateChooser();
-		fechaNacimiento.getCalendarButton().addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
 		GridBagConstraints gbc_fechaNacimiento = new GridBagConstraints();
 		gbc_fechaNacimiento.gridwidth = 3;
 		gbc_fechaNacimiento.insets = new Insets(0, 0, 5, 5);
@@ -295,7 +291,8 @@ public class DatosUsuario extends JFrame {
 		gbc_btnCancelar.gridx = 2;
 		gbc_btnCancelar.gridy = 11;
 		contentPane.add(btnCancelar, gbc_btnCancelar);
-
+		
+		// Acción correspondiente al botón cancelar
 		btnCancelar.addActionListener( new ActionListener(){
 
 			@Override
@@ -360,7 +357,7 @@ public class DatosUsuario extends JFrame {
 	private void llamarControladorRegistro() {		
 		try {
             // Intentar el registro
-            boolean registroExitoso = controlador.registrarUsuario(
+			controlador.registrarUsuario(
                 nombre.getText(),
                 apellidos.getText(),
                 telefono.getText(),
@@ -373,12 +370,12 @@ public class DatosUsuario extends JFrame {
             );
 
             // Si el registro es exitoso, mostrar confirmación.
-            if (registroExitoso) {
+            
                 MensajeAdvertencia.mostrarConfirmacion("Registro completado satisfactoriamente", contentPane);
                 Login login = new Login();
                 login.setVisible(true);
                 dispose(); 
-            }
+            
             
         } catch (ExcepcionRegistro e1) {
         	e1.printStackTrace();

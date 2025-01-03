@@ -2,11 +2,15 @@ package dominio;
 
 import javax.swing.ImageIcon;
 
+/**
+ * Clase que represena un contacto individual
+ */
+
 public class ContactoIndividual extends Contacto {
 	
     
     private String telefono;
-    private Usuario usuario;
+    private Usuario usuario; // Usuario al que corresponde el contacto
 
     public ContactoIndividual(String nombre, String telefono, Usuario user) {
         super(nombre);

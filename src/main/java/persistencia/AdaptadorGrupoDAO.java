@@ -70,10 +70,11 @@ public class AdaptadorGrupoDAO implements IAdaptadorGrupoDAO{
         grupo.setNombre(servicioPersistencia.recuperarPropiedadEntidad(eGrupo, "nombre"));
         grupo.setImagen(servicioPersistencia.recuperarPropiedadEntidad(eGrupo, "imagen"));
         
+        // Se añade el objeto al pool para evitar bucles a la hora de la recuperación de los objetos.
         PoolDAO.getInstance().addObjeto(grupo.getCodigo(), grupo);
         
         grupo.setPropietario(adaptadorUsuario.recuperarUsuario(Integer.parseInt(servicioPersistencia.recuperarPropiedadEntidad(eGrupo, "propietario"))));
-        grupo.setMiembros(PersistenciaUtils.getListaContactosDesdeCodigos(servicioPersistencia.recuperarPropiedadEntidad(eGrupo, "miembros")));
+        grupo.setMiembros(PersistenciaUtils.getListaMiembrosDesdeCodigos(servicioPersistencia.recuperarPropiedadEntidad(eGrupo, "miembros")));
         grupo.setMensajes(PersistenciaUtils.obtenerMensajesDesdeCódigos(servicioPersistencia.recuperarPropiedadEntidad(eGrupo, "mensajes")));
         return grupo;
     }

@@ -8,20 +8,18 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
-
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.TabSettings;
 import com.itextpdf.text.pdf.PdfWriter;
-
 import persistencia.*;
 import persistencia.interfaces.IAdaptadorContactoDAO;
 import persistencia.interfaces.IAdaptadorGrupoDAO;
@@ -57,8 +55,9 @@ public class Controlador {
 	private Controlador() {
 		repositorioUsuarios  = RepositorioUsuarios.getInstance();
 		inicializarAdaptadores();
-		supplierDescuento.put("DescuentoPorMensajes", DescuentoMensajes::new);
-		supplierDescuento.put("DescuentoFechaRegistro", DescuentoFechaRegistro::new);
+		supplierDescuento.put(DescuentoMensajes.class.getName(), DescuentoMensajes::new);
+		supplierDescuento.put(DescuentoFechaRegistro.class.getName(), DescuentoFechaRegistro::new);
+		supplierDescuento.put(DescuentoCompuesto.class.getName(), DescuentoCompuesto::new);
 	}
 	
 	private void inicializarAdaptadores() {
@@ -92,7 +91,7 @@ public class Controlador {
 	 * @throws ExcepcionDAO 
 	 */
 
-	public boolean registrarUsuario(String nombre, String apellidos, String movil, String contrasena,
+	public void registrarUsuario(String nombre, String apellidos, String movil, String contrasena,
             String contrasenaRepe, String email, Date fechaNacimiento,
             String pathImagen, String mensajeSaludo) throws ExcepcionRegistro {
 		
@@ -120,7 +119,6 @@ public class Controlador {
 			throw new ExcepcionRegistro("Usuario ya registrado");
 		}
 		
-		return true;
 	}
 	
 	/**
@@ -131,7 +129,7 @@ public class Controlador {
 	 * @throws ExcepcionLogin
 	 */
 	
-	public boolean loguearUsuario(String telefono, String contrasena) throws ExcepcionLogin {
+	public void loguearUsuario(String telefono, String contrasena) throws ExcepcionLogin {
 	    
 		repositorioUsuarios.getUsuarioPorTelefono(telefono)
 	    .ifPresentOrElse(
@@ -144,7 +142,6 @@ public class Controlador {
 	        throw new ExcepcionLogin("La contraseña es incorrecta.");
 	    }
 	    
-	    return true;
 	}
 
 	
@@ -155,7 +152,7 @@ public class Controlador {
 	 * @return true si el contacto se agregó correctamente
 	 * @throws ExcepcionContacto si el contacto ya existe o el usuario no está registrado
 	 */
-	public boolean agregarContacto(String tlf, String nombreContacto) throws ExcepcionAgregarContacto {
+	public void agregarContacto(String tlf, String nombreContacto) throws ExcepcionAgregarContacto {
 	    
 	    // Verifica si el nombre del contacto ya está en uso
 	    if(usuarioActual.getContactoPorNombre(nombreContacto).isPresent()) {
@@ -186,8 +183,6 @@ public class Controlador {
 	    	e.printStackTrace();
 	        throw new ExcepcionAgregarContacto("Error al registrar el contacto: contacto duplicado.");
 	    }
-
-	    return true;
 	}
 	
 	/**
@@ -198,16 +193,23 @@ public class Controlador {
 	 * @return true si el grupo se crea correctamente.
 	 * @throws ExcepcionCrearGrupo si el grupo ya está registrado o se produce algún error durante su creación.
 	 */
-	public boolean crearGrupo(String nombreGrupo, String imagenGrupo, DefaultListModel<ContactoIndividual> listaMiembros) throws ExcepcionCrearGrupo {
+	public void crearGrupo(String nombreGrupo, String imagenGrupo, DefaultListModel<ContactoIndividual> listaMiembros) throws ExcepcionCrearGrupo {
 	    
 		if(nombreGrupo.equals("")) {
 			throw new ExcepcionCrearGrupo("Introduzca un nombre para grupo");
 		}
 		
+		if(listaMiembros.isEmpty() || listaMiembros.size() < 2) {
+			throw new ExcepcionCrearGrupo("El grupo ya ha sido registrado");
+		}
+		
 	    // Convertir la lista de miembros del modelo en una lista de ContactoIndividual
-	    List<ContactoIndividual> miembrosGrupo = new ArrayList<>();
+	    Set<ContactoIndividual> miembrosGrupo = new HashSet<>();
+	    
 	    for (int i = 0; i < listaMiembros.getSize(); i++) {
-	        miembrosGrupo.add(listaMiembros.getElementAt(i));
+	        if(!miembrosGrupo.add(listaMiembros.getElementAt(i))) {
+	        	throw new ExcepcionCrearGrupo("No puede haber miembros repetidos en el grupo");
+	        }
 	    }
 	    
 	    Grupo grupoNuevo;
@@ -230,7 +232,6 @@ public class Controlador {
 	        throw new ExcepcionCrearGrupo("El grupo ya ha sido registrado");
 	    }
 
-	    return true;
 	}
 
 	/**
@@ -239,13 +240,20 @@ public class Controlador {
 	 * @param nombreGrupo     Nombre del grupo a modificar.
 	 * @param listaMiembros   Nueva lista de miembros para el grupo.
 	 * @return true si el grupo se modifica correctamente.
+	 * @throws ExcepcionModificarGrupo 
 	 */
-	public boolean modificarGrupo(String nombreGrupo, DefaultListModel<ContactoIndividual> listaMiembros) {
+	public void modificarGrupo(String nombreGrupo, DefaultListModel<ContactoIndividual> listaMiembros) throws ExcepcionModificarGrupo {
 	    
+		if(listaMiembros.size() < 2 || listaMiembros.isEmpty()) {
+			throw new ExcepcionModificarGrupo("Seleccione un número válido de miembros");
+		}
+		
 	    // Convertir la lista de miembros del modelo en una lista de ContactoIndividual
-	    List<ContactoIndividual> miembrosGrupo = new ArrayList<>();
+	    Set<ContactoIndividual> miembrosGrupo = new HashSet<>();
 	    for (int i = 0; i < listaMiembros.getSize(); i++) {
-	        miembrosGrupo.add(listaMiembros.getElementAt(i));
+	        if(!miembrosGrupo.add(listaMiembros.getElementAt(i))) {
+	        	throw new ExcepcionModificarGrupo("No puede haber miembros repetidos en el grupo");
+	        }
 	    }
 
 	    // Obtener el grupo existente y actualizar su lista de miembros
@@ -255,8 +263,6 @@ public class Controlador {
 	    // Guardar los cambios en la base de datos 
 	    adaptadorGrupo.modificarGrupo(grupoAmodificar);
 	    adaptadorUsuario.modificarUsuario(usuarioActual);
-
-	    return true;
 	}
 	
 	/**
@@ -272,13 +278,17 @@ public class Controlador {
 		
 		usuarioActual.setPremium(true);
 		
-		if(usuarioActual.getNumMensajesUltimoMes() >= 5) {		//CAMBIAR LUEGO POR NUM MAS GRANDE SI ESO			
+		if(usuarioActual.getNumMensajesUltimoMes() >= 5 && usuarioActual.getFechaRegistro().isAfter(LocalDate.of(2025, 1, 1))){
+			Descuento descuentoCompuesto = supplierDescuento.get("DescuentoCompuesto").get();
+			 ((DescuentoCompuesto) descuentoCompuesto).addDescuento(supplierDescuento.get("DescuentoMensajes").get());
+			 ((DescuentoCompuesto) descuentoCompuesto).addDescuento(supplierDescuento.get("DescuentoFechaRegistro").get());
+			 usuarioActual.setDescuento(descuentoCompuesto);
+		}else if(usuarioActual.getNumMensajesUltimoMes() >= 5) {				
 			usuarioActual.setDescuento(supplierDescuento.get("DescuentoMensajes").get());
 			adaptadorUsuario.modificarUsuario(usuarioActual);
-		}else if(usuarioActual.getFechaRegistro().isAfter(LocalDate.of(2024, 12, 27))) { // Si se ha registrado despues del 27 de dicmiembre
+		}else if(usuarioActual.getFechaRegistro().isAfter(LocalDate.of(2025, 1, 1))) { 
 			usuarioActual.setDescuento(supplierDescuento.get("DescuentoFechaRegistro").get());
 			adaptadorUsuario.modificarUsuario(usuarioActual);
-
 		}
 				
 		return usuarioActual.getPrecio();
@@ -329,7 +339,9 @@ public class Controlador {
 
 	        // Recorrer los mensajes del contacto
 	        List<Mensaje> mensajes = contactoSeleccionado.getMensajes();
-	        mensajes.sort(Comparator.comparing(Mensaje::getFechaYhora)); // Ordenar por fecha y hora
+	        
+	        // Ordenar por fecha y hora
+	        mensajes.sort(Comparator.comparing(Mensaje::getFechaYhora)); 
 
 	        for (Mensaje mensaje : mensajes) {
 	            // Formatear el mensaje
@@ -350,10 +362,6 @@ public class Controlador {
 	        return false;
 	    }
 	}
-
-
-	
-	
 	
 	
 	/**
@@ -371,18 +379,8 @@ public class Controlador {
 	 *
 	 * @return Lista de contactos y grupos del usuario actual.
 	 */
-	public List<Contacto> obtenerContactosYgrupos() {
-	    
-	    List<Contacto> contactosYgrupos = new ArrayList<>();
-
-	    if (usuarioActual != null) {
-	        // Agregar contactos y grupos del usuario actual a la lista
-	        contactosYgrupos.addAll(usuarioActual.getListaContactos());
-	        contactosYgrupos.addAll(usuarioActual.getGrupos());
-	        return contactosYgrupos;
-	    }
-
-	    return new ArrayList<>(); // Retornar lista vacía si no hay usuario actual
+	public List<Contacto> obtenerContactosYgrupos() {	    
+	    return usuarioActual.obtenerContactosYgrupos();
 	}
 
 	/**
@@ -394,13 +392,13 @@ public class Controlador {
 	    return usuarioActual.getNombresGrupos();
 	}
 	
+	/**
+	 * 
+	 * @return Lista de nombres del contacto
+	 */
+	
 	public List<String> obtenerNombresContactos(){
-		List<String> contactos = new ArrayList<String>();
-		
-		for(ContactoIndividual co : obtenerContactos()) {
-			contactos.add(co.getNombre());
-		}
-		return contactos;
+		return obtenerNombresContactos();
 	}
 
 	/**

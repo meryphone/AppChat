@@ -1,66 +1,37 @@
 package vista;
 
-import java.awt.EventQueue;
-import java.awt.Graphics2D;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.UIManager;
-import javax.swing.border.EmptyBorder;
-import java.awt.BorderLayout;
-import javax.swing.BoxLayout;
-import java.awt.Image;
-import java.awt.RenderingHints;
-import java.awt.Dimension;
-import javax.swing.border.BevelBorder;
-import javax.swing.JFileChooser;
-
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.*;
+import java.awt.event.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.List;
-
-import javax.swing.JButton;
-import javax.swing.ImageIcon;
-import javax.swing.border.TitledBorder;
-
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.border.*;
 import controlador.Controlador;
 import dominio.Contacto;
 import tds.BubbleText;
 
-import javax.swing.border.LineBorder;
-import java.awt.Color;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JMenuItem;
-
-import java.awt.Component;
-
-import javax.imageio.ImageIO;
-import javax.swing.Box;
-import javax.swing.DefaultListModel;
-import javax.swing.JScrollPane;
-import javax.swing.JScrollBar;
-import java.awt.FlowLayout;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-
+/**
+ * Clase Principal representa la ventana principal de la aplicación.
+ * Permite gestionar contactos, grupos y funcionalidades premium, además de enviar mensajes.
+ */
 public class Principal extends JFrame {
 
     private static final long serialVersionUID = 1L;
+
+    // Componentes principales de la ventana
     private JPanel contentPane;
-    private JLabel lblUsuario;
-    private JList<Contacto> listaContactos;
-    private Controlador controlador = Controlador.getInstance();
-    private double precioPremium = -1;
-    private Principal principal = this;
-	private JTextField textField;
+    private JLabel lblUsuario; 
+    private JList<Contacto> listaContactos; 
+    private Controlador controlador = Controlador.getInstance(); 
+    private double precioPremium = -1; 
+    private Principal principal = this; 
+    private JTextField textField; 
 
     /**
-     * Launch the application.
+     * Método principal para ejecutar la ventana.
      */
     public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
@@ -74,62 +45,73 @@ public class Principal extends JFrame {
     }
 
     /**
-     * Create the frame.
+     * Constructor de la clase.
+     * Configura la ventana principal y sus componentes.
      */
     public Principal() {
+    	
+        // Configuración de la ventana
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 934, 512);
+
+        // Configuración del panel principal
         contentPane = new JPanel();
         contentPane.setBackground(UIManager.getColor("CheckBoxMenuItem.acceleratorForeground"));
         contentPane.setPreferredSize(new Dimension(20, 20));
         contentPane.setSize(new Dimension(800, 800));
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-
         setContentPane(contentPane);
         contentPane.setLayout(new BorderLayout(0, 0));
 
+        // Configuración del panel superior con botones y opciones de usuario
+        configurarPanelSuperior();
+
+        // Configuración del área central (contactos y chat)
+        configurarPanelCentral();
+    }
+
+    /**
+     * Configura el panel superior con botones y opciones de usuario.
+     */
+    private void configurarPanelSuperior() {
         JPanel arriba = new JPanel();
         arriba.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
         contentPane.add(arriba, BorderLayout.NORTH);
         arriba.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
-        
+
         // Botón para gestionar grupos
         JButton btnGestionGrupos = new JButton("Gestionar Grupos");
         btnGestionGrupos.setIcon(new ImageIcon(Principal.class.getResource("/resources/citizen_8382930(1).png")));
         arriba.add(btnGestionGrupos);
-        
-        JPopupMenu menuGrupos = new JPopupMenu();
 
+        // Menú contextual para gestionar grupos
+        JPopupMenu menuGrupos = new JPopupMenu();
         JMenuItem crearGrupo = new JMenuItem("Crear grupo");
-       crearGrupo.addActionListener(ev -> {
-    	   CreacionGrupos creador = new CreacionGrupos(principal);
-    	   creador.setVisible(true);
-    	  
-       });
-       
+        crearGrupo.addActionListener(ev -> {
+            CreacionGrupos creador = new CreacionGrupos(principal);
+            creador.setVisible(true);
+        });
         menuGrupos.add(crearGrupo);
 
         JMenuItem modificarGrupo = new JMenuItem("Modificar grupo");
         modificarGrupo.addActionListener(ev -> {
-     	  String grupoSeleccionado = SeleccionarGrupo.mostrarDialogo(null, controlador.obtenerNombresGruposUsuario());
-     	  if(grupoSeleccionado != null) {
-     		 ModificarGrupo modificador = new ModificarGrupo(principal, grupoSeleccionado);
-        	 modificador.setVisible(true);
-        	 actualizarListaContactos();
-     	  }
-     
+            String grupoSeleccionado = SeleccionarGrupo.mostrarDialogo(null, controlador.obtenerNombresGruposUsuario());
+            if (grupoSeleccionado != null) {
+                ModificarGrupo modificador = new ModificarGrupo(principal, grupoSeleccionado);
+                modificador.setVisible(true);
+                actualizarListaContactos();
+            }
         });
-        
         menuGrupos.add(modificarGrupo);
 
         JMenuItem eliminarGrupo = new JMenuItem("Eliminar grupo");
-        eliminarGrupo.setEnabled(false); 
+        eliminarGrupo.setEnabled(false);
         menuGrupos.add(eliminarGrupo);
-        
+
         btnGestionGrupos.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (e.isPopupTrigger()) { 
+                if (e.isPopupTrigger()) {
                     menuGrupos.show(e.getComponent(), e.getX(), e.getY());
                 }
             }
@@ -142,25 +124,24 @@ public class Principal extends JFrame {
             }
         });
 
+        // Botón para exportar contactos en formato PDF
         JButton exportar = new JButton("");
         exportar.setIcon(new ImageIcon(Principal.class.getResource("/resources/document_9890148(1).png")));
         arriba.add(exportar);
-        
         exportar.addActionListener(ev -> {
-        	if(controlador.isUsuarioPremium()) {
-        		String[] contactoYrutaSeleccionado = SeleccionarContacto.mostrarDialogo(principal, controlador.obtenerNombresContactos());        		
-      
-            		if(controlador.exportarPDF(contactoYrutaSeleccionado[1], contactoYrutaSeleccionado[0])) {
-            			MensajeAdvertencia.mostrarConfirmacion("Se ha exportado correctamente el documento", principal);
-            		}else {
-            			MensajeAdvertencia.mostrarError("No se ha podido exportar el documento", principal);
-            		}
-        		
-        	}else {
-        		MensajeAdvertencia.mostrarError("Esta funcionalidad solo está disponible para usuarios premium", principal);
-        	}
+            if (controlador.isUsuarioPremium()) {
+                String[] contactoYrutaSeleccionado = SeleccionarContacto.mostrarDialogo(principal, controlador.obtenerNombresContactos());
+                if (controlador.exportarPDF(contactoYrutaSeleccionado[1], contactoYrutaSeleccionado[0])) {
+                    MensajeAdvertencia.mostrarConfirmacion("Se ha exportado correctamente el documento", principal);
+                } else {
+                    MensajeAdvertencia.mostrarError("No se ha podido exportar el documento", principal);
+                }
+            } else {
+                MensajeAdvertencia.mostrarError("Esta funcionalidad solo está disponible para usuarios premium", principal);
+            }
         });
 
+        // Botón para buscar contactos
         JButton buscar = new JButton("");
         buscar.setIcon(new ImageIcon(Principal.class.getResource("/resources/buscar(1).png")));
         arriba.add(buscar);
@@ -169,10 +150,7 @@ public class Principal extends JFrame {
             buscador.setVisible(true);
         });
 
-        JLabel lblNewLabel = new JLabel("");
-        lblNewLabel.setIcon(new ImageIcon(Principal.class.getResource("/resources/Appchatlogominecraft(3).png")));
-        arriba.add(lblNewLabel);
-
+        // Botón para agregar contactos
         JButton btnContactos = new JButton("Agregar contacto");
         btnContactos.setIcon(new ImageIcon(Principal.class.getResource("/resources/libreta-de-contactos.png")));
         arriba.add(btnContactos);
@@ -180,13 +158,34 @@ public class Principal extends JFrame {
             AñadirContacto contactos = new AñadirContacto(this);
             contactos.setVisible(true);
             actualizarListaContactos();
-
         });
 
+        // Botón para gestionar la versión premium
         JButton btnPremium = new JButton("PREMIUM");
         btnPremium.setIcon(new ImageIcon(Principal.class.getResource("/resources/dolar(2)(1).png")));
         arriba.add(btnPremium);
+        configurarBotonPremium(btnPremium);
 
+        // Etiqueta del usuario con imagen de perfil
+        ImageIcon imagenPerfil = hacerCircularYRedimensionar(controlador.getImagenUsuario(), 24, 24);
+        lblUsuario = new JLabel(controlador.getNombreUsuario());
+        lblUsuario.setIcon(imagenPerfil);
+        lblUsuario.setIconTextGap(10);
+        lblUsuario.setHorizontalTextPosition(SwingConstants.RIGHT);
+        lblUsuario.setVerticalTextPosition(SwingConstants.CENTER);
+        arriba.add(lblUsuario);
+        lblUsuario.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                cambiarImagenPerfil();
+            }
+        });
+    }
+
+    /**
+     * Configura el botón de la versión premium con acciones específicas.
+     */
+    private void configurarBotonPremium(JButton btnPremium) {
         btnPremium.addActionListener(ev -> {
             if (controlador.isUsuarioPremium()) {
                 MensajeAdvertencia.mostrarConfirmacion("El usuario ya ha obtenido la versión premium.", contentPane);
@@ -194,7 +193,9 @@ public class Principal extends JFrame {
                 precioPremium = controlador.setPremium();
                 String precioAtexto = String.format("%.2f", precioPremium);
                 if (precioPremium > 0) {
-                    MensajeAdvertencia.mostrarConfirmacion("Enhorabuena, has obtenido la versión premium con un precio de: " + precioAtexto , contentPane);
+                    MensajeAdvertencia.mostrarConfirmacion(
+                            "Enhorabuena, has obtenido la versión premium con un precio de: " + precioAtexto,
+                            contentPane);
                     btnPremium.setIcon(new ImageIcon(Principal.class.getResource("/resources/cheque(1).png")));
                 } else {
                     MensajeAdvertencia.mostrarError("No se ha podido obtener la versión premium", contentPane);
@@ -202,72 +203,23 @@ public class Principal extends JFrame {
             }
         });
 
-        if(controlador.isUsuarioPremium()) {
+        if (controlador.isUsuarioPremium()) {
             btnPremium.setIcon(new ImageIcon(Principal.class.getResource("/resources/cheque(1).png")));
         }
+    }
 
-        // Crear menú contextual
-        JPopupMenu menuContextual = new JPopupMenu();
-        JMenuItem cancelarSuscripcion = new JMenuItem("Cancelar suscripción");        
-        menuContextual.add(cancelarSuscripcion);
-        
-        
-        // Configurar acción de "Cancelar suscripción"
-        cancelarSuscripcion.addActionListener(e -> {
-            controlador.cancelarPremium();
-            MensajeAdvertencia.mostrarConfirmacion("Has cancelado tu suscripción premium.", contentPane);
-            btnPremium.setIcon(new ImageIcon(Principal.class.getResource("/resources/dolar(2)(1).png")));
-        });
-
-        // Mostrar menú contextual solo si el usuario es premium
-        btnPremium.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (e.isPopupTrigger() && controlador.isUsuarioPremium()) {
-                    cancelarSuscripcion.setEnabled(true);
-                    menuContextual.show(e.getComponent(), e.getX(), e.getY());
-                }
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (e.isPopupTrigger() && controlador.isUsuarioPremium()) {
-                    cancelarSuscripcion.setEnabled(true);
-                    menuContextual.show(e.getComponent(), e.getX(), e.getY());
-                }
-            }
-        });
-
-        
-        ImageIcon imagenPerfil = hacerCircularYRedimensionar(controlador.getImagenUsuario(),24,24);
-        lblUsuario = new JLabel(controlador.getNombreUsuario());
-        lblUsuario.setIcon(imagenPerfil);
-        lblUsuario.setIconTextGap(10); 
-        lblUsuario.setHorizontalTextPosition(SwingConstants.RIGHT); 
-        lblUsuario.setVerticalTextPosition(SwingConstants.CENTER); 
-        arriba.add(lblUsuario); 
-        
-        
-        lblUsuario.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                cambiarImagenPerfil();
-            }
-        });
-		
-        
-        Component verticalGlue = Box.createVerticalGlue();
-        arriba.add(verticalGlue);
-
+    /**
+     * Configura el panel central que incluye la lista de contactos y el área de chat.
+     */
+    private void configurarPanelCentral() {
         JPanel centro = new JPanel();
         contentPane.add(centro, BorderLayout.CENTER);
         centro.setLayout(new BorderLayout(0, 0));
 
+        // Panel izquierdo con la lista de contactos
         JPanel izq = new JPanel();
         Dimension panelSize = new Dimension(250, 0);
         izq.setPreferredSize(panelSize);
-        izq.setMinimumSize(panelSize);
-        izq.setMaximumSize(panelSize);
         izq.setBorder(new TitledBorder(new LineBorder(new Color(99, 130, 191), 2), "Mensajes", TitledBorder.LEADING,
                 TitledBorder.TOP, null, new Color(51, 51, 51)));
         izq.setBackground(UIManager.getColor("List.dropCellBackground"));
@@ -277,23 +229,22 @@ public class Principal extends JFrame {
         JScrollPane scrollPane = new JScrollPane();
         izq.add(scrollPane, BorderLayout.CENTER);
 
-        listaContactos = new JList<Contacto>();
-        listaContactos.setCellRenderer(new ContactoIndividualCellRenderer());
+        listaContactos = new JList<>();
+        listaContactos.setCellRenderer(new ContactoCellRenderer());
         scrollPane.setViewportView(listaContactos);
 
         actualizarListaContactos();
 
+        // Panel derecho con el área de chat
         JPanel der = new JPanel();
         der.setPreferredSize(panelSize);
-        der.setMinimumSize(panelSize);
-        der.setMaximumSize(panelSize);
-        der.setBorder(new TitledBorder(new LineBorder(new Color(99, 130, 191), 2), "Chat", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(51, 51, 51)));
+        der.setBorder(new TitledBorder(new LineBorder(new Color(99, 130, 191), 2), "Chat", TitledBorder.LEADING,
+                TitledBorder.TOP, null, new Color(51, 51, 51)));
         der.setBackground(UIManager.getColor("Tree.dropCellBackground"));
         centro.add(der, BorderLayout.CENTER);
         der.setLayout(new BorderLayout(0, 0));
 
         JScrollPane scrollPane_1 = new JScrollPane();
-        scrollPane_1.setBackground(new Color(255, 255, 255));
         der.add(scrollPane_1, BorderLayout.CENTER);
 
         JPanel chat = new JPanel();
@@ -301,61 +252,79 @@ public class Principal extends JFrame {
         chat.setLayout(new BoxLayout(chat, BoxLayout.Y_AXIS));
         chat.setBackground(UIManager.getColor("Tree.dropCellBackground"));
 
-        JPanel enviarMensaje = new JPanel(new BorderLayout()); 
+        configurarPanelEnviarMensaje(chat, der);
+    }
+
+    /**
+     * Configura el panel para enviar mensajes en el área de chat.
+     * 
+     * @param chat Panel de chat.
+     * @param der  Panel derecho que contiene el chat.
+     */
+    private void configurarPanelEnviarMensaje(JPanel chat, JPanel der) {
+        JPanel enviarMensaje = new JPanel(new BorderLayout());
         der.add(enviarMensaje, BorderLayout.SOUTH);
-        
+
         JPopupMenu menuEmoticonos = new JPopupMenu();
-        for (int i = 0; i < 8; i++) { 
-            final int index = i; 
-            JLabel emoticonoLabel = new JLabel(BubbleText.getEmoji(index)); 
+        for (int i = 0; i < 8; i++) {
+            final int index = i;
+            JLabel emoticonoLabel = new JLabel(BubbleText.getEmoji(index));
             menuEmoticonos.add(emoticonoLabel);
 
             emoticonoLabel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    BubbleText burbujaEmoticono = new BubbleText(chat, index, Color.GREEN, controlador.getNombreUsuario(), BubbleText.SENT,18); 
+                    BubbleText burbujaEmoticono = new BubbleText(chat, index, Color.GREEN,
+                            controlador.getNombreUsuario(), BubbleText.SENT, 18);
                     chat.add(burbujaEmoticono);
                     chat.revalidate();
                     chat.repaint();
-                    menuEmoticonos.setVisible(false); 
+                    menuEmoticonos.setVisible(false);
                 }
             });
         }
 
         JButton btnEmoticono = new JButton("");
         btnEmoticono.setIcon(new ImageIcon(Principal.class.getResource("/resources/contento(1).png")));
-        enviarMensaje.add(btnEmoticono, BorderLayout.WEST); 
-
-        btnEmoticono.addActionListener(e -> menuEmoticonos.show(btnEmoticono, btnEmoticono.getWidth() / 2, btnEmoticono.getHeight() / 2));
         enviarMensaje.add(btnEmoticono, BorderLayout.WEST);
 
+        btnEmoticono.addActionListener(e -> menuEmoticonos.show(btnEmoticono, btnEmoticono.getWidth() / 2,
+                btnEmoticono.getHeight() / 2));
+
         textField = new JTextField();
-        enviarMensaje.add(textField, BorderLayout.CENTER); 
+        enviarMensaje.add(textField, BorderLayout.CENTER);
 
         JButton btnEnviar = new JButton("");
         btnEnviar.setIcon(new ImageIcon(Principal.class.getResource("/resources/enviar-mensaje(1).png")));
-        enviarMensaje.add(btnEnviar, BorderLayout.EAST); 
+        enviarMensaje.add(btnEnviar, BorderLayout.EAST);
 
         btnEnviar.addActionListener(ev -> {
             String mensajeTexto = textField.getText();
 
             if (!mensajeTexto.isEmpty()) {
-                BubbleText burbuja = new BubbleText(chat, mensajeTexto, Color.GREEN, controlador.getNombreUsuario(), BubbleText.SENT);
+                BubbleText burbuja = new BubbleText(chat, mensajeTexto, Color.GREEN,
+                        controlador.getNombreUsuario(), BubbleText.SENT);
                 chat.add(burbuja);
 
                 chat.revalidate();
                 chat.repaint();
 
-                JScrollBar verticalScrollBar = scrollPane_1.getVerticalScrollBar();
+                JScrollBar verticalScrollBar = ((JScrollPane) chat.getParent().getParent()).getVerticalScrollBar();
                 verticalScrollBar.setValue(verticalScrollBar.getMaximum());
 
                 textField.setText("");
             }
         });
-	
-
     }
 
+    /**
+     * Redimensiona y convierte una imagen en circular.
+     * 
+     * @param pathImagen Ruta de la imagen.
+     * @param ancho      Ancho deseado.
+     * @param alto       Alto deseado.
+     * @return Icono de imagen circular.
+     */
     private ImageIcon hacerCircularYRedimensionar(String pathImagen, int ancho, int alto) {
         if (pathImagen == null || pathImagen.isEmpty()) {
             throw new IllegalArgumentException("El path de la imagen no puede ser nulo o vacío.");
@@ -382,6 +351,9 @@ public class Principal extends JFrame {
         return new ImageIcon(imagenCircular);
     }
 
+    /**
+     * Cambia la imagen de perfil del usuario.
+     */
     private void cambiarImagenPerfil() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Selecciona una nueva imagen de perfil");
@@ -399,7 +371,7 @@ public class Principal extends JFrame {
 
                 controlador.setImagenPerfilUsuario(pathImagen);
 
-                ImageIcon imagenCircular = hacerCircularYRedimensionar(pathImagen,24,24);
+                ImageIcon imagenCircular = hacerCircularYRedimensionar(pathImagen, 24, 24);
 
                 lblUsuario.setIcon(imagenCircular);
 
@@ -409,10 +381,13 @@ public class Principal extends JFrame {
         }
     }
 
+    /**
+     * Actualiza la lista de contactos mostrada en la ventana.
+     */
     public void actualizarListaContactos() {
         List<Contacto> contactos = controlador.obtenerContactosYgrupos();
 
-        DefaultListModel<Contacto> modelo = new DefaultListModel<Contacto>();
+        DefaultListModel<Contacto> modelo = new DefaultListModel<>();
         for (Contacto contacto : contactos) {
             modelo.addElement(contacto);
         }

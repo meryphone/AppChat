@@ -24,13 +24,13 @@ import javax.swing.border.TitledBorder;
 import controlador.Controlador;
 import dominio.ContactoIndividual;
 import dominio.Grupo;
+import excepciones.ExcepcionModificarGrupo;
 
 public class ModificarGrupo extends JFrame {
 
     private static final long serialVersionUID = 1L;
     private JPanel contentPane;
     private Controlador controlador = Controlador.getInstance();
-    private Principal principal;
     private String grupoAmodificar;
 
     private JPanel center;
@@ -52,7 +52,7 @@ public class ModificarGrupo extends JFrame {
      * Launch the application.
      */
     public static void main(String[] args) {
-        // Inicio de la aplicación ModificarGrupoRegistro para depuración
+
         EventQueue.invokeLater(() -> {
             try {
                 ModificarGrupo frame = new ModificarGrupo(null, "Grupo de ejemplo");
@@ -67,7 +67,6 @@ public class ModificarGrupo extends JFrame {
      * Create the frame.
      */
     public ModificarGrupo(Principal principal, String grupoAmodificar) {
-        this.principal = principal;
         this.grupoAmodificar = grupoAmodificar;
 
         setBackground(SystemColor.window);
@@ -80,7 +79,7 @@ public class ModificarGrupo extends JFrame {
         setContentPane(contentPane);
         contentPane.setLayout(new BorderLayout(0, 0));
 
-        // Center Panel
+        // Panel central
         center = new JPanel();
         center.setBackground(UIManager.getColor("List.dropCellBackground"));
         contentPane.add(center, BorderLayout.CENTER);
@@ -98,7 +97,7 @@ public class ModificarGrupo extends JFrame {
         scrollPaneIzq.setPreferredSize(new Dimension(250,400));
 
         izq.add(scrollPaneIzq, BorderLayout.CENTER);
-        listaContactos.setCellRenderer(new ContactoIndividualCellRenderer());
+        listaContactos.setCellRenderer(new ContactoCellRenderer());
         scrollPaneIzq.setViewportView(listaContactos);
 
         // Panel de las flechas
@@ -111,7 +110,6 @@ public class ModificarGrupo extends JFrame {
         flechas.add(izqDer);
         izqDer.addActionListener(ev -> {
             DefaultListModel<ContactoIndividual> modeloGrupo = (DefaultListModel<ContactoIndividual>) listaContactosGrupo.getModel();
-            // Obtener el modelo de listaContactosGrupoRegistro para depuración
             modeloGrupo.addElement(listaContactos.getSelectedValue());
             listaContactosGrupo.setModel(modeloGrupo);
         });
@@ -128,7 +126,7 @@ public class ModificarGrupo extends JFrame {
             listaContactosGrupo.setModel(modeloGrupo);
         });
 
-        // Right Panel
+        // Panel de la derecha
         der = new JPanel();
         der.setPreferredSize(new Dimension(250, 400));
         der.setLayout(new BorderLayout(0, 0));
@@ -139,10 +137,10 @@ public class ModificarGrupo extends JFrame {
         scrollPaneDer.setPreferredSize(new Dimension(250,400));
         scrollPaneDer.setPreferredSize(new Dimension(250,400));
         der.add(scrollPaneDer, BorderLayout.CENTER);
-        listaContactosGrupo.setCellRenderer(new ContactoIndividualCellRenderer());
+        listaContactosGrupo.setCellRenderer(new ContactoCellRenderer());
         scrollPaneDer.setViewportView(listaContactosGrupo);
 
-        // Bottom Panel
+        // Panel de abajo
         buttom = new JPanel();
         buttom.setBackground(UIManager.getColor("List.dropCellBackground"));
         buttom.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
@@ -156,13 +154,15 @@ public class ModificarGrupo extends JFrame {
         buttom.add(confirmar);
         confirmar.addActionListener(ev -> {
             DefaultListModel<ContactoIndividual> modeloGrupo = (DefaultListModel<ContactoIndividual>) listaContactosGrupo.getModel();
-            if (controlador.modificarGrupo(grupoAmodificar, modeloGrupo)) {
-                // Confirmación de modificación del grupoRegistro para depuración
-                MensajeAdvertencia.mostrarConfirmacion("Se ha modificado el grupo correctamente", principal);
-                dispose();
-            } else {
-                MensajeAdvertencia.mostrarError("No se ha podido modificar el grupo", principal);
-            }
+            try {
+					controlador.modificarGrupo(grupoAmodificar, modeloGrupo);
+				    MensajeAdvertencia.mostrarConfirmacion("Se ha modificado el grupo correctamente", principal);
+				    dispose();
+				
+			} catch (ExcepcionModificarGrupo e) {
+				e.printStackTrace();
+				MensajeAdvertencia.mostrarError( e.getMessage(), principal);
+			}
         });
         
         rigidArea = Box.createRigidArea(new Dimension(20, 20));
@@ -181,7 +181,7 @@ public class ModificarGrupo extends JFrame {
         buttom.add(horizontalGlue);
         cancelar.addActionListener(ev -> dispose());
 
-        // Initial Data Loading
+        // Actualizaciones de listas de contactos
         actualizarListaContactos();
         listaContactosGrupo.setModel(actulizarListaMiembrosGrupo());
         
@@ -192,7 +192,6 @@ public class ModificarGrupo extends JFrame {
 
     private void actualizarListaContactos() {
         List<ContactoIndividual> contactos = controlador.obtenerContactos();
-        // Obtener la lista de contactos del controladorRegistro para depuración
         DefaultListModel<ContactoIndividual> modelo = new DefaultListModel<>();
         for (ContactoIndividual contacto : contactos) {
             modelo.addElement(contacto);
@@ -203,7 +202,6 @@ public class ModificarGrupo extends JFrame {
     private DefaultListModel<ContactoIndividual> actulizarListaMiembrosGrupo() {
         Grupo grupo = controlador.getGrupoPorNombre(grupoAmodificar);
         List<ContactoIndividual> contactos = grupo.getMiembros();
-        // Obtener los miembros actuales del grupoRegistro para depuración
         DefaultListModel<ContactoIndividual> modelo = new DefaultListModel<>();
         for (ContactoIndividual contacto : contactos) {
             modelo.addElement(contacto);

@@ -18,7 +18,7 @@ public class SeleccionarContacto extends JDialog {
     private JTextField textFieldRuta;
 
     public SeleccionarContacto(Frame owner, List<String> nombresContactos) {
-        super(owner, true); // Establece que el diálogo sea modal
+        super(owner, true); 
         setBounds(100, 100, 500, 300);
         getContentPane().setBackground(UIManager.getColor("List.dropCellBackground"));
         getContentPane().setLayout(new BorderLayout());        

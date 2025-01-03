@@ -4,9 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import excepciones.ExcepcionDAO;
-import persistencia.AdaptadorUsuarioDAO;
 import persistencia.FactoriaDAO;
 
 public class RepositorioUsuarios {

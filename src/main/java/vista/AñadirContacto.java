@@ -1,188 +1,174 @@
 package vista;
 
-import java.awt.EventQueue;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.border.EmptyBorder;
-
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.border.*;
 import controlador.Controlador;
-import dominio.ContactoIndividual;
-import dominio.Grupo;
 import excepciones.ExcepcionAgregarContacto;
 
-import java.awt.BorderLayout;
-import javax.swing.BoxLayout;
-import javax.swing.DefaultListModel;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import java.awt.Dimension;
-import javax.swing.JButton;
-import java.awt.FlowLayout;
-import java.awt.Component;
-import javax.swing.Box;
-import javax.swing.ImageIcon;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.util.List;
-import javax.swing.UIManager;
-import javax.swing.border.LineBorder;
-import java.awt.Color;
+/**
+ * Ventana para añadir un nuevo contacto.
+ * Permite al usuario ingresar el nombre y el teléfono del contacto y añadirlo a la lista.
+ */
+public class AñadirContacto extends JFrame {
 
-public class AñadirContacto extends JFrame{
+    private static final long serialVersionUID = 1L;
 
-	private static final long serialVersionUID = 1L;
-	private JPanel contentPane;
-	private JTextField textTlf;
-	private JTextField textNombre;
-	private Controlador controlador = Controlador.getInstance();
-	private Principal principal;
+    private JPanel contentPane;
+    private JTextField textTlf;
+    private JTextField textNombre;
+    private Controlador controlador = Controlador.getInstance();
 
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					AñadirContacto frame = new AñadirContacto(null);
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
 
-	/**
-	 * Create the frame.
-	 */
-	public AñadirContacto(Principal principal) {
-		this.principal = principal;
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 516, 288);
-		setResizable(false); // Evita que la ventana se pueda redimensionar
-		contentPane = new JPanel();
-		contentPane.setBackground(UIManager.getColor("List.dropCellBackground"));
-		contentPane.setBorder(new LineBorder(UIManager.getColor("CheckBoxMenuItem.acceleratorForeground"), 4));
+    public static void main(String[] args) {
+        EventQueue.invokeLater(() -> {
+            try {
+                AñadirContacto frame = new AñadirContacto(null);
+                frame.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
 
-		setContentPane(contentPane);
-		contentPane.setLayout(new BorderLayout(0, 0));
+    /**
+     * Constructor de la ventana.
+     * Configura el diseño y los componentes gráficos.
+     * 
+     * @param principal Referencia a la ventana principal para actualizar la lista de contactos.
+     */
+    public AñadirContacto(Principal principal) {
+        // Configuración de la ventana principal
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setBounds(100, 100, 516, 288);
+        setResizable(false); // Evita que la ventana se pueda redimensionar
 
-		JPanel abajo = new JPanel();
-		abajo.setBackground(UIManager.getColor("List.dropCellBackground"));
-		abajo.setBorder(new EmptyBorder(26, 0, 0, 0));
-		contentPane.add(abajo, BorderLayout.SOUTH);
-		FlowLayout fl_abajo = new FlowLayout(FlowLayout.RIGHT, 5, 5);
-		fl_abajo.setAlignOnBaseline(true);
-		abajo.setLayout(fl_abajo);
+        // Configuración del panel principal
+        contentPane = new JPanel();
+        contentPane.setBackground(UIManager.getColor("List.dropCellBackground"));
+        contentPane.setBorder(new LineBorder(UIManager.getColor("CheckBoxMenuItem.acceleratorForeground"), 4));
+        setContentPane(contentPane);
+        contentPane.setLayout(new BorderLayout(0, 0));
 
-		JButton aceptar = new JButton("Aceptar");
-		aceptar.setHorizontalAlignment(SwingConstants.LEADING);
-		abajo.add(aceptar);
+        // Sección inferior: Botones de aceptar y cancelar
+        configurarPanelInferior(principal);
 
-		aceptar.addActionListener(ev -> {
-			try {
-				boolean agregarContacto = controlador.agregarContacto(textTlf.getText(), textNombre.getText());
-				if (agregarContacto) {
-					MensajeAdvertencia.mostrarConfirmacion("Contacto añadido correctamente", contentPane);					
-					dispose();
-					
-				}
-			} catch (ExcepcionAgregarContacto e) {
-				MensajeAdvertencia.mostrarError(e.getMessage(), contentPane);
-				e.printStackTrace();
-			}
-		});
+        // Sección central: Entrada de datos y mensaje de alerta
+        configurarPanelCentral();
 
-		JButton cancelar = new JButton("Cancelar");
-		cancelar.setHorizontalAlignment(SwingConstants.LEADING);
-		abajo.add(cancelar);
-			   
-	    
-	    //WindowListener para detectar el cierre de la ventana Contactos
+        // Espaciador superior
+        Component rigidArea_2 = Box.createRigidArea(new Dimension(20, 20));
+        rigidArea_2.setPreferredSize(new Dimension(20, 30));
+        contentPane.add(rigidArea_2, BorderLayout.NORTH);
+    }
+
+    /**
+     * Configura el panel inferior con los botones de aceptar y cancelar.
+     * 
+     * @param principal Referencia a la ventana principal para actualizar la lista de contactos.
+     */
+    private void configurarPanelInferior(Principal principal) {
+        JPanel abajo = new JPanel();
+        abajo.setBackground(UIManager.getColor("List.dropCellBackground"));
+        abajo.setBorder(new EmptyBorder(26, 0, 0, 0));
+        contentPane.add(abajo, BorderLayout.SOUTH);
+        abajo.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+
+        // Botón de aceptar
+        JButton aceptar = new JButton("Aceptar");
+        aceptar.setFont(new Font("Liberation Mono", Font.BOLD, 12));
+        aceptar.setHorizontalAlignment(SwingConstants.LEADING);
+        abajo.add(aceptar);
+
+        // Acción del botón de aceptar
+        aceptar.addActionListener(ev -> {
+            try {
+                controlador.agregarContacto(textTlf.getText(), textNombre.getText());
+                MensajeAdvertencia.mostrarConfirmacion("Contacto añadido correctamente", contentPane);
+                dispose();
+            } catch (ExcepcionAgregarContacto e) {
+                MensajeAdvertencia.mostrarError(e.getMessage(), contentPane);
+                e.printStackTrace();
+            }
+        });
+
+        // Botón de cancelar
+        JButton cancelar = new JButton("Cancelar");
+        cancelar.setFont(new Font("Liberation Mono", Font.BOLD, 12));
+        cancelar.setHorizontalAlignment(SwingConstants.LEADING);
+        abajo.add(cancelar);
+
+        // Acción del botón de cancelar
+        cancelar.addActionListener(e -> dispose());
+
+        // Actualización de la lista de contactos al cerrar la ventana
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent e) {
                 if (principal != null) {
-                    principal.actualizarListaContactos(); // Actualiza la lista en Principal al cerrar la ventana para añadir contactos
+                    principal.actualizarListaContactos();
                 }
             }
         });
+    }
 
-		cancelar.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				dispose(); 
-			}
-		});
+    /**
+     * Configura el panel central con los campos de entrada de datos y el mensaje de alerta.
+     */
+    private void configurarPanelCentral() {
+        JPanel centro = new JPanel();
+        centro.setBackground(UIManager.getColor("List.dropCellBackground"));
+        contentPane.add(centro, BorderLayout.CENTER);
+        centro.setLayout(new BoxLayout(centro, BoxLayout.Y_AXIS));
 
-		JPanel centro = new JPanel();
-		centro.setBackground(UIManager.getColor("List.dropCellBackground"));
-		contentPane.add(centro, BorderLayout.CENTER);
-		centro.setLayout(new BoxLayout(centro, BoxLayout.Y_AXIS));
+        // Mensaje de alerta en la parte superior
+        JPanel mensaje_alerta = new JPanel();
+        mensaje_alerta.setBackground(UIManager.getColor("List.dropCellBackground"));
+        centro.add(mensaje_alerta);
+        mensaje_alerta.setLayout(new BoxLayout(mensaje_alerta, BoxLayout.X_AXIS));
 
-		JPanel mensaje_alerta = new JPanel();
-		mensaje_alerta.setBackground(UIManager.getColor("List.dropCellBackground"));
-		centro.add(mensaje_alerta);
-		mensaje_alerta.setLayout(new BoxLayout(mensaje_alerta, BoxLayout.X_AXIS));
+        JLabel lblNewLabel_3 = new JLabel("");
+        lblNewLabel_3.setIcon(new ImageIcon(AñadirContacto.class.getResource("/resources/alerta24x24.png")));
+        mensaje_alerta.add(lblNewLabel_3);
 
-		JLabel lblNewLabel_3 = new JLabel("");
-		lblNewLabel_3.setIcon(new ImageIcon(AñadirContacto.class.getResource("/resources/alerta24x24.png")));
-		mensaje_alerta.add(lblNewLabel_3);
+        JLabel lblNewLabel_2 = new JLabel("   Introduzca el nombre del contacto y su teléfono");
+        lblNewLabel_2.setFont(new Font("Liberation Mono", Font.BOLD, 15));
+        mensaje_alerta.add(lblNewLabel_2);
 
-		JLabel lblNewLabel_2 = new JLabel("   Introduzca el nombre del contacto y su teléfono");
-		lblNewLabel_2.setBackground(UIManager.getColor("List.dropCellBackground"));
-		lblNewLabel_2.setFont(new Font("Liberation Mono", Font.BOLD, 15));
-		mensaje_alerta.add(lblNewLabel_2);
+        // Espaciadores para separar las secciones
+        centro.add(Box.createRigidArea(new Dimension(20, 20)));
+        centro.add(Box.createRigidArea(new Dimension(20, 20)));
 
-		Component rigidArea_1 = Box.createRigidArea(new Dimension(20, 20));
-		centro.add(rigidArea_1);
-		
-		Component rigidArea = Box.createRigidArea(new Dimension(20, 20));
-		centro.add(rigidArea);
+        // Campo de entrada para el nombre
+        JPanel nombre = new JPanel();
+        nombre.setBackground(UIManager.getColor("List.dropCellBackground"));
+        nombre.setMaximumSize(new Dimension(32767, 0));
+        centro.add(nombre);
+        nombre.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 
-		JPanel nombre = new JPanel();
-		nombre.setBackground(UIManager.getColor("List.dropCellBackground"));
-		nombre.setMaximumSize(new Dimension(32767, 0));
-		centro.add(nombre);
-		nombre.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        JLabel lblNewLabel = new JLabel("Nombre:");
+        lblNewLabel.setPreferredSize(new Dimension(67, 17));
+        lblNewLabel.setFont(new Font("Liberation Mono", Font.BOLD, 15));
+        nombre.add(lblNewLabel);
 
-		JLabel lblNewLabel = new JLabel("Nombre:");
-		lblNewLabel.setPreferredSize(new Dimension(67, 17));
-		lblNewLabel.setFont(new Font("Liberation Mono", Font.BOLD, 15));
-		nombre.add(lblNewLabel);
+        textNombre = new JTextField();
+        nombre.add(textNombre);
+        textNombre.setColumns(10);
 
-		textNombre = new JTextField();
-		nombre.add(textNombre);
-		textNombre.setColumns(10);
+        // Campo de entrada para el teléfono
+        JPanel telefono = new JPanel();
+        telefono.setBackground(UIManager.getColor("List.dropCellBackground"));
+        centro.add(telefono);
+        telefono.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 
-		JPanel teléfono = new JPanel();
-		teléfono.setBackground(UIManager.getColor("List.dropCellBackground"));
-		centro.add(teléfono);
-		teléfono.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        JLabel lblNewLabel_1 = new JLabel("Teléfono:");
+        lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
+        lblNewLabel_1.setFont(new Font("Liberation Mono", Font.BOLD, 15));
+        telefono.add(lblNewLabel_1);
 
-		JLabel lblNewLabel_1 = new JLabel("Teléfono:");
-		lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
-		lblNewLabel_1.setFont(new Font("Liberation Mono", Font.BOLD, 15));
-		teléfono.add(lblNewLabel_1);
-
-		textTlf = new JTextField();
-		teléfono.add(textTlf);
-		textTlf.setColumns(10);
-
-		Component rigidArea_2 = Box.createRigidArea(new Dimension(20, 20));
-		rigidArea_2.setPreferredSize(new Dimension(20, 30));
-		contentPane.add(rigidArea_2, BorderLayout.NORTH);
-	}
-	
+        textTlf = new JTextField();
+        telefono.add(textTlf);
+        textTlf.setColumns(10);
+    }
 }

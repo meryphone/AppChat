@@ -2,6 +2,11 @@ package dominio;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Clase abstracta que representa un contacto en el sistema.
+ * Es la base para los contactos individuales y los grupos.
+ */
+
 public abstract class Contacto {
 	
 	private String nombre;

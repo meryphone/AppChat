@@ -172,6 +172,37 @@ public class Usuario {
         }
         return new ImageIcon(pathImagen);
     }
+    
+    /**
+	 * Obtiene todos los contactos y grupos asociados al usuario actual.
+	 *
+	 * @return Lista de contactos y grupos del usuario actual.
+	 */
+	public List<Contacto> obtenerContactosYgrupos() {
+	    
+	    List<Contacto> contactosYgrupos = new ArrayList<>();
+	   
+	        // Agregar contactos y grupos del usuario a la lista
+	        contactosYgrupos.addAll(listaContactos);
+	        contactosYgrupos.addAll(grupos);
+	        return contactosYgrupos;
+	    
+	}
+
+	
+	/**
+	 * Obtiene los nombres de los contacto individuales del usuario.
+	 * @return Lista de nombres de los contactos del usuario
+	 */
+	
+	public List<String> obtenerNombresContactos(){
+		List<String> contactos = new ArrayList<String>();
+		
+		for(ContactoIndividual co : listaContactos) {
+			contactos.add(co.getNombre());
+		}
+		return contactos;
+	}
 
     // Getters y setters
 

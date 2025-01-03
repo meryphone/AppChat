@@ -1,7 +1,9 @@
 package persistencia;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import dominio.ContactoIndividual;
@@ -141,6 +143,32 @@ public class PersistenciaUtils {
 
 	static List<ContactoIndividual> getListaContactosDesdeCodigos(String codigos) {
 		List<ContactoIndividual> listaContactos = new ArrayList<>();
+
+		// Validar si la cadena es nula o vacía
+		if (codigos == null || codigos.trim().isEmpty()) {
+			return listaContactos; // Retornar lista vacía
+		}
+
+		StringTokenizer strTok = new StringTokenizer(codigos, " ");
+
+		while (strTok.hasMoreTokens()) {
+			int codigo = Integer.parseInt((String) strTok.nextElement());
+			ContactoIndividual contacto = adaptadorContacto.recuperarContacto(codigo);
+			listaContactos.add(contacto);
+		}
+
+		return listaContactos;
+	}
+	
+	/**
+	 * Convierte una cadena que contiene codigos de contactos a su contacto respectivo, esta vez devolviendo un se.
+	 * @param codigos
+	 * @return
+	 * @throws ExcepcionRegistroDuplicado
+	 */
+	
+	static Set<ContactoIndividual> getListaMiembrosDesdeCodigos(String codigos) {
+		Set<ContactoIndividual> listaContactos = new HashSet<>();
 
 		// Validar si la cadena es nula o vacía
 		if (codigos == null || codigos.trim().isEmpty()) {

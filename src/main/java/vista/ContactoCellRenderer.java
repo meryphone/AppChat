@@ -1,7 +1,5 @@
 package vista;
 
-import java.net.URL;
-
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -20,7 +18,7 @@ import java.io.File;
 import java.io.IOException;
 
 @SuppressWarnings("serial")
-public class ContactoIndividualCellRenderer extends JPanel implements ListCellRenderer<Contacto> {
+public class ContactoCellRenderer extends JPanel implements ListCellRenderer<Contacto> {
     private static final Border SELECCIONADO = BorderFactory.createLineBorder(Color.BLUE, 2);
     private static final Border NO_SELECCIONADO = BorderFactory.createEmptyBorder(2, 2, 2, 2);
 
@@ -29,7 +27,7 @@ public class ContactoIndividualCellRenderer extends JPanel implements ListCellRe
     private JLabel lblTelefono;
     private JLabel lblSaludo;
 
-    public ContactoIndividualCellRenderer() {
+    public ContactoCellRenderer() {
         setLayout(new BorderLayout(10, 10)); // Espaciado entre imagen y texto
 
         lblImagen = new JLabel();
